@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from data_processing import integrate
+from Data_processing import integrate
 from config.custom import setFigure, unit, getColor
 from config.scatterPlot import scatter
 from config.violinPlot import violin

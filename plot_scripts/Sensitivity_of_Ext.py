@@ -6,8 +6,8 @@ from pandas import read_csv, concat
 import pickle
 from config.scatterPlot import scatter
 from processDecorator import function_handler
-from data_processing import Mie_PESD
-from data_processing import integrate
+from Data_processing import Mie_PESD
+from Data_processing import integrate
 import matplotlib.pyplot as plt
 
 

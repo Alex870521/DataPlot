@@ -1,7 +1,7 @@
 from os.path import join as pth
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from config.custom import setFigure, unit, getColor
-from data_processing import integrate
+from Data_processing import integrate
 
 import pandas as pd
 import matplotlib.pyplot as plt

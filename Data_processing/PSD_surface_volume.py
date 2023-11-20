@@ -4,7 +4,7 @@ import pandas as pd
 
 from pathlib import Path
 from pandas import read_csv
-from data_processing.processDecorator import save_to_csv
+from Data_processing.processDecorator import save_to_csv
 
 PATH_MAIN = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2")
 PATH_DIST = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2/distribution")

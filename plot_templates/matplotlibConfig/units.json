@@ -25,7 +25,7 @@
     "Extinction": "Extinction (1/Mm)",
     "Bsca": "Mie Amb Scattering (1/Mm)",
     "Bsca_dry": "Mie Dry Scattering (1/Mm)",
-    "Scattering": "$Scattering (1/Mm)",
+    "Scattering": "Scattering (1/Mm)",
     "Diurnal": "Hour",
     "VC": "VC (m^{2}/s)$",
     "MAC": "MAC (m^{2}/g)",

@@ -4,6 +4,8 @@ from functools import wraps
 from .ColorHandler import getColor
 from .UnitHandler import unit
 
+# For more details please seehttps://matplotlib.org/stable/users/explain/customizing.html
+
 __all__ = ['set_figure',
            'prop_text',
            'prop_legend']
@@ -96,5 +98,5 @@ if __name__ == '__main__':
         ax.set_title(title)
         ax.legend(prop=dict(weight='bold', size=12))
 
-    test(title='Test the title')
+    test(title='test the title')
 

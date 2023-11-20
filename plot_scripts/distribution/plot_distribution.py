@@ -4,11 +4,11 @@ import pandas as pd
 from pandas import read_csv, concat
 import matplotlib.pyplot as plt
 from PyMieScatt.Mie import AutoMieQ
-from data_processing import integrate
+from Data_processing import integrate
 from Data_classify import state_classify
 from config.custom import setFigure, unit, getColor
 from scipy.signal import find_peaks
-from data_processing.PSD_property import dist_prop
+from Data_processing.PSD_property import dist_prop
 
 PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
 PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")

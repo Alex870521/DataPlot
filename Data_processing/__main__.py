@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from data_processing.processDecorator import save_to_csv
-import data_processing as dataproc
+from Data_processing.processDecorator import save_to_csv
+import Data_processing as dataproc
 
 PATH_MAIN = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data")
 

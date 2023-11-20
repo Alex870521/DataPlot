@@ -2,7 +2,7 @@ from windrose import WindroseAxes
 from matplotlib.pyplot import subplots, rcParams, show
 from pathlib import Path
 from datetime import datetime as dtm
-from data_processing import integrate
+from Data_processing import integrate
 from Data_classify import state_classify
 
 color_lst = ['#8ecae6', '#f1dca7', '#f4a261', '#bc3908']
@@ -48,11 +48,6 @@ for state, _df in dic.items():
     ax.axis('off')
 
     fs = 15.
-    font_fam = 'Times New Roman'
-    # font_fam = 'DejaVu Sans'
-    rcParams['font.sans-serif'] = font_fam
-    rcParams['mathtext.fontset'] = 'matplotlibConfig'
-    font_dic = dict(fontsize=fs, math_fontfamily='matplotlibConfig')
 
     dt_met = _df
     ws, wd = dt_met['WS'], dt_met['WD']
@@ -65,4 +60,4 @@ for state, _df in dic.items():
     show()
     # ax.set_legend(framealpha=0,bbox_to_anchor=[-.05,-.05], fontsize=fs-2.,loc='lower left',ncol=3)
 
-    fig.savefig(f'windrose/windrose_{state}.png')
+    # fig.savefig(f'windrose/windrose_{state}.png')

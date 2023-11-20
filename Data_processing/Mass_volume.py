@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas import read_csv, concat
 from pathlib import Path
-from data_processing.processDecorator import save_to_csv
+from Data_processing.processDecorator import save_to_csv
 
 PATH_MAIN = Path('C:/Users/alex/PycharmProjects/DataPlot/Data')
 

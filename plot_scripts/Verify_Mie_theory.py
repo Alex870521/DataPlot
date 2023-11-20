@@ -6,7 +6,7 @@ from pandas import read_csv, concat
 import pickle
 from config.scatterPlot import scatter, scatter_mutiReg
 from processDecorator import function_handler, save_to_csv
-from data_processing import integrate
+from Data_processing import integrate
 import matplotlib.pyplot as plt
 import seaborn as sns
 

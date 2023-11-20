@@ -68,8 +68,8 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
 
     xlim = kwargs.get('xlim') or x_range
     ylim = kwargs.get('ylim') or y_range
-    xlabel = kwargs.get('xlabel') or unit.x or 'xlabel'
-    ylabel = kwargs.get('ylabel') or unit.y or 'ylabel'
+    xlabel = kwargs.get('xlabel') or unit(x) or 'xlabel'
+    ylabel = kwargs.get('ylabel') or unit(y) or 'ylabel'
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
     title = kwargs.get('title') or 'title'
@@ -151,8 +151,8 @@ def scatter_mutiReg(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
 
     xlim = kwargs.get('xlim')
     ylim = kwargs.get('ylim')
-    xlabel = kwargs.get('xlabel') or unit.x or ''
-    ylabel = kwargs.get('ylabel') or unit.y1 or ''
+    xlabel = kwargs.get('xlabel') or unit(x) or ''
+    ylabel = kwargs.get('ylabel') or unit(y1) or ''
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
     title = kwargs.get('title') or ''
@@ -210,5 +210,5 @@ if __name__ == '__main__':
          'diversity': np.random.random(500) * 1})
 
     # scatter(df, x='Extinction', y='Scattering', c='RH', title='Title', regression=True, box=True)
-    scatter_mutiReg(df, x='Extinction', y1='Scattering', y2='Absorption')
+    scatter_mutiReg(df, x='Extinction', y1='Scattering', y2='Absorption', regression=True)
     # sns.jointplot(df, x='Extinction', y='Scattering')

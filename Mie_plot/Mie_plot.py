@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pathlib import Path
-from data_processing.Mie_plus import Mie_Q, Mie_MEE
+from Data_processing.Mie_plus import Mie_Q, Mie_MEE
 from config.custom import setFigure
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}

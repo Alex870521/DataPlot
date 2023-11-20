@@ -120,7 +120,7 @@ def save_to_csv(filename):
 
 
 if __name__ == '__main__':
-    PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/data_processing")
+    PATH_MAIN = Path("/Data_processing")
 
     # @save_to_csv((PATH_MAIN / 'output1.csv', PATH_MAIN / 'output2.csv'))
     @save_to_csv(PATH_MAIN / 'output1.csv')

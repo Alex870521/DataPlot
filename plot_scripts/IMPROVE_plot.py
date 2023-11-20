@@ -1,6 +1,6 @@
 from pathlib import Path
 from scipy.optimize import curve_fit
-from data_processing import integrate
+from Data_processing import integrate
 from Data_classify import state_classify, season_classify, Seasons
 from config.custom import setFigure, unit, getColor
 

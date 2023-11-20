@@ -1,6 +1,6 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from Data_processing_main import integrate
+from Data_processing import integrate
 from Data_classify import state_classify, season_classify, Seasons
 from datetime import datetime
 import pandas as pd
@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from config.custom import setFigure, unit, getColor, color_maker
+from plot_templates import set_figure, unit, getColor, color_maker
 
 PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
 PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")

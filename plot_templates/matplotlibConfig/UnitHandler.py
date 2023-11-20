@@ -14,6 +14,14 @@ class Unit:
         # bug in Pycharm
         self.shape = ''
 
+    def __call__(self, key):
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            print(f"Attribute '{key}' not found.")
+            print(f"Please use unit.set_unit(key, value) to set new unit.")
+            return None
+
     def __getattr__(self, item):
         try:
             return super().__getattribute__(item)
