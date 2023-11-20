@@ -78,7 +78,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
     # color_bar
     if colorbar:
         color_bar = plt.colorbar(scatter, extend='both')
-        color_bar.set_label(label=unit.c or 'clabel', size=14)
+        color_bar.set_label(label=unit(c) or 'clabel', size=14)
 
     if regression:
         x_fit = x_data.reshape(-1, 1)
