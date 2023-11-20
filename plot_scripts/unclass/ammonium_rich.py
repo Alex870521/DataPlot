@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from template import set_figure, unit, getColor, prop_legend, prop_text
+from plot_templates import set_figure, unit, getColor, prop_legend, prop_text
 
 
 @set_figure

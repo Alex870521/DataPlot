@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from template import set_figure, unit, getColor, prop_legend
+from plot_templates import set_figure, unit, getColor, prop_legend
 
 
 @set_figure

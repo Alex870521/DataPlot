@@ -1,14 +1,13 @@
-from os.path import join as pth
 import numpy as np
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+from pathlib import Path
 from scipy.optimize import curve_fit
-import config.custom as pc
+from plot_templates import set_figure
 
-
-df = pd.read_excel(pth('Koschmieder.xlsx'), sheet_name=0)
+Path_Data = Path('C:/Users/Alex/PycharmProjects/DataPlot/Data')
+df = pd.read_excel(Path_Data / 'Koschmieder.xlsx', sheet_name=0)
 # x = Visibility, y = Extinction, log-log fit!!
 
 
@@ -42,6 +41,7 @@ def reciprocal_fit(x, y, func = lambda x, a, b : a / (x**b)):
     return popt, pcov
 
 
+@set_figure
 def kos_naked(df):
     _df1 = df[['Extinction_dry', 'Ext_gas', 'Vis_Naked']].dropna().copy()
     _df2 = df[['IMPROVE_ext', 'Ext_gas', 'Vis_Naked']].dropna().copy()
@@ -110,9 +110,10 @@ def kos_naked(df):
     plt.xlabel(r'$\bf Naked\ Visibility\ (km)$')
     plt.ylabel(r'$\bf Extinction\ coefficient\ (1/Mm)$')
     plt.show()
-    fig.savefig(pth(f'Koschmieder_Naked'))
+    # fig.savefig(pth(f'Koschmieder_Naked'))
 
 
+@set_figure
 def kos_LPV(df,):
     _df1 = df[['Extinction_dry', 'Ext_gas', 'Vis_LPV']].dropna().copy()
     _df2 = df[['IMPROVE_ext', 'Ext_gas', 'Vis_LPV']].dropna().copy()
@@ -186,7 +187,7 @@ def kos_LPV(df,):
     plt.xlabel(r'$\bf LPV\ Visibility\ (km)$')
     plt.ylabel(r'$\bf Extinction\ coefficient\ (1/Mm)$')
     plt.show()
-    fig.savefig(pth(f'Koschmieder_LPV'))
+    # fig.savefig(pth(f'Koschmieder_LPV'))
 
 
 if __name__ == '__main__':

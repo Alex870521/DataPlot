@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm, lognorm
 import matplotlib.pyplot as plt
-from template import set_figure
+from plot_templates import set_figure
 
 #https://stackoverflow.com/questions/8870982/how-do-i-get-a-lognormal-distribution-in-python-with-mu-and-sigma
 

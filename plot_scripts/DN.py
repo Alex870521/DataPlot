@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from template import set_figure, unit, getColor
+from plot_templates import set_figure, unit, getColor
 
 
 # Read file

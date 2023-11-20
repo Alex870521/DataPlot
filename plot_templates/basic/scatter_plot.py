@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from template import set_figure, unit, getColor
+from plot_templates import set_figure, unit, getColor
 from sklearn.linear_model import LinearRegression
 import seaborn as sns
 
@@ -143,7 +143,7 @@ def scatter_mutiReg(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
     y_data1 = np.array(df[y1])
     y_data2 = np.array(df[y2])
 
-    from template import linecolor
+    from plot_templates import linecolor
     color1, color2, color3 = linecolor()
 
     scatter1 = ax.scatter(x_data, y_data1, s=25, color=color1['face'], alpha=0.8, edgecolors=color1['edge'], label='Internal')

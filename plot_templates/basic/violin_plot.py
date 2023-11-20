@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from template import set_figure, unit, getColor
+from plot_templates import set_figure, unit, getColor
 
 
 @set_figure(figsize=(6, 6))

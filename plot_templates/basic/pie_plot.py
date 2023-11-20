@@ -1,7 +1,7 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from template import set_figure, unit, getColor, prop_legend, prop_text
+from plot_templates import set_figure, unit, getColor, prop_legend, prop_text
 
 
 __all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext']

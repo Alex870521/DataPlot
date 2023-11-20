@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import read_csv
 import matplotlib.pyplot as plt
-from template import set_figure, unit, getColor
+from plot_templates import set_figure, unit, getColor
 
 PATH_MAIN = Path('C:/Users/alex/PycharmProjects/DataPlot/Data/Level1')
 

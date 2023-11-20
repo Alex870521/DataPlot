@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from template import set_figure, unit, getColor
+from plot_templates import set_figure, unit, getColor
 
 __all__ = ['barplot_extend', 'barplot_concen', 'barplot_combine']
 
