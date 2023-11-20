@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # df.reset_index(drop=True, inplace=True)
     # sns.jointplot(data=df, x="Extinction", y="Bext", hue="method")
 
-    verify_scat_plot()
+    # verify_scat_plot()
 
     # scatter(df, x='PM25', y='total_mass', xlim=[0, 100], ylim=[0, 100], regression=True, diagonal=True)
     # scatter(df, x='PM1/PM25', y='MEE')
@@ -74,5 +74,5 @@ if __name__ == '__main__':
     # scatter(df, x='PM25', y='Scattering', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM25', y='Absorption', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM1', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
-    # scatter(df, x='Extinction', y='MSE', c='PM1/PM25', y_range=[0, 15], c_range=[0, 1])
+    scatter(df, x='Extinction', y='MSE', c='PM1/PM25', y_range=[0, 15], c_range=[0, 1])
 
