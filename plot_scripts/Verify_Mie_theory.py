@@ -4,9 +4,8 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from config.scatterPlot import scatter, scatter_mutiReg
-from processDecorator import function_handler, save_to_csv
-from Data_processing import integrate
+from plot_templates import scatter, scatter_mutiReg
+from Data_processing import integrate, function_handler, save_to_csv
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -14,7 +13,7 @@ import seaborn as sns
 PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
 PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")
 
-with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
 with open(PATH_MAIN / 'level2' / 'mass_volume_VAM.csv', 'r', encoding='utf-8', errors='ignore') as f:
@@ -43,7 +42,7 @@ def verify_scat_plot():
     # scatter(df, x='Scattering', y='Bsca_dry', c='gRH', c_range=[1, 2], xlim=[0, 500], ylim=[0, 500], regression=True, diagonal=True)
     # scatter(df, x='Absorption', y='Babs_dry', c='gRH', c_range=[1, 2], xlim=[0, 200], ylim=[0, 200], regression=True, diagonal=True)
 
-    scatter(df, x='Extinction', y='Bext', c='RH', c_range=[50, 100], xlim=[0, 700], ylim=[0, 700], regression=True, diagonal=True)
+    scatter(df, x='Extinction', y='Bext_internal', c='RH', c_range=[50, 100], xlim=[0, 700], ylim=[0, 700], regression=True, diagonal=True)
     scatter(df, x='Extinction', y='Bext_external', c='RH', c_range=[50, 100], xlim=[0, 700], ylim=[0, 700], regression=True, diagonal=True)
 
     # scatter(df, x='Scattering', y='Bsca', c='RH', c_range=[50, 100], xlim=[0, 600], ylim=[0, 600], regression=True, diagonal=True)
@@ -67,11 +66,11 @@ if __name__ == '__main__':
     # df.reset_index(drop=True, inplace=True)
     # sns.jointplot(data=df, x="Extinction", y="Bext", hue="method")
 
-    # verify_scat_plot()
+    verify_scat_plot()
 
     # scatter(df, x='PM25', y='total_mass', xlim=[0, 100], ylim=[0, 100], regression=True, diagonal=True)
     # scatter(df, x='PM1/PM25', y='MEE')
-    scatter(df, x='PM25', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
+    # scatter(df, x='PM25', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM25', y='Scattering', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM25', y='Absorption', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM1', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
