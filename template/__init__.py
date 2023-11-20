@@ -1,10 +1,10 @@
 
 
-from .matplotlibConfig.ColorHandler import *
-from .matplotlibConfig.FigureHandler import *
-from .matplotlibConfig.UnitHandler import unit
+from template.matplotlibConfig.ColorHandler import *
+from template.matplotlibConfig.FigureHandler import *
+from template.matplotlibConfig.UnitHandler import unit
 
-from .bar_plot import *
-from .pie_plot import *
-from .violin_plot import *
-from .scatter_plot import *
+from template.bar_plot import *
+from template.pie_plot import *
+from template.violin_plot import *
+from template.scatter_plot import *
