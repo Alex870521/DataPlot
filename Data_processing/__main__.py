@@ -3,8 +3,7 @@ from pandas import read_csv, concat
 from Data_processing.processDecorator import save_to_csv
 import Data_processing as dataproc
 
-PATH_MAIN = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data")
-
+PATH_MAIN = Path(__file__).parent.parent / 'Data'
 
 @save_to_csv(PATH_MAIN / 'All_data.csv')
 def integrate(reset=False, filename=None):

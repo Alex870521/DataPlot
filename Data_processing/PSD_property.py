@@ -7,8 +7,8 @@ from pathlib import Path
 from pandas import read_csv, concat
 from processDecorator import save_to_csv
 
-PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2")
-PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")
+PATH_MAIN = Path(__file__).parent.parent / 'Data' / 'Level2'
+PATH_DIST = PATH_MAIN / 'distribution'
 
 with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')

@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, concat
 from Data_processing.processDecorator import save_to_csv
 
-PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
+PATH_MAIN = Path(__file__).parent.parent / 'Data'
 
 
 @save_to_csv(PATH_MAIN / 'Level1' / 'IMPACT.csv')

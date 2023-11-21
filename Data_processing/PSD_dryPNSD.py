@@ -6,11 +6,11 @@ from pathlib import Path
 from pandas import read_csv, concat
 from processDecorator import save_to_csv
 from PSD_extinction import Extinction_dry_PSD_internal_process
-from config.scatterPlot import scatter, scatter_mutiReg
+# from config.scatterPlot import scatter, scatter_mutiReg
 
 
-PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2")
-PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")
+PATH_MAIN = Path(__file__).parent.parent / 'Data' / 'Level2'
+PATH_DIST = PATH_MAIN / 'distribution'
 
 with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
@@ -105,7 +105,6 @@ def score():
 
     df = concat([Measurement, PESD_dry], axis=1)
 
-    scatter(df, x='Extinction', y='Bext_dry', c='gRH', c_range=[1, 2], xlim=[0, 600], ylim=[0, 600], regression=True, diagonal=True)
     return 'R'
 
 

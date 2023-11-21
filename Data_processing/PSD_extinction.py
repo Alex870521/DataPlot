@@ -7,8 +7,8 @@ from pandas import read_csv, concat
 from Data_processing.processDecorator import save_to_csv
 from Data_processing.Mie_plus import Mie_PESD, Mie_MEE
 
-PATH_MAIN = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2")
-PATH_DIST = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2/distribution")
+PATH_MAIN = Path(__file__).parent.parent / 'Data' / 'Level2'
+PATH_DIST = PATH_MAIN / 'distribution'
 
 with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')

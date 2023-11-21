@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, concat
 from Data_processing.processDecorator import save_to_csv
 
-PATH_MAIN = Path("C:/Users/Alex/PycharmProjects/DataPlot/Data")
+PATH_MAIN = Path(__file__).parent.parent / 'Data'
 
 with open(PATH_MAIN / 'level1' / 'fRH.csv', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_csv(f).set_index('RH')
