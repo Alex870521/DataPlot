@@ -1,15 +1,14 @@
 import numpy as np
-from scipy.stats import norm, lognorm
 import matplotlib.pyplot as plt
-from plot_templates import set_figure
+from scipy.stats import norm, lognorm
+from DataPlot.plot_templates import set_figure
 
 #https://stackoverflow.com/questions/8870982/how-do-i-get-a-lognormal-distribution-in-python-with-mu-and-sigma
 
 
 @set_figure(fs=10, titlesize=12)
 def size_distribution_test():
-
-    # 设置随机数种子，以确保每次生成的随机数相同
+    # 設定隨機數種子，以確保每次產生的隨機數相同
     np.random.seed(123)
 
     # 给定的幾何平均粒徑和幾何平均標準差
@@ -57,55 +56,46 @@ def size_distribution_test():
 
     data6 = ln3.rvs(size=1000)
 
+    def plot_distribution(ax, x, pdf, color='k-', **kwargs):
+        ax.plot(x, pdf, color, **kwargs)
+        ax.set_title('Particle Size Distribution')
+        ax.set_xlabel('Particle Size (micron)')
+        ax.set_ylabel('Probability Density')
+
     # 繪製粒徑分布
-    fig, ([ax1, ax2], [ax3, ax4], [ax5, ax6]) = plt.subplots(3, 2, figsize=(5, 8))
+    fig, ([ax1, ax2], [ax3, ax4], [ax5, ax6]) = plt.subplots(3, 2)
+    # ax1
+    plot_distribution(ax1, x, pdf, linewidth=2)
 
-    ax1.plot(x, pdf, 'k-', linewidth=2)
-    ax1.set_title('Particle Size Distribution')
-    ax1.set_xlabel('Particle Size (micron)')
-    ax1.set_ylabel('Probability Density')
-
-    ax2.plot(x2, ln2_1.pdf(x2), 'b-', linewidth=5)
-    ax2.plot(x2, pdf2_1, 'g-', linewidth=3)
-    ax2.plot(x2, pdf2_2, 'r-', linewidth=3)
-    ax2.set_title('Particle Size Distribution')
-    ax2.set_xlabel('Particle Size (micron)')
-    ax2.set_ylabel('Probability Density')
+    # ax2
+    plot_distribution(ax2, x2, ln2_1.pdf(x2), 'b-', linewidth=2)
+    plot_distribution(ax2, x2, pdf2_1, 'g-', linewidth=2)
+    plot_distribution(ax2, x2, pdf2_2, 'r-', linewidth=2)
     ax2.set_xlim(0.01, 50)
     ax2.semilogx()
 
-
-    ax3.plot(x2, pdf3, 'k-', linewidth=2)
-    ax3.set_title('Particle Size Distribution')
-    ax3.set_xlabel('Particle Size (micron)')
-    ax3.set_ylabel('Probability Density')
+    # ax3
+    plot_distribution(ax3, x2, pdf3, 'k-', linewidth=2)
     ax3.set_xlim(x2.min(), x2.max())
     ax3.semilogx()
 
-
+    # ax4
     x = np.linspace(min(Y), max(Y), 1000)
     pdf = nor2.pdf(x)
-    ax4.plot(x, pdf, 'k-', linewidth=2)
-    ax4.set_title('Particle Size Distribution')
-    ax4.set_xlabel('Particle Size (micron)')
-    ax4.set_ylabel('Probability Density')
+    plot_distribution(ax4, x, pdf, 'k-', linewidth=2)
 
-
+    # ax5
     x = np.linspace(min(data5), max(data5), 1000)
-    ax5.plot(x, nor3.pdf(x), 'k-', linewidth=2)
-    ax5.set_title('Particle Size Distribution')
-    ax5.set_xlabel('Particle Size (micron)')
-    ax5.set_ylabel('Probability Density')
+    plot_distribution(ax5, x, nor3.pdf(x), 'k-', linewidth=2)
 
+    # ax6
     ax6.hist(Z, bins=5000, density=True, alpha=0.6, color='g')
     x = np.geomspace(min(Z), max(Z), 1000)
-    ax6.plot(x, ln3.pdf(x), 'k-', linewidth=2)
-    ax6.plot(x, lognormpdf(x, gmean=0.8, gstd=1.5))
-    ax6.set_title('Particle Size Distribution')
-    ax6.set_xlabel('Particle Size (micron)')
-    ax6.set_ylabel('Probability Density')
+    plot_distribution(ax6, x, ln3.pdf(x), 'k-', linewidth=2)
+    plot_distribution(ax6, x, lognormpdf(x, gmean=0.8, gstd=1.5), 'r-', linewidth=2)
     ax6.set_xlim(0.01, 20)
     ax6.semilogx()
+
     plt.show()
 
 
