@@ -1,8 +1,10 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from plot_templates import set_figure, unit, getColor, prop_legend, prop_text
+from DataPlot.plot_templates import set_figure, unit, getColor, linecolor
 
+prop_text = {'fontsize': 14, }
+prop_legend = {'fontsize': 14, }
 
 __all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext']
 

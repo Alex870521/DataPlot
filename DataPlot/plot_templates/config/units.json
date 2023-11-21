@@ -57,5 +57,7 @@
     "Babs_dry_external": "Dry Babs_{external}",
     "Bext_Fixed_PNSD": "Mie Amb Extinction (1/Mm)",
     "Bext_Fixed_RI": "Mie Amb Extinction (1/Mm)",
-    "ABC": "ABC (%)"
+    "ABC": "ABC (%)",
+    "CPC_1": "CPC_1 ({\\#}/cm^{3})",
+    "CPC_2": "CPC_2 ({\\#}/cm^{3})"
 }

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 
-class Unit:
+class UnitHandler:
     """
     matplotlib.pyplot 單位
     """
@@ -63,4 +63,4 @@ class Unit:
             json.dump(old_data, f, indent=4)
 
 
-unit = Unit()
+unit = UnitHandler()

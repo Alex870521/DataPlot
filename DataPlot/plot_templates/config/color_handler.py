@@ -3,8 +3,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
 
-__all__ = ['getColor', 'color_maker', 'linecolor']
-
 
 def getColor(num=6, kinds='default', colormap='jet_r', **kwargs):
     if kinds == 'default':

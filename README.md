@@ -1,4 +1,37 @@
 ## DataPlot
+
+## Structure
+```plaintext
+DataPlot/
+├── Data_processing (ContainerHandle)/
+│   ├── Module1.py
+│   ├── Module2.py
+│   └── ...
+├── Mie_plot (PyMieScatt)/
+│   ├── Module1.py
+│   ├── Module2.py
+│   └── ...
+├── Plot_scripts/
+│   ├── Module1.py
+│   ├── Module2.py
+│   └── ...
+├── Plot_templates/
+│   ├── basic/
+│   │   ├── scatter_plot.py
+│   │   ├── bar_plot.py
+│   │   ├── pie_plot.py
+│   │   ├── violin_plot.py
+│   │   └── ...
+│   ├── config.py
+│   │   ├── color_handler.py
+│   │   ├── rcParams_decorator.py
+│   │   ├── unit_handler.py
+│   │   └── unit.json
+│   │   └── ...
+│   └── ...
+└── ...
+```
+
 ### Provide tools for visualizing research data for newcomers to the *aerosol field*.
 
 > The provided code comprises a versatile toolkit for data 

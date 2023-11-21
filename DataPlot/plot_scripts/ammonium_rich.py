@@ -21,7 +21,7 @@ def ammonium_rich(_df, title=''):
     ax.set_title(title)
 
     lines, labels = ax.get_legend_handles_labels()
-    ax.legend(lines, labels, loc='best', prop=prop_legend, frameon=False)
+    ax.legend(lines, labels, loc='best')
 
     color_bar = plt.colorbar(scatter, extend='both')
     color_bar.set_label(label=unit.PM25, size=14)

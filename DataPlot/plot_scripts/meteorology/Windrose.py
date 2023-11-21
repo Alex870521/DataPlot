@@ -25,8 +25,8 @@ Seasons = {'2020-Summer': (dtm(2020, 9, 4), dtm(2020, 9, 21, 23)),
 #     font_fam = 'Times New Roman'
 #     # font_fam = 'DejaVu Sans'
 #     rcParams['font.sans-serif'] = font_fam
-#     rcParams['mathtext.fontset'] = 'matplotlibConfig'
-#     font_dic = dict(fontsize=fs, math_fontfamily='matplotlibConfig')
+#     rcParams['mathtext.fontset'] = 'config'
+#     font_dic = dict(fontsize=fs, math_fontfamily='config')
 #
 #     dt_met = df[_st:_ed]
 #     ws, wd = dt_met['WS'], dt_met['WD']

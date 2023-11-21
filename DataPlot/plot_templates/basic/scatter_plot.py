@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from plot_templates import set_figure, unit, getColor
-from sklearn.linear_model import LinearRegression
+from matplotlib.ticker import ScalarFormatter, FuncFormatter
 import seaborn as sns
+from DataPlot.plot_templates import set_figure, unit, getColor, linecolor
+from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html
 
@@ -126,6 +127,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         plt.xlim(x_range[0], x_range[1])
         ax.set_xticks(bins, labels=bins.astype(int))
 
+    ax.ticklabel_format(axis='both', style='sci', scilimits=(0, 5), useMathText=True)
     # savefig
 
     return fig, ax
@@ -143,7 +145,6 @@ def scatter_mutiReg(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
     y_data1 = np.array(df[y1])
     y_data2 = np.array(df[y2])
 
-    from plot_templates import linecolor
     color1, color2, color3 = linecolor()
 
     scatter1 = ax.scatter(x_data, y_data1, s=25, color=color1['face'], alpha=0.8, edgecolors=color1['edge'], label='Internal')
@@ -199,16 +200,3 @@ def scatter_mutiReg(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
     # savefig
 
     return fig, ax
-
-
-if __name__ == '__main__':
-    df = pd.DataFrame(
-        {'Extinction': np.linspace(0, 5, 500) + np.random.randn(500)*1*np.random.randn(500),
-         'Scattering': np.linspace(0, 10, 500) + np.random.randn(500)*1*np.random.randn(500),
-         'Absorption': np.linspace(0, 8, 500) + np.random.randn(500)*1*np.random.randn(500),
-         'RH': np.random.random(500) * 100,
-         'diversity': np.random.random(500) * 1})
-
-    # scatter(df, x='Extinction', y='Scattering', c='RH', title='Title', regression=True, box=True)
-    scatter_mutiReg(df, x='Extinction', y1='Scattering', y2='Absorption', regression=True)
-    # sns.jointplot(df, x='Extinction', y='Scattering')

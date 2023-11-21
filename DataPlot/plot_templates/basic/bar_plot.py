@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from plot_templates import set_figure, unit, getColor
+from DataPlot.plot_templates import set_figure, unit
 
-__all__ = ['barplot_extend', 'barplot_concen', 'barplot_combine']
+__all__ = ['barplot_extend',
+           'barplot_concen',
+           'barplot_combine',
+           ]
 
 
 def autolabel(bars, x, y, val, threshold=3, symbol=True):
@@ -87,7 +90,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
         plt.title(fr'$\bf {title}$')
         plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
         plt.show()
-        fig.savefig(f"IMPR_exd_va_{title}")
+        # fig.savefig(f"IMPR_exd_va_{title}")
 
     if orientation == 'ha':
         ax.invert_yaxis()
@@ -96,7 +99,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
         plt.title(fr'$\bf {title}$')
         plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
         plt.show()
-        fig.savefig(f"IMPR_exd_ha_{title}")
+        # fig.savefig(f"IMPR_exd_ha_{title}")
 
     return fig, ax
 
@@ -165,7 +168,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
         ax.set_ylabel(r'$\bf Contribution\ (\%)$')
         # ax.yaxis.set_visible(False)
         ax.set_ylim(0, np.sum(data, axis=1).max())
-        fig.savefig(f"IMPR_con_va_{title}")
+        # fig.savefig(f"IMPR_con_va_{title}")
 
     if orientation == 'ha':
         ax.invert_yaxis()
@@ -174,7 +177,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
         # ax.legend(labels, ncol=species, bbox_to_anchor=(0, 1), loc='lower left', prop={'size': 12}, frameon=False)
         ax.xaxis.set_visible(False)
         ax.set_xlim(0, np.sum(data, axis=1).max())
-        fig.savefig(f"IMPR_con_ha_{title}", transparent=True)
+        # fig.savefig(f"IMPR_con_ha_{title}", transparent=True)
     # plt.axis('off')
     return fig, ax
 
@@ -268,18 +271,6 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
     plt.title(fr'$\bf {title}$')
     plt.legend(axx, labels, loc='upper right', prop={'size': 12}, frameon=False)
     plt.show()
-    fig.savefig(f"IMPR_exd_va_{title}")
+    # fig.savefig(f"IMPR_exd_va_{title}")
 
     return fig, ax
-
-
-if __name__ == '__main__':
-    amb_data = {'Clean': [0.0052, 0.7602, 0.2346],
-                'Transition': [0.0044, 0.8555, 0.1401],
-                'Event': [0.0025, 0.8916, 0.1059]}
-    dry_data = {'Clean': [0.0098, 0.8135, 0.1767],
-                'Transition': [0.008, 0.8811, 0.111],
-                'Event': [0.0061, 0.9287, 0.0652]}
-    barplot_concen(dry_data,
-                   labels=[r'$\bf ultrafine$', r'$\bf accumulation$', r'$\bf coarse$'],
-                   figsize=(5, 6))
