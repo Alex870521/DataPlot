@@ -74,5 +74,5 @@ if __name__ == '__main__':
     # scatter(df, x='PM25', y='Scattering', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM25', y='Absorption', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM1', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
-    scatter(df, x='Extinction', y='MSE', c='PM1/PM25', y_range=[0, 15], c_range=[0, 1])
+    scatter(df, x='Extinction', y='O3', c='PM1', y_range=[0, 15], c_range=[0, 1])
 

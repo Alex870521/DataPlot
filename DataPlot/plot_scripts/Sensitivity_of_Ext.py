@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from config.scatterPlot import scatter
+from plot_templates.basic.scatter_plot import scatter
 from processDecorator import function_handler
 from Data_processing import Mie_PESD
 from Data_processing import integrate
