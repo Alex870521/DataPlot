@@ -1,51 +1,7 @@
-from pathlib import Path
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pandas import read_csv, concat
-import matplotlib.pyplot as plt
-from PyMieScatt.Mie import AutoMieQ
-from Data_processing import integrate
-from Data_classify import state_classify
-from config.custom import setFigure, unit, getColor
-from scipy.signal import find_peaks
-from Data_processing.PSD_property import dist_prop
-
-PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
-PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")
-
-
-with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PSSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PSSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PVSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PVSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PESDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PESD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PESDist_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PESD_dry = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PESDist_external.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PESD_external = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-dp = np.array(PNSD.columns, dtype='float')
-_length = np.size(dp)
-dlogdp = np.array([0.014] * _length)
-
-df = integrate()
-state_classify(df)
-
-Ext_amb_df = concat([df[['Extinction', 'State']], PESD], axis=1)
-Ext_dry_df = concat([df[['Extinction', 'State']], PESD_dry], axis=1)
-Ext_amb_df_external = concat([df[['Extinction', 'State']], PESD_external], axis=1)
-
-PSD_amb_df = concat([df[['Extinction', 'State']], PNSD], axis=1)
-PSSD_amb_df = concat([df[['Extinction', 'State']], PSSD], axis=1)
-PVSD_amb_df = concat([df[['Extinction', 'State']], PVSD], axis=1)
+from DataPlot.plot_templates import set_figure
 
 
 def get_group_avgdist_stddist(group):
@@ -147,7 +103,7 @@ color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
                 'Event': ['#9f1d4a', '#e984a7']}
 
 
-@setFigure(figsize=(10, 6))
+@set_figure(figsize=(10, 6))
 def plot_dist(dist, enhancement=False, figname='', **kwargs):
     if isinstance(dist, dict):
         Clean_line = dist['Clean']
@@ -203,10 +159,10 @@ def plot_dist(dist, enhancement=False, figname='', **kwargs):
     plt.title(title, family='Times New Roman', weight='bold', size=20)
     plt.semilogx()
     plt.show()
-    fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
+    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
-@setFigure(figsize=(8, 6), fs=16)
+@set_figure(figsize=(8, 6), fs=16)
 def plot_dist_example(PSSD, PSSD_std, Q_ext, PESD, PESD_std, **kwargs):
     fig, ax = plt.subplots(1, 1)
     a, = ax.plot(dp, PSSD, ls='solid', color='#14336d', lw=2)
@@ -258,7 +214,7 @@ def plot_dist_example(PSSD, PSSD_std, Q_ext, PESD, PESD_std, **kwargs):
     plt.show()
 
 
-@setFigure(figsize=(8, 6))
+@set_figure(figsize=(8, 6))
 def plot_dry_amb_dist_test(dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
     fig, ax = plt.subplots(1, 1)
     widths = np.diff(dp)
@@ -286,7 +242,7 @@ def plot_dry_amb_dist_test(dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
 
 
 
-@setFigure(figsize=(8, 6))
+@set_figure(figsize=(8, 6))
 def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Clean', **kwargs):
     PESD, PESD_std= Ext_amb_dis[state], Ext_amb_dis_std[state]
     PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(_length,)
@@ -317,10 +273,10 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
     plt.title(title, family='Times New Roman', weight='bold', size=20)
     plt.semilogx()
     plt.show()
-    fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{state}_Ext_dist', transparent=True)
+    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{state}_Ext_dist', transparent=True)
 
 
-@setFigure(figsize=(8, 6))
+@set_figure(figsize=(8, 6))
 def plot_dist2(dist, dist2, figname='', **kwargs):
     if isinstance(dist, dict):
         Clean_line = dist['Clean']
@@ -368,10 +324,10 @@ def plot_dist2(dist, dist2, figname='', **kwargs):
     plt.title(title, family='Times New Roman', weight='bold', size=20)
     plt.semilogx()
     plt.show()
-    fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
+    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
-@setFigure(figsize=(8, 6))
+@set_figure(figsize=(8, 6))
 def plot_dist_fRH(dist, dist2, figname='', **kwargs):
     if isinstance(dist, dict):
         cut = 10
@@ -407,7 +363,7 @@ def plot_dist_fRH(dist, dist2, figname='', **kwargs):
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
-@setFigure(figsize=(8, 6))
+@set_figure(figsize=(8, 6))
 def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     PESD, PESD_std = dist, std1
     PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(_length, )*0.2
@@ -451,24 +407,5 @@ def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     plt.title(title, family='Times New Roman', weight='bold', size=20)
 
     plt.show()
-    fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'000_Ext_dist', transparent=True)
+    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'000_Ext_dist', transparent=True)
     return fig, ax
-
-
-if __name__ == '__main__':
-    print('')
-    # plot_dist(Ext_amb_dis, title=r'$\bf Ambient\ Extinction\ Distribution$', enhancement=False, figname='Amb_Ext_Dist')
-    # plot_dist(Ext_dry_dis, title=r'$\bf Dry\ Extinction\ Distribution$', enhancement=True, figname='Dry_Ext_Dist')
-    # plot_dist(PSD_amb_dis, ylim=(0, 1.5e5), ylabel=r'$\bf dN/dlogdp\ (1/Mm)$', title=r'$\bf Ambient\ Particle\ Number\ Distribution$')
-
-    # plot_dist2(PSD_amb_dis, PSSD_amb_dis, title=r'$\bf Particle\ Number\ &\ Surface\ Area\ Distribution$', figname='NumSurf_dist')
-    plot_dist_fRH(Ext_dry_dis, Ext_amb_dis, title=r'$\bf Distribution$', figname='fRH_dist')
-    # plot_dist_example(PSSD_amb_df.mean()[1:], PSSD_amb_df.std()[1:], Q_ext, Ext_amb_df.mean()[1:], Ext_amb_df.std()[1:])
-
-    # plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Clean')
-    # plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Transition')
-    # plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Event')
-
-    # dist1, diat_std1 = Ext_amb_df.dropna().iloc[:, 2:].mean(),  Ext_amb_df.dropna().iloc[:, 2:].std()
-    # dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
-    # fig, ax = plot_dist_cp(dist1, diat_std1, dist2, diat_std2)

@@ -1,9 +1,10 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from Data_processing.processDecorator import save_to_csv
-import Data_processing as dataproc
+from DataPlot.Data_processing.csv_decorator import save_to_csv
+import DataPlot.Data_processing as dataproc
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
+
 
 @save_to_csv(PATH_MAIN / 'All_data.csv')
 def integrate(reset=False, filename=None):

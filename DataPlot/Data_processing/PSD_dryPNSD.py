@@ -4,12 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from pandas import read_csv, concat
-from processDecorator import save_to_csv
-from PSD_extinction import Extinction_dry_PSD_internal_process
-# from config.scatterPlot import scatter, scatter_mutiReg
+from DataPlot.Data_processing.csv_decorator import save_to_csv
+from DataPlot.Data_processing.PSD_extinction import Extinction_dry_PSD_internal_process
 
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data' / 'Level2'
+PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'
 
 with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:

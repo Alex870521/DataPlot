@@ -127,7 +127,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         plt.xlim(x_range[0], x_range[1])
         ax.set_xticks(bins, labels=bins.astype(int))
 
-    ax.ticklabel_format(axis='both', style='sci', scilimits=(0, 5), useMathText=True)
+    ax.ticklabel_format(axis='both', style='sci', scilimits=(-1, 3), useMathText=True)
     # savefig
 
     return fig, ax
