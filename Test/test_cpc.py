@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.plot_templates import set_figure, unit
 from pathlib import Path
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parent
 
 df1 = (pd.read_csv(PATH_MAIN / '20231120-CPC1.csv', usecols=range(7), header=17, skipfooter=8, engine='python')
        .set_index('Elapsed Time'))
@@ -37,3 +38,24 @@ def cpc_vs():
     ax.legend(loc='best')
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
     ax.ticklabel_format(axis='both', style='sci', scilimits=(0, 3), useMathText=True)
+
+    axins = inset_axes(ax, width="30%", height="30%", loc='upper center')
+    axins.scatter(dic['60 nm']['CPC_1'], dic['60 nm']['CPC_2'], label='Zoomed In')
+    axins.scatter(dic['60* nm']['CPC_1'], dic['60* nm']['CPC_2'], label='Zoomed In')
+    axins.scatter(dic['60** nm']['CPC_1'], dic['60** nm']['CPC_2'], label='Zoomed In')
+    # 设置放大图坐标轴的范围
+    x1, x2, y1, y2 = 2.22e5, 2.33e5, 2.51e5, 2.64e5  # 设置放大区域的范围
+    axins.set_xlim(x1, x2)
+    axins.set_ylim(y1, y2)
+    axins.ticklabel_format(axis='both', style='sci', scilimits=(0, 3), useMathText=True)
+
+    # 将放大图坐标轴的刻度去掉
+    axins.set_xticks([])
+    axins.set_yticks([])
+
+    # 添加连接线
+    ax.indicate_inset_zoom(axins, edgecolor="black")
+
+
+if __name__ == '__main__':
+    cpc_vs()
