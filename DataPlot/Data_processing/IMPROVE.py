@@ -1,11 +1,11 @@
 from pathlib import Path
-from pandas import read_csv, concat
+from pandas import read_csv, read_json, concat
 from DataPlot.Data_processing.csv_decorator import save_to_csv
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
 
-with open(PATH_MAIN / 'level1' / 'fRH.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    frh = read_csv(f).set_index('RH')
+with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
+    frh = read_json(f)
 
 
 def f_RH(RH, version=None):
@@ -19,6 +19,7 @@ def f_RH(RH, version=None):
         val = frh[version][95]
     else:
         val = frh[version][int(RH)]
+
     return val
 
 
