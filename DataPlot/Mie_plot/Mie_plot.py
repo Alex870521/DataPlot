@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pathlib import Path
-from Data_processing.Mie_plus import Mie_Q, Mie_MEE
-from config.custom import setFigure
+from DataPlot.Data_processing.Mie_plus import Mie_Q, Mie_MEE
+from DataPlot.plot_templates import set_figure
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
 textprops = {'fontname': 'Times New Roman', 'weight': 'bold', 'fontsize': 16}
@@ -13,7 +13,8 @@ dp = np.geomspace(10, 10000, 5000)
 
 PATH_MAIN = Path(__file__).resolve().parent / 'Figure'
 
-@setFigure(figsize=(6, 6))
+
+@set_figure(figsize=(6, 6))
 def Q_plot(species, subdic):
     fig, ax = plt.subplots(1, 1)
 
@@ -32,7 +33,7 @@ def Q_plot(species, subdic):
     fig.savefig(PATH_MAIN/f'Q_{species}')
 
 
-@setFigure(figsize=(6, 6))
+@set_figure(figsize=(6, 6))
 def MEE_plot(species, subdic):
     fig, ax = plt.subplots(1, 1)
 
@@ -49,7 +50,7 @@ def MEE_plot(species, subdic):
     fig.savefig(PATH_MAIN/f'MEE_{species}')
 
 
-@setFigure(figsize=(6, 6))
+@set_figure(figsize=(6, 6))
 def Q_size_para_plot(species, subdic):
     fig, ax = plt.subplots(1, 1, figsize=(6, 6), dpi=150, constrained_layout=True)
     size_para = math.pi * dp / 550
@@ -72,7 +73,7 @@ def Q_size_para_plot(species, subdic):
     fig.savefig(PATH_MAIN/f'Q_sp_{species}')
 
 
-@setFigure(figsize=(8, 6), fs=16)
+@set_figure(figsize=(8, 6), fs=16)
 def All_species_Q(dic, x='dp', y='Q', mode='ext', **kwargs):
     """
 
@@ -121,7 +122,7 @@ def All_species_Q(dic, x='dp', y='Q', mode='ext', **kwargs):
         fig.savefig(PATH_MAIN/f'Q_ALL_{mode}', transparent=True)
 
 
-@setFigure(figsize=(8, 6), fs=16)
+@set_figure(figsize=(8, 6), fs=16)
 def All_species_MEE(dic, x='dp', y='MEE', mode='ext', **kwargs):
     """
 
@@ -166,7 +167,7 @@ def All_species_MEE(dic, x='dp', y='MEE', mode='ext', **kwargs):
         fig.savefig(PATH_MAIN/f'MEE_ALL_{mode}', transparent=True)
 
 
-@setFigure(figsize=(12, 6))
+@set_figure(figsize=(12, 6))
 def IJ_couple():
     """ 測試實虛部是否互相影響
 
@@ -207,7 +208,7 @@ def IJ_couple():
     fig.savefig(PATH_MAIN/f'IJ_couple')
 
 
-@setFigure(figsize=(6, 5))
+@set_figure(figsize=(6, 5))
 def RRI_2D(mode='ext', **kwargs):
     """
 

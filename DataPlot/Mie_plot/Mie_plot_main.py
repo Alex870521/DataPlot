@@ -1,5 +1,5 @@
 import numpy as np
-from Data_processing.Mie_plus import Mie_Q, Mie_MEE
+from DataPlot.Data_processing.Mie_plus import Mie_Q, Mie_MEE
 from Mie_plot import Q_plot, Q_size_para_plot, MEE_plot, All_species_Q, All_species_MEE, RRI_2D, IJ_couple
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
