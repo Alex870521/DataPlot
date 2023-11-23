@@ -52,15 +52,15 @@ def save_to_csv(filename):
     :param filename:
     :return:
     """
-    def decorator(func):
-        @wraps(func)
+    def decorator(_func):
+        @wraps(_func)
         def wrapper(reset=False, *args, **kwargs):
-            print('Loading...', func.__name__)
+            print('Loading...', _func.__name__)
             if not reset:
-                print('Finish....', func.__name__)
+                print('Finish....', _func.__name__)
                 return open_csv(filename)
 
-            result = func(reset=True, filename=filename, *args, **kwargs)
+            result = _func(reset=True, filename=filename, *args, **kwargs)
 
             if isinstance(result, pd.DataFrame):
                 result.to_csv(filename)
@@ -76,7 +76,7 @@ def save_to_csv(filename):
             else:
                 raise TypeError("The function must return a DataFrame or a tuple of DataFrames")
 
-            print('Finish....', func.__name__)
+            print('Finish....', _func.__name__)
             return result
         return wrapper
     return decorator

@@ -2,9 +2,9 @@ from DataPlot.Data_processing.IMPACT import impact_process
 from DataPlot.Data_processing.csv_decorator import *
 
 
-def test():
+def test_save_decorator():
     print(__file__)
-    # impact_process()
+
     PATH_MAIN = Path(__file__).parent.parent
 
     @save_to_csv(PATH_MAIN / 'output1.csv')
@@ -18,4 +18,6 @@ def test():
         # 'C': [4, 5, 6], 'D': [10, 11, 12]}).set_index('Time')
         return df1
 
-    abc = my_function(reset=True)
+    my_function(reset=True)
+
+    # impact_process()

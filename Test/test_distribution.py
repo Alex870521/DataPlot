@@ -5,8 +5,7 @@ import pandas as pd
 
 from pandas import read_csv, concat
 from PyMieScatt.Mie import AutoMieQ
-from DataPlot.Data_processing import integrate
-from DataPlot.Data_processing.PSD_property import dist_prop
+from DataPlot.Data_processing import main
 from DataPlot.Data_processing.Data_classify import state_classify
 from DataPlot.plot_templates import set_figure, unit
 from pathlib import Path
@@ -40,7 +39,7 @@ dp = np.array(PNSD.columns, dtype='float')
 _length = np.size(dp)
 dlogdp = np.array([0.014] * _length)
 
-df = integrate()
+df = main()
 state_classify(df)
 
 Ext_amb_df = concat([df[['Extinction', 'State']], PESD], axis=1)

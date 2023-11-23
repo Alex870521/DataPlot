@@ -26,14 +26,11 @@ class SizeDist:
     def number(self):
         return Number_PSD_process(data=self.data, reset=True)
 
-
     def surface(self):
         return Surface_PSD_process(data=self.data, reset=True)
 
-
     def volume(self):
         return Volume_PSD_process(data=self.data, reset=True)
-
 
     def extinction(self):
         return Extinction_PSD_process(data=self.data, reset=True)

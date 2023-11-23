@@ -7,17 +7,13 @@ from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.csv_decorator import save_to_csv
 
-PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
-PATH_DIST = PATH_MAIN / 'distribution'
+PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2' / 'distribution'
 
-with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_DIST / 'PNSDist_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PNSD_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD_dry = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-with open(PATH_DIST / 'PESDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PESD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
 
 dp = np.array(PNSD.columns, dtype='float')
@@ -51,7 +47,3 @@ def geometric_prop(_dp, _prop):
     _gsd = ((((_dp_mesh - _gmd_mesh) ** 2) * _prop).sum() / _prop_t.copy()) ** .5
 
     return np.exp(_gmd).__round__(2), np.exp(_gsd).__round__(2)
-
-
-dist = PESD.dropna().iloc[1]
-aaa = dist_prop(dist)

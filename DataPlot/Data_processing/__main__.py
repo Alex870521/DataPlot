@@ -7,7 +7,7 @@ PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
 
 
 @save_to_csv(PATH_MAIN / 'All_data.csv')
-def integrate(reset=False, filename=None):
+def main(reset=False, filename=None):
     # 1. EPB
     with open(PATH_MAIN / 'level1' / 'EPB.csv', 'r', encoding='utf-8', errors='ignore') as f:
         minion = read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
@@ -16,7 +16,7 @@ def integrate(reset=False, filename=None):
     impact = dataproc.impact_process(reset=False)
 
     # 3. Mass_volume
-    mass = dataproc.mass_volume_process(reset=False)
+    mass = dataproc.chemical_process(reset=False)
 
     # 4. IMPROVE
     improve = dataproc.improve_process(reset=False, version='revised')
@@ -39,4 +39,4 @@ def integrate(reset=False, filename=None):
 
 
 if __name__ == '__main__':
-    df = integrate(reset=True)
+    df = main(reset=True)

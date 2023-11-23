@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import pandas as pd
-
 from pathlib import Path
 from pandas import read_csv
 from DataPlot.Data_processing.csv_decorator import save_to_csv
@@ -12,6 +11,7 @@ PATH_DIST = PATH_MAIN / 'distribution'
 
 class DataTypeError(Exception):
     """ 請確認粒徑分布的數據 """
+
 
 def number_dist(column):
     """ make sure the input data unit is dN/dlogdp """
@@ -101,7 +101,6 @@ if __name__ == '__main__':
     dlogdp = np.array([0.014] * _length)
     index = PNSD.index.copy()
     df_input = PNSD.dropna()
-
 
     Number_PNSD = Number_PSD_process(reset=True)
     # Surface_PNSD = Surface_PSD_process(reset=True)

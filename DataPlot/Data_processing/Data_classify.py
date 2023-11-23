@@ -1,5 +1,4 @@
 from datetime import datetime
-from Data_processing import integrate
 
 
 # set_group
@@ -119,7 +118,3 @@ def four_quadrant(df):
     _dic['3'] = df.loc[(_df.Extinction >= 68.22) & (_df.PM25 < 16)]
     _dic['4'] = df.loc[(_df.Extinction >= 68.22) & (_df.PM25 >= 16)]
     return _dic
-
-
-if __name__ == '__main__':
-    df = integrate(reset=False)
