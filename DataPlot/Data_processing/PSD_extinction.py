@@ -76,7 +76,7 @@ def extinction_dist(column, mode, kind):
 
 
 @save_to_csv(PATH_MAIN / 'PESD.csv')
-def Extinction_PSD_process(data=df_input, reset=False, filename=None):
+def extinction_psd_process(data=df_input, reset=False, filename=None):
     """ Calculated the extinction distribution
 
     :param mode: 'mixing type'
@@ -197,6 +197,6 @@ def Extinction_dry_PSD_external_process(reset=False, filename=None):
 
 
 if __name__ == '__main__':
-    Extinction_PESD = Extinction_PSD_process(reset=True)
+    Extinction_PESD = extinction_psd_process(reset=True)
     # Extinction_dry_PSD_internal_process(reset=True)
     # Extinction_dry_PSD_external_process(reset=True)

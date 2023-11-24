@@ -22,14 +22,14 @@ def main(reset=False, filename=None):
     improve = dataproc.improve_process(reset=False, version='revised')
 
     # 5. Extinction distribution
-    Extinction_PNSD = dataproc.Extinction_PSD_process(reset=False)
+    Extinction_PNSD = dataproc.extinction_psd_process(reset=False)
 
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
 
     # 6. Number & Surface & volume distribution
-    number = dataproc.Number_PSD_process(reset=False)
-    surface = dataproc.Surface_PSD_process(reset=False)
-    volume = dataproc.Volume_PSD_process(reset=False)
+    number = dataproc.number_psd_process(reset=False)
+    surface = dataproc.surface_psd_process(reset=False)
+    volume = dataproc.volume_psd_process(reset=False)
 
     df = concat([minion, impact, mass, improve, Extinction_PNSD, number, surface, volume], axis=1)
 
