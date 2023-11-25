@@ -30,5 +30,5 @@ def impact_process(reset=False, filename=None):
 
 
 if __name__ == '__main__':
-    df = impact_process(reset=False)
+    df = impact_process(reset=True)
 
