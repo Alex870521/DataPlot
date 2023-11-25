@@ -55,9 +55,10 @@ class SizeDist:
         pass
         # return extinction_psd_process(data=self.data, reset=True)
 
-    def export_to_csv(self, filename='PSD.csv'):
+    def psd_process(self, reset=False, filename='PSD.csv'):
         result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1)
         result_df.reindex(self.index).to_csv(self.path_main / filename)
+        return result_df
 
     def __geometric_prop(self, ser):
         num = np.array(ser)
@@ -90,4 +91,4 @@ class SizeDist:
 
 if __name__ == '__main__':
     PNSD_data = SizeDist(_reader())
-    PNSD_data.export_to_csv()
+    PNSD_data.psd_process()
