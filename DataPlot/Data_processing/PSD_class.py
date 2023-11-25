@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
 from PSD_extinction import extinction_psd_process
-from PSD_reader import _reader
+from DataPlot.Data_processing.PSD_reader import _reader
 from DataPlot.Data_processing.csv_decorator import save_to_csv
 
 
@@ -56,12 +56,7 @@ class SizeDist:
         # return extinction_psd_process(data=self.data, reset=True)
 
     def export_to_csv(self, filename='PSD.csv'):
-        num_df = self.number()
-        surf_df = self.surface()
-        vol_df = self.volume()
-
-        result_df = pd.concat([num_df, surf_df, vol_df], axis=1)
-
+        result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1)
         result_df.reindex(self.index).to_csv(self.path_main / filename)
 
     def __geometric_prop(self, ser):
