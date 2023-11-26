@@ -59,5 +59,7 @@
     "Bext_Fixed_RI": "Mie Amb Extinction (1/Mm)",
     "ABC": "ABC (%)",
     "CPC_1": "CPC_1 ({\\#}/cm^{3})",
-    "CPC_2": "CPC_2 ({\\#}/cm^{3})"
+    "CPC_2": "CPC_2 ({\\#}/cm^{3})",
+    "BC6": "BC6 (ng/cm^{3}) (880 nm)",
+    "IR BCc": "IR BCc (ng/cm^{3}) (880 nm)"
 }
