@@ -3,8 +3,8 @@ import math
 import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
-from PSD_extinction import extinction_psd_process
-from DataPlot.Data_processing.PSD_reader import _reader
+# from PSD_extinction import extinction_psd_process
+from DataPlot.Data_processing.PSD_reader import psd_reader
 from DataPlot.Data_processing.csv_decorator import save_to_csv
 
 
@@ -14,54 +14,79 @@ class DataTypeError(Exception):
 
 class SizeDist:
     """ 輸入粒徑分布檔案，計算表面機、體積分布與幾何平均粒徑等方法 """
-    path_main = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
-    path_dist = path_main / 'distribution'
+    default_path = Path(__file__).parent.parent.parent / 'Data' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
 
-    def __init__(self, df):
-        self.dp = np.array(df.columns, dtype='float')
-        self.dlogdp = np.array([0.014] * np.size(self.dp))
-        self.index = df.index.copy()
-        self.data = df.dropna()
+    def __init__(self, path=None, filename=None):
+        self.path = path or self.default_path.parent
+        self.filename = filename or self.default_path.name
+
+        self.data = psd_reader(self.path / self.filename).dropna()
+        self.index = self.data.index.copy()
+        self.dp = np.array(self.data.columns, dtype='float')
+        self.dlogdp = np.full_like(self.dp, 0.014)
 
     def number(self, reset=False, **kwargs):
         num_dist = self.data
-        num_prop = num_dist.apply(self.__geometric_prop, axis=1, result_type='expand')
+        num_prop = num_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
         return pd.DataFrame({'Number': num_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDn': num_prop[0],
-                             'GSDn': num_prop[1]})
+                             'GMDn': num_prop['GMD'],
+                             'GSDn': num_prop['GSD'],
+                             'mode_n': num_prop['mode'],
+                             'cont_n': num_prop['contribution']})
 
     def surface(self, reset=False, filename='PSSD_dSdlogdp.csv', **kwargs):
         surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1, result_type='broadcast')
-        surf_prop = surf_dist.apply(self.__geometric_prop, axis=1, result_type='expand')
+        surf_prop = surf_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        surf_dist.reindex(self.index).to_csv(self.path_dist / filename)
+        surf_dist.reindex(self.index).to_csv(self.path / filename)
 
         return pd.DataFrame({'Surface': surf_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDs': surf_prop[0],
-                             'GSDs': surf_prop[1]})
+                             'GMDs': surf_prop['GMD'],
+                             'GSDs': surf_prop['GSD'],
+                             'mode_s': surf_prop['mode'],
+                             'cont_s': surf_prop['contribution']})
 
     def volume(self, reset=False, filename='PVSD_dVdlogdp.csv', **kwargs):
         vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1, result_type='broadcast')
-        vol_prop = vol_dist.apply(self.__geometric_prop, axis=1, result_type='expand')
+        vol_prop = vol_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        vol_dist.reindex(self.index).to_csv(self.path_dist / filename)
+        vol_dist.reindex(self.index).to_csv(self.path / filename)
 
         return pd.DataFrame({'Volume': vol_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDv': vol_prop[0],
-                             'GSDv': vol_prop[1]})
+                             'GMDv': vol_prop['GMD'],
+                             'GSDv': vol_prop['GSD'],
+                             'mode_v': vol_prop['mode'],
+                             'cont_v': vol_prop['contribution']})
 
-    def extinction(self):
+    def extinction(self, reset=False, filename='PESD_dEdlogdp.csv', **kwargs):
+        ext_dist = self.data.apply(np.sum, axis=1, result_type='broadcast')
+        ext_prop = ext_dist.apply(self.__dist_prop, axis=1, result_type='expand')
+
+        ext_dist.reindex(self.index).to_csv(self.path / filename)
         pass
         # return extinction_psd_process(data=self.data, reset=True)
 
     def psd_process(self, reset=False, filename='PSD.csv'):
-        result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1)
-        result_df.reindex(self.index).to_csv(self.path_main / filename)
-        return result_df
+        return pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index).to_csv(self.path.parent / filename)
+
+    def __mode_contribution(self, ser):
+        num = np.array(ser) * self.dlogdp
+        total_num = num.sum()
+
+        ultra_range = (self.dp >= 11.8) & (self.dp < 100)
+        accum_range = (self.dp >= 100) & (self.dp < 1000)
+        coarse_range = (self.dp >= 1000) & (self.dp < 2500)
+
+        ultra_num = np.sum(num[ultra_range])
+        accum_num = np.sum(num[accum_range])
+        coars_num = np.sum(num[coarse_range])
+
+        return [(ultra_num / total_num), (accum_num / total_num), (coars_num / total_num)]
 
     def __geometric_prop(self, ser):
-        num = np.array(ser)
+        """ First change the distribution into dN """
+        num = np.array(ser) * self.dlogdp
         total_num = num.sum()
 
         _dp = np.log(self.dp)
@@ -72,23 +97,26 @@ class SizeDist:
 
         return np.exp(_gmd), np.exp(_gsd)
 
-    def __dist_prop(self, dist):
-        peaks1, _ = find_peaks(np.concatenate(([min(dist)], dist, [min(dist)])), distance=20)
-        num = np.array(dist * self.dlogdp)
-        total_num = np.sum(num)
+    def __mode_prop(self, ser):
+        min_value = np.array([min(ser)])
+        extend_ser = np.concatenate([min_value, ser, min_value])
+        _mode, _ = find_peaks(extend_ser, distance=20)
+        return self.dp[_mode - 1]
 
-        ultra_num = np.sum(num[0:67])
-        accum_num = np.sum(num[67:139])
-        PM1_num = (ultra_num + accum_num)
-        coars_num = np.sum(num[139:167])
+    def __dist_prop(self, ser):
+        GMD, GSD = self.__geometric_prop(ser)
+        Mode = self.__mode_prop(ser)
+        contribution = self.__mode_contribution(ser)
 
-        GMD, GSD = self.__geometric_prop(self.dp, num)
-
-        contrbution = [(ultra_num / total_num), (accum_num / total_num), (coars_num / total_num)]
-        return dict(mode=self.dp[peaks1 - 1], GMD=GMD, GSD=GSD, PM1_num=PM1_num, PM25_num=total_num,
-                    contrbution=contrbution, )
+        return dict(GMD=GMD, GSD=GSD, mode=Mode, contribution=contribution, )
 
 
 if __name__ == '__main__':
-    PNSD_data = SizeDist(_reader())
-    PNSD_data.psd_process()
+    PNSD_data = SizeDist()
+
+    # file_path = Path('C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2/distribution')
+    # PNSD_data = SizeDist(path=file_path, filename='PNSD_dNdlogdp_dry.csv')
+
+
+
+
