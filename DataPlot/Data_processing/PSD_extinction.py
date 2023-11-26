@@ -1,11 +1,11 @@
 import numpy as np
-import math
 import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.csv_decorator import save_to_csv
 from DataPlot.Data_processing.Mie_plus import Mie_PESD, Mie_MEE
+from DataPlot.Data_processing.PSD_reader import psd_reader, chemical_reader
+
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'
@@ -13,16 +13,14 @@ PATH_DIST = PATH_MAIN / 'distribution'
 with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-# with open(PATH_DIST / 'PNSD_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
-#     PNSD_dry = read_csv(f, parse_dates=['Time']).set_index('Time')
-
 with open(PATH_MAIN / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    chemical = read_csv(f, parse_dates=['Time']).set_index('Time')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb', 'density', 'AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio', 'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]
-
+    chemical = read_csv(f, parse_dates=['Time']).set_index('Time')[
+        ['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb', 'density',
+         'AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio', 'SS_volume_ratio',
+         'EC_volume_ratio', 'ALWC_volume_ratio']]
 
 df = concat([PNSD, chemical], axis=1)
 
-# df_dry = concat([PNSD_dry, refractive_index, volume_ratio], axis=1)
 
 dp = np.array(PNSD.columns, dtype='float')
 _length = np.size(dp)
@@ -41,6 +39,8 @@ def selection(object1, object2, object3, kind):
 
 
 def extinction_dist(column, mode, kind):
+    chemical = chemical_reader()
+
     if mode == 'internal':
         m = column['n_amb'] + 1j * column['k_amb']
         ndp = np.array(column[:_length])
@@ -98,12 +98,12 @@ def extinction_psd_process(data=df_input, reset=False, filename=None):
                               'Babs_internal': Abs_dist.apply(np.sum, axis=1),
                               'Bext_external': Ext_dist2.apply(np.sum, axis=1),
                               'Bsca_external': Sca_dist2.apply(np.sum, axis=1),
-                              'Babs_external': Abs_dist2.apply(np.sum, axis=1),}).reindex(index)
+                              'Babs_external': Abs_dist2.apply(np.sum, axis=1), }).reindex(index)
     # GMD, GSD ...
 
     # Save .csv
-    (Ext_dist/dlogdp).reindex(index).to_csv(PATH_DIST / f'PESD_dextdlogdp_internal.csv')
-    (Ext_dist2/dlogdp).reindex(index).to_csv(PATH_DIST / f'PESD_dextdlogdp_external.csv')
+    (Ext_dist / dlogdp).reindex(index).to_csv(PATH_DIST / f'PESD_dextdlogdp_internal.csv')
+    (Ext_dist2 / dlogdp).reindex(index).to_csv(PATH_DIST / f'PESD_dextdlogdp_external.csv')
     # Sca_dist.reindex(index).to_csv(PATH_DIST / f'PESD_dscadlogdp_{mode}.csv')
     # Abs_dist.reindex(index).to_csv(PATH_DIST / f'PESD_dabsdlogdp_{mode}.csv')
 
@@ -198,5 +198,4 @@ def Extinction_dry_PSD_external_process(reset=False, filename=None):
 
 if __name__ == '__main__':
     Extinction_PESD = extinction_psd_process(reset=True)
-    # Extinction_dry_PSD_internal_process(reset=True)
-    # Extinction_dry_PSD_external_process(reset=True)
+

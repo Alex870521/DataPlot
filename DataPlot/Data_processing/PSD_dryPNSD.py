@@ -14,15 +14,13 @@ PATH_DIST = PATH_MAIN / 'distribution'
 with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_MAIN / 'mass_volume_VAM.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    refractive_index = read_csv(f, parse_dates=['Time']).set_index('Time')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb']]
+with open(PATH_MAIN / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
+    chemical = read_csv(f, parse_dates=['Time']).set_index('Time')[
+        ['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb', 'density',
+         'AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio', 'SS_volume_ratio',
+         'EC_volume_ratio', 'ALWC_volume_ratio']]
 
-with open(PATH_MAIN / 'mass_volume_VAM.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    volume_ratio = read_csv(f, parse_dates=['Time']).set_index('Time')[['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio',
-                                                                        'Soil_volume_ratio', 'SS_volume_ratio', 'EC_volume_ratio',
-                                                                        'ALWC_volume_ratio']]
-
-df = concat([PNSD, refractive_index, volume_ratio], axis=1)
+df = concat([PNSD, chemical], axis=1)
 
 
 dp = np.array(PNSD.columns, dtype='float')

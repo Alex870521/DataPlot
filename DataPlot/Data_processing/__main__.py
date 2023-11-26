@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.csv_decorator import save_to_csv
-from DataPlot.Data_processing.PSD_reader import _reader
+from DataPlot.Data_processing.PSD_reader import psd_reader
 from DataPlot.Data_processing.IMPACT import impact_process
 import DataPlot.Data_processing as dataproc
 
@@ -23,19 +23,16 @@ def main(reset=False, filename=None):
     # 4. IMPROVE
     improve = dataproc.improve_process(reset=False, version='revised')
 
-    # 5. Extinction distribution
-    Extinction_PNSD = dataproc.extinction_psd_process(reset=False)
+    # 5. Number & Surface & volume distribution
+    PSD = dataproc.SizeDist().psd_process(reset=False)
 
+    # 6. Extinction distribution
+    PESD = dataproc.extinction_psd_process(reset=False)
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
-
-    # 6. Number & Surface & volume distribution
-    PSD = dataproc.SizeDist(_reader()).psd_process(reset=False)
-
-    df = concat([minion, impact, mass, improve, Extinction_PNSD, PSD], axis=1)
 
     # df = dataproc.other_process(df.copy())
 
-    return df
+    return concat([minion, impact, mass, improve, PESD, PSD], axis=1)
 
 
 if __name__ == '__main__':

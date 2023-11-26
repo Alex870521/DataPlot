@@ -11,7 +11,7 @@ def impact_process(reset=False, filename=None):
         with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
             return read_csv(f, parse_dates=['Time']).set_index('Time')
 
-    with open(PATH_MAIN / 'Level1' / 'optical.csv', 'r', encoding='utf-8', errors='ignore') as f:
+    with open(PATH_MAIN / 'Level1' / 'Optical.csv', 'r', encoding='utf-8', errors='ignore') as f:
         optical = read_csv(f, parse_dates=['Time']).set_index('Time')
 
     with open(PATH_MAIN / 'Level1' / 'PBLH.csv', 'r', encoding='utf-8', errors='ignore') as f:
