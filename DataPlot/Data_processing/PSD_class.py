@@ -3,8 +3,8 @@ import math
 import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
-# from PSD_extinction import extinction_psd_process
-from DataPlot.Data_processing.PSD_reader import psd_reader
+from DataPlot.Data_processing.PSD_reader import psd_reader, chemical_reader
+from DataPlot.Data_processing.Mie_plus import Mie_PESD, Mie_MEE
 
 
 class DataTypeError(Exception):
@@ -21,7 +21,7 @@ class SizeDist:  # 可以加入一些錯誤的raise
     >>> psd_data = SizeDist()
 
     Example 2: Specify custom path and filename
-    >>> custom_psd_data = SizeDist(path='custom/path', filename='custom_PSD.csv')
+    >>> custom_psd_data = SizeDist(path=Path('custom/path'), filename='custom_PSD.csv')
 
     Parameters
     ----------
@@ -76,6 +76,7 @@ class SizeDist:  # 可以加入一些錯誤的raise
         self.dlogdp = np.full_like(self.dp, 0.014)
 
     def number(self):
+        """ dN/dlogdp """
         num_dist = self.data
         num_prop = num_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
@@ -109,11 +110,53 @@ class SizeDist:  # 可以加入一些錯誤的raise
                              'mode_v': vol_prop['mode'],
                              'cont_v': vol_prop['contribution']})
 
-    def extinction(self, filename='PESD_dEdlogdp.csv'):
-        pass
+    def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
+        ext_data = pd.concat([self.data, chemical_reader()], axis=1).dropna()
+
+        result_dic = ext_data.apply(self.__internal_ext_dist, axis=1, result_type='expand')
+
+        ext_dist = pd.DataFrame(result_dic['ext'].tolist(), index=result_dic['ext'].index).set_axis(self.dp, axis=1)
+        sca_dist = pd.DataFrame(result_dic['sca'].tolist(), index=result_dic['sca'].index).set_axis(self.dp, axis=1)
+        abs_dist = pd.DataFrame(result_dic['abs'].tolist(), index=result_dic['abs'].index).set_axis(self.dp, axis=1)
+
+        ext_prop = ext_dist.apply(self.__dist_prop, axis=1, result_type='expand')
+
+        ext_dist.reindex(self.index).to_csv(self.path / filename)
+
+        return pd.DataFrame({'Bext_internal': ext_dist.apply(np.sum, axis=1) * 0.014,
+                             'Bsca_internal': sca_dist.apply(np.sum, axis=1) * 0.014,
+                             'Babs_internal': abs_dist.apply(np.sum, axis=1) * 0.014,
+                             'GMD_ext_in': ext_prop['GMD'],
+                             'GSD_ext_in': ext_prop['GSD'],
+                             'mode_ext_in': ext_prop['mode'], })
+
+    def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
+        ext_data = pd.concat([self.data, chemical_reader()], axis=1).dropna()
+
+        result_dic2 = ext_data.apply(self.__external_ext_dist, axis=1, result_type='expand')
+
+        ext_dist2 = pd.DataFrame(result_dic2['ext'].tolist(), index=result_dic2['ext'].index).set_axis(self.dp, axis=1)
+        sca_dist2 = pd.DataFrame(result_dic2['sca'].tolist(), index=result_dic2['sca'].index).set_axis(self.dp, axis=1)
+        abs_dist2 = pd.DataFrame(result_dic2['abs'].tolist(), index=result_dic2['abs'].index).set_axis(self.dp, axis=1)
+
+        ext_prop2 = ext_dist2.apply(self.__dist_prop, axis=1, result_type='expand')
+
+        ext_dist2.reindex(self.index).to_csv(self.path / filename)
+
+        return pd.DataFrame({'Bext_external': ext_dist2.apply(np.sum, axis=1) * 0.014,
+                             'Bsca_external': sca_dist2.apply(np.sum, axis=1) * 0.014,
+                             'Babs_external': abs_dist2.apply(np.sum, axis=1) * 0.014,
+                             'GMD_ext_ex': ext_prop2['GMD'],
+                             'GSD_ext_ex': ext_prop2['GSD'],
+                             'mode_ext_ex': ext_prop2['mode'], })
 
     def psd_process(self, filename='PSD.csv'):
-        return pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index).to_csv(self.path.parent / filename)
+        return pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index).to_csv(
+            self.path.parent / filename)
+
+    def ext_process(self, filename='PESD.csv'):
+        return pd.concat([self.extinction_internal(), self.extinction_external(), ], axis=1).reindex(self.index).to_csv(
+            self.path.parent / filename)
 
     def __geometric_prop(self, ser):
         """ First change the distribution into dN """
@@ -155,13 +198,36 @@ class SizeDist:  # 可以加入一些錯誤的raise
 
         return dict(GMD=GMD, GSD=GSD, mode=Mode, contribution=contribution, )
 
+    def __internal_ext_dist(self, ser):
+        m = ser['n_amb'] + 1j * ser['k_amb']
+        ndp = np.array(ser[:np.size(self.dp)])
+        ext_dist, sca_dist, abs_dist = Mie_PESD(m, 550, self.dp, self.dlogdp, ndp)
+        return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
+
+    def __external_ext_dist(self, ser):
+        RI_dic = {'AS': 1.53 + 0j,
+                  'AN': 1.55 + 0j,
+                  'OM': 1.54 + 0j,
+                  'Soil': 1.56 + 0.01j,
+                  'SS': 1.54 + 0j,
+                  'BC': 1.80 + 0.54j,
+                  'water': 1.333 + 0j}
+
+        ext_dist, sca_dist, abs_dist = np.zeros((167,)), np.zeros((167,)), np.zeros((167,))
+        ndp = np.array(ser[:np.size(self.dp)])
+
+        for _m, _specie in zip(RI_dic.values(),
+                               ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
+                                'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']):
+            _ndp = ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp
+            _Ext_dist, _Sca_dist, _Abs_dist = Mie_PESD(_m, 550, self.dp, self.dlogdp, _ndp)
+            ext_dist += _Ext_dist
+            sca_dist += _Sca_dist
+            abs_dist += _Abs_dist
+
+        return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
+
 
 if __name__ == '__main__':
     PNSD_data = SizeDist()
-
-    # file_path = Path('C:/Users/Alex/PycharmProjects/DataPlot/Data/Level2/distribution')
-    # PNSD_data = SizeDist(path=file_path, filename='PNSD_dNdlogdp_dry.csv')
-
-
-
-
+    PNSD_data.ext_process()

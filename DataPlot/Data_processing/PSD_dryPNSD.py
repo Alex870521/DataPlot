@@ -5,22 +5,17 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.csv_decorator import save_to_csv
-from DataPlot.Data_processing.PSD_extinction import Extinction_dry_PSD_internal_process
+from DataPlot.Data_processing.PSD_reader import psd_reader, chemical_reader
 
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'
 
-with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_MAIN / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    chemical = read_csv(f, parse_dates=['Time']).set_index('Time')[
-        ['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb', 'density',
-         'AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio', 'SS_volume_ratio',
-         'EC_volume_ratio', 'ALWC_volume_ratio']]
+PNSD = psd_reader()
+chemical = chemical_reader()
 
-df = concat([PNSD, chemical], axis=1)
+df = concat([PNSD(), chemical()], axis=1)
 
 
 dp = np.array(PNSD.columns, dtype='float')

@@ -66,12 +66,13 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
     Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     # dN / dlogdp
-    dN = ndp * dlogdp
+    dNdlogdp = ndp
 
     # dN = equal to the area under n(dp)
     # The 1E-6 here is so that the final value is the same as 1/10^6m.
-    Ext = Q_ext * (math.pi / 4 * dp ** 2) * dN * 1e-6
-    Sca = Q_sca * (math.pi / 4 * dp ** 2) * dN * 1e-6
-    Abs = Q_abs * (math.pi / 4 * dp ** 2) * dN * 1e-6
+    # return dext/dlogdp
+    Ext = Q_ext * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
+    Sca = Q_sca * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
+    Abs = Q_abs * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
 
     return Ext, Sca, Abs
