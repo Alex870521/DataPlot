@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
 from DataPlot.Data_processing.PSD_reader import psd_reader, chemical_reader
-from DataPlot.Data_processing.Mie_plus import Mie_PESD, Mie_MEE
+from DataPlot.Data_processing.Mie_plus import Mie_PESD
 
 
 class DataTypeError(Exception):
@@ -87,7 +87,8 @@ class SizeDist:  # 可以加入一些錯誤的raise
                              'cont_n': num_prop['contribution']})
 
     def surface(self, filename='PSSD_dSdlogdp.csv'):
-        surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1, result_type='broadcast')
+        surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1,
+                                    result_type='broadcast')
         surf_prop = surf_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
         surf_dist.reindex(self.index).to_csv(self.path / filename)
@@ -99,7 +100,8 @@ class SizeDist:  # 可以加入一些錯誤的raise
                              'cont_s': surf_prop['contribution']})
 
     def volume(self, filename='PVSD_dVdlogdp.csv'):
-        vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1, result_type='broadcast')
+        vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1,
+                                   result_type='broadcast')
         vol_prop = vol_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
         vol_dist.reindex(self.index).to_csv(self.path / filename)
@@ -192,11 +194,11 @@ class SizeDist:  # 可以加入一些錯誤的raise
         return [(ultra_num / total_num), (accum_num / total_num), (coars_num / total_num)]
 
     def __dist_prop(self, ser):
-        GMD, GSD = self.__geometric_prop(ser)
-        Mode = self.__mode_prop(ser)
+        gmd, gsd = self.__geometric_prop(ser)
+        mode = self.__mode_prop(ser)
         contribution = self.__mode_contribution(ser)
 
-        return dict(GMD=GMD, GSD=GSD, mode=Mode, contribution=contribution, )
+        return dict(GMD=gmd, GSD=gsd, mode=mode, contribution=contribution, )
 
     def __internal_ext_dist(self, ser):
         m = ser['n_amb'] + 1j * ser['k_amb']
@@ -205,18 +207,18 @@ class SizeDist:  # 可以加入一些錯誤的raise
         return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
 
     def __external_ext_dist(self, ser):
-        RI_dic = {'AS': 1.53 + 0j,
-                  'AN': 1.55 + 0j,
-                  'OM': 1.54 + 0j,
-                  'Soil': 1.56 + 0.01j,
-                  'SS': 1.54 + 0j,
-                  'BC': 1.80 + 0.54j,
-                  'water': 1.333 + 0j}
+        refractive_dic = {'AS': 1.53 + 0j,
+                          'AN': 1.55 + 0j,
+                          'OM': 1.54 + 0j,
+                          'Soil': 1.56 + 0.01j,
+                          'SS': 1.54 + 0j,
+                          'BC': 1.80 + 0.54j,
+                          'water': 1.333 + 0j}
 
         ext_dist, sca_dist, abs_dist = np.zeros((167,)), np.zeros((167,)), np.zeros((167,))
         ndp = np.array(ser[:np.size(self.dp)])
 
-        for _m, _specie in zip(RI_dic.values(),
+        for _m, _specie in zip(refractive_dic.values(),
                                ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
                                 'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']):
             _ndp = ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp
