@@ -2,47 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from DataPlot.plot_templates import set_figure
-
-
-def get_group_avgdist_stddist(group):
-    avg_line = {}
-    std_line = {}
-    for name, subdf in group.__iter__():
-        avg_line[name] = np.array(subdf.mean()[1:])
-        std_line[name] = np.array(subdf.std()[1:])
-    return avg_line, std_line
-
-
-Ext_amb_dis, Ext_amb_dis_std = get_group_avgdist_stddist(Ext_amb_df.dropna().groupby('State'))
-Ext_dry_dis, Ext_dry_dis_std = get_group_avgdist_stddist(Ext_dry_df.dropna().groupby('State'))
-Ext_amb_dis_external, Ext_amb_dis_std__external = get_group_avgdist_stddist(Ext_amb_df_external.dropna().groupby('State'))
-
-PSD_amb_dis, PSD_amb_dis_std = get_group_avgdist_stddist(PSD_amb_df.dropna().groupby('State'))
-PSSD_amb_dis, PSSD_amb_dis_std = get_group_avgdist_stddist(PSSD_amb_df.dropna().groupby('State'))
-PVSD_amb_dis, PVSD_amb_dis_std = get_group_avgdist_stddist(PVSD_amb_df.dropna().groupby('State'))
-
-
-# print('Number')
-# print(dist_prop(PSD_amb_dis['Clean']))
-# print(dist_prop(PSD_amb_dis['Transition']))
-# print(dist_prop(PSD_amb_dis['Event']))
-# print('Surface')
-# print(dist_prop(PSSD_amb_dis['Clean']))
-# print(dist_prop(PSSD_amb_dis['Transition']))
-# print(dist_prop(PSSD_amb_dis['Event']))
-print('Ext')
-print(dist_prop(Ext_amb_dis['Clean']))
-print(dist_prop(Ext_amb_dis['Transition']))
-print(dist_prop(Ext_amb_dis['Event']))
-print(dist_prop(Ext_dry_dis['Clean']))
-print(dist_prop(Ext_dry_dis['Transition']))
-print(dist_prop(Ext_dry_dis['Event']))
-
-
-# print('Vol')
-# print(dist_prop(PVSD_amb_dis['Clean']))
-# print(dist_prop(PVSD_amb_dis['Transition']))
-# print(dist_prop(PVSD_amb_dis['Event']))
+from DataPlot.Data_processing import SizeDist
+from scipy.signal import find_peaks
 
 
 def fitting(dp, dist, cut):
@@ -94,16 +55,15 @@ def fitting(dp, dist, cut):
 # fitting(dp[:-50], PSSD_amb_dis['Clean'][:-50], cut=30)
 # fitting(dp[:-1], Ext_amb_dis['Clean'][:-1], cut=1)
 
-table = pd.pivot_table(df, values=df.keys()[:-5], index='State', columns='Diurnal',
-                       aggfunc=np.mean)
-
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
                 'Transition': ['#4a9f1d', '#a7e984'],
                 'Event': ['#9f1d4a', '#e984a7']}
 
+dp = SizeDist().dp
 
-@set_figure(figsize=(10, 6))
+
+@set_figure(figsize=(6, 6))
 def plot_dist(dist, enhancement=False, figname='', **kwargs):
     if isinstance(dist, dict):
         Clean_line = dist['Clean']
@@ -128,6 +88,7 @@ def plot_dist(dist, enhancement=False, figname='', **kwargs):
         ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
         ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
         plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
 
         if enhancement:
             ax2 = ax.twinx()
@@ -242,23 +203,26 @@ def plot_dry_amb_dist_test(dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
 
 
 
-@set_figure(figsize=(8, 6))
+@set_figure(figsize=(6, 6))
 def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Clean', **kwargs):
-    PESD, PESD_std= Ext_amb_dis[state], Ext_amb_dis_std[state]
-    PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(_length,)
-    PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
-
-
-    PESD_dry, PESD_std_dry= Ext_dry_dis[state], Ext_dry_dis_std[state]
-    PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(_length,)
-    PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
-
     fig, ax = plt.subplots(1, 1)
-    a, = ax.plot(dp, PESD, ls='solid', color=color_choose[state][0], lw=2)
-    b, = ax.plot(dp, PESD_dry, ls='dashed', color='k', lw=2)
-    c = ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.5, color=color_choose[state][1], edgecolor=None)
-    d = ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.5, color='#ece8e7', edgecolor=None)
-    plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    for state in Ext_amb_dis.keys():
+
+        PESD, PESD_std= Ext_amb_dis[state], Ext_amb_dis_std[state]
+        PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167,)
+        PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
+
+        PESD_dry, PESD_std_dry= Ext_dry_dis[state], Ext_dry_dis_std[state]
+        PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(167,)
+        PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
+
+        a, = ax.plot(dp, PESD, ls='solid', color=color_choose[state][0], lw=2, label=f'Amb {state}')
+        b, = ax.plot(dp, PESD_dry, ls='dashed', color=color_choose[state][1], lw=2, label=f'Dry {state}')
+        c = ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.4, color=color_choose[state][1], edgecolor=None, label='__nolegend__')
+        # d = ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.5, color='#ece8e7', edgecolor=color_choose[state][1], label='__nolegend__')
+        plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+
+
     # figure_set
     xlim = kwargs.get('xlim') or (11.8, 2500)
     ylim = kwargs.get('ylim') or (0, 850)
@@ -266,9 +230,7 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
     ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
-    legend = ax.legend([a, b,],
-                       [r'$\bf Ambient$', r'$\bf Dry$'],
-                       loc='upper left')
+    legend = ax.legend(loc='upper left', prop={'weight': 'bold'})
     title = kwargs.get('title') or r'$\bf Extinction\ Distribution$'
     plt.title(title, family='Times New Roman', weight='bold', size=20)
     plt.semilogx()
@@ -327,6 +289,7 @@ def plot_dist2(dist, dist2, figname='', **kwargs):
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
+# dealing
 @set_figure(figsize=(8, 6))
 def plot_dist_fRH(dist, dist2, figname='', **kwargs):
     if isinstance(dist, dict):
@@ -366,11 +329,11 @@ def plot_dist_fRH(dist, dist2, figname='', **kwargs):
 @set_figure(figsize=(8, 6))
 def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     PESD, PESD_std = dist, std1
-    PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(_length, )*0.2
+    PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167, )*0.2
     PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
 
     PESD_dry, PESD_std_dry = dist2, std2
-    PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(_length, )*0.2
+    PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(167, )*0.2
     PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
 
     # 创建两个数组
@@ -379,7 +342,7 @@ def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     difference = np.subtract(approximate, exact)
     abs_difference = np.absolute(difference)
     percentage_error = np.divide(abs_difference, exact) * 100
-    percentage_error = np.array(pd.DataFrame(percentage_error).ewm(span=10).mean()).reshape(_length, )
+    percentage_error = np.array(pd.DataFrame(percentage_error).ewm(span=10).mean()).reshape(167, )
     print(percentage_error)
 
     fig, ax = plt.subplots(1, 1)

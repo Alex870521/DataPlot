@@ -41,9 +41,17 @@ def extdist_reader(file_path=None):
     file_path = file_path or default_path
 
     with open(file_path / 'PESD_dextdlogdp_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD_inter = read_csv(f, parse_dates=['Time']).set_index('Time')
+        PESD_internal = read_csv(f, parse_dates=['Time']).set_index('Time')
 
     with open(file_path / 'PESD_dextdlogdp_external.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD_exter = read_csv(f, parse_dates=['Time']).set_index('Time')
+        PESD_external = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-    return PESD_inter, PESD_exter
+    return PESD_internal, PESD_external
+
+
+def dry_extdist_reader(file_path=None):
+    default_path = Path(__file__).parent.parent.parent / 'Data' / 'Level2' / 'distribution'
+    file_path = file_path or default_path
+
+    with open(file_path / 'PESD_dextdlogdp_dry_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
+        return read_csv(f, parse_dates=['Time']).set_index('Time')

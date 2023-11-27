@@ -1,4 +1,6 @@
 
+from DataPlot.Data_processing._reader import *
+
 from DataPlot.Data_processing.IMPACT import impact_process
 from DataPlot.Data_processing.Chemical import chemical_process
 from DataPlot.Data_processing.IMPROVE import improve_process
@@ -10,7 +12,13 @@ from DataPlot.Data_processing.others import other_process
 from DataPlot.Data_processing.__main__ import main
 
 
-__all__ = ['impact_process',
+__all__ = ['psd_reader',
+           'chemical_reader',
+           'sizedist_reader',
+           'extdist_reader',
+           'dry_extdist_reader',
+
+           'impact_process',
            'chemical_process',
            'improve_process',
            'SizeDist',

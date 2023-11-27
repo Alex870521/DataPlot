@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from plot_templates import set_figure, unit, getColor, prop_legend, prop_text
+from DataPlot.plot_templates import set_figure, unit, getColor
 
 
 @set_figure
