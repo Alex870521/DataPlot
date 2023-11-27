@@ -75,32 +75,3 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
     Abs = Q_abs * (math.pi / 4 * dp ** 2) * dN * 1e-6
 
     return Ext, Sca, Abs
-
-
-def integral_range(dp, integral):
-    """ 用來計算PM2.5 或 PM1的濃度
-
-    :param dp:
-    :param integral:
-    :return:
-    """
-    start_index = None
-    end_index = None
-
-    for index, value in enumerate(dp):
-        if value >= integral[0] and start_index is None:
-            start_index = index
-        if value <= integral[1]:
-            end_index = index
-
-    # if start_index is not None and end_index is not None:
-    #     print(f"The integral should start from index: {start_index} and end at index: {end_index}")
-    # else:
-    #     print("No suitable range found in the dp list.")
-
-    return start_index, end_index
-
-
-
-
-

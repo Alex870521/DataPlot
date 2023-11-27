@@ -111,10 +111,10 @@ def extinction_psd_process(data=df_input, reset=False, filename=None):
 
 
 # internal mixing
-@save_to_csv((PATH_MAIN / 'PESD_dry.csv', PATH_DIST / 'PESDist_dry.csv'))
-def Extinction_dry_PSD_internal_process(reset=False, filename=None):
-    index = df_dry.index.copy()
-    df_input = df_dry.dropna()
+@save_to_csv(PATH_MAIN / 'PESD_dry.csv')
+def Extinction_dry_PSD_internal_process(data, reset=False, filename=None):
+    index = data.index.copy()
+    df_input = data.dropna()
     _index = df_input.index.copy()
 
     out = {'Bext': [],
@@ -141,10 +141,10 @@ def Extinction_dry_PSD_internal_process(reset=False, filename=None):
 
 
 # external mixing
-@save_to_csv((PATH_MAIN / 'PESD_dry_external.csv', PATH_DIST / 'PESDist_dry_external.csv'))
-def Extinction_dry_PSD_external_process(reset=False, filename=None):
-    index = df_dry.index.copy()
-    df_input = df_dry.dropna()
+@save_to_csv(PATH_MAIN / 'PESD_dry_external.csv')
+def Extinction_dry_PSD_external_process(data, reset=False, filename=None):
+    index = data.index.copy()
+    df_input = data.dropna()
     _index = df_input.index.copy()
 
     out = {'Bext': [],
