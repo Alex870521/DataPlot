@@ -22,9 +22,8 @@ def main(reset=False, filename=None):
     improve = dataproc.improve_process(reset=False, version='revised')
 
     # 5. Number & Surface & volume distribution
-    cls = dataproc.SizeDist()
-    PSD = cls.psd_process()
-    breakpoint()
+    PSD = dataproc.SizeDist().psd_process()
+
     # 6. Extinction distribution
     PESD = dataproc.SizeDist().ext_process()
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
