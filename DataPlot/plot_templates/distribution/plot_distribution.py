@@ -238,53 +238,52 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{state}_Ext_dist', transparent=True)
 
 
-@set_figure(figsize=(8, 6))
-def plot_dist2(dist, dist2, figname='', **kwargs):
-    if isinstance(dist, dict):
-        Clean_line = dist['Clean']
-        Transition_line = dist['Transition']
-        Event_line = dist['Event']
+@set_figure(figsize=(12, 4), fs=12)
+def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    ls_lst = ['dotted', 'dashed', 'solid']
+    label_lst = ['Number', 'Surface', 'Volume']
+    for i, state in enumerate(dist.keys()):
+        a, = ax1.plot(dp, dist[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
+                     label=f'{state}')
 
-        Clean_line2 = dist2['Clean']
-        Transition_line2 = dist2['Transition']
-        Event_line2 = dist2['Event']
+    # figure_set
+    xlim = kwargs.get('xlim') or (11.8, 2500)
+    ylim = kwargs.get('ylim') or (0, 2e5)
+    xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
+    ylabel = kwargs.get('ylabel') or r'$\bf dN/dlogdp $'
+    ax1.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+    ax1.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
+    ax1.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    ax1.semilogx()
+    # ax2
+    # ax2 = ax1.twinx()
+    for i, state in enumerate(dist2.keys()):
+        b, = ax2.plot(dp, dist2[state], ls='solid', color=color_choose[state][1], lw=2, alpha=0.8,
+                     label='__nolegend__')
 
-        alpha = 0.8
-        fig, ax = plt.subplots(1, 1)
-        a, = ax.plot(dp, Clean_line, ls='dotted', color='k', lw=3, alpha=alpha)
-        b, = ax.plot(dp, Transition_line, ls='dashed', color='k', lw=3, alpha=alpha)
-        c, = ax.plot(dp, Event_line, ls='solid', color='k', lw=3, alpha=alpha)
 
-        # figure_set
-        xlim = kwargs.get('xlim') or (11.8, 2500)
-        ylim = kwargs.get('ylim') or (0, 2e5)
-        xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
-        ylabel = kwargs.get('ylabel') or r'$\bf dN/dlogdp $'
-        ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-        ax.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2))
-        plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    ylim = kwargs.get('ylim') or (0, 1.5e9)
+    ylabel = kwargs.get('ylabel') or r'$\bf dS/dlogdp$'
+    ax2.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+    ax2.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
+    ax2.semilogx()
+    # ax3
+    # ax3 = ax1.twinx()
+    ax3.spines['right'].set_position(('outward', 60))
+    for i, state in enumerate(dist3.keys()):
+        c, = ax3.plot(dp, dist3[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
+                      label='__nolegend__')
 
-        ax2 = ax.twinx()
-        d, = ax2.plot(dp, Clean_line2, ls='dotted', color='b', lw=3, alpha=alpha)
-        e, = ax2.plot(dp, Transition_line2, ls='dashed', color='b', lw=3, alpha=alpha)
-        f, = ax2.plot(dp, Event_line2, ls='solid', color='b', lw=3, alpha=alpha)
-        ylim = kwargs.get('ylim') or (0, 1.5e9)
-        ylabel = kwargs.get('ylabel') or r'$\bf dS/dlogdp$'
-        ax2.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-        ax2.tick_params(axis='y', colors=d.get_color())
-        ax2.tick_params(axis='y', colors=d.get_color())
-        ax2.yaxis.label.set_color(d.get_color())
-        ax2.yaxis.label.set_color(d.get_color())
-        ax2.spines['right'].set_color(d.get_color())
-        ax2.spines['right'].set_color(d.get_color())
-
-        legend = ax.legend([a, b, c],
-                           [r'$\bf Clean$', r'$\bf Transition$', r'$\bf Event$'],
-                           loc='upper left')
-
+    ylim = kwargs.get('ylim') or (0, 1.5e11)
+    ylabel = kwargs.get('ylabel') or r'$\bf dV/dlogdp$'
+    ax3.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+    ax3.tick_params(axis='y', color=c.get_color())
+    ax3.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True, useLocale=True)
+    legend = ax1.legend(loc='upper left', prop={'weight': 'bold'})
     title = kwargs.get('title') or ''
-    plt.title(title, family='Times New Roman', weight='bold', size=20)
-    plt.semilogx()
+    # plt.title(title, family='Times New Roman', weight='bold', size=20)
+    ax3.semilogx()
     plt.show()
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
