@@ -1,12 +1,13 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from DataPlot.Data_processing.csv_decorator import save_to_csv
+from DataPlot.Data_processing.decorator import save_to_csv, timer
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
 
 
+@timer
 @save_to_csv(PATH_MAIN / 'Level1' / 'IMPACT.csv')
-def impact_process(reset=False, filename=None):
+def impact_process(filename=None, reset=False):
     if filename.exists() & (~reset):
         with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
             return read_csv(f, parse_dates=['Time']).set_index('Time')
@@ -30,5 +31,5 @@ def impact_process(reset=False, filename=None):
 
 
 if __name__ == '__main__':
-    df = impact_process(reset=True)
+    df = impact_process(reset=False)
 

@@ -22,21 +22,26 @@ def open_csv(filename):
         raise TypeError("Please check the files or make sure you're input a DataFrame or a tuple of DataFrames.")
 
 
-def save_to_csv(filename):
+def save_to_csv(filename, *, print_args=False):
     """ 當Datafrmae作為一個方法的輸出變數即可使用這個方法儲存csv
 
+    :param print_args:
     :param filename:
     :return:
     """
     def decorator(_func):
         @wraps(_func)
-        def wrapper(reset=False, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             print('Loading...', _func.__name__)
-            if not reset:
+
+            if print_args:
+                print(f'"{_func.__name__}, args: {args}, kwargs: {kwargs}"')
+
+            if not kwargs.get('reset'):
                 print('Opening...', filename)
                 return open_csv(filename)
 
-            result = _func(reset=True, filename=filename, *args, **kwargs)
+            result = _func(filename=filename, *args, **kwargs)
 
             if isinstance(result, pd.DataFrame):
                 result.to_csv(filename)

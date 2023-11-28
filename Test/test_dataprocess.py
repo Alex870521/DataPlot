@@ -1,5 +1,4 @@
-from DataPlot.Data_processing.IMPACT import impact_process
-from DataPlot.Data_processing.csv_decorator import *
+from DataPlot.Data_processing.decorator.csv_decorator import *
 
 
 def test_save_decorator():
