@@ -17,7 +17,7 @@ def fitting(dp, dist, cut):
     peak1 = dp[peak[0]-1]
     peak2 = dp[peak[1]-1]
 
-    Num = np.sum(dist * dlogdp[:-cut])
+    Num = np.sum(dist * np.log(dp)[:-cut])
     data = dist / Num
 
     # 定義兩個對數常態分佈的函數

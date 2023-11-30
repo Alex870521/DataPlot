@@ -1,18 +1,18 @@
 from pathlib import Path
-from pandas import read_csv
+from pandas import read_csv, read_json
 import matplotlib.pyplot as plt
-from plot_templates import set_figure, unit, getColor
+from DataPlot.plot_templates import set_figure, unit, getColor
 
-PATH_MAIN = Path('C:/Users/alex/PycharmProjects/DataPlot/Data/Level1')
+PATH_MAIN = Path(__file__).parents[2] / 'Data'
 
-with open(PATH_MAIN / 'fRH.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    frh = read_csv(f).set_index('RH')
+with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
+    frh = read_json(f)
 
 
 @set_figure
 def fRH_plot():  # ref f(RH)
     print(f'Plot: fRH_plot')
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6), dpi=150, constrained_layout=True)
+    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
     plt.plot(frh.index, frh['fRH'], 'k-o', lw=2)
     plt.plot(frh.index, frh['fRHs'], 'g-o', lw=2)
     plt.plot(frh.index, frh['fRHl'], 'r-o', lw=2)
