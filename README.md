@@ -9,9 +9,9 @@ DataPlot/
 │   ├── Chemical.py
 │   ├── IMPACT.py
 │   ├── IMPROVE.py
-│   ├── .py
-│   ├── .py
-│   ├── .py
+│   ├── core/
+│   ├── decorator/
+│   ├── script/
 │   └── ...
 ├── Mie_plot (PyMieScatt)/
 │   ├── Module1.py
@@ -32,7 +32,7 @@ DataPlot/
 │   │   ├── color_handler.py
 │   │   ├── rcParams_decorator.py
 │   │   ├── unit_handler.py
-│   │   └── unit.json
+│   │   ├── unit.json
 │   │   └── ...
 │   └── ...
 └── ...

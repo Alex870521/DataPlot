@@ -3,11 +3,11 @@ from pandas import read_csv, concat
 from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
 import DataPlot.Data_processing as dataproc
 
-PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data'
 
 
 @save_to_csv(PATH_MAIN / 'All_data.csv')
-def main(reset=False, filename=None):
+def main(filename=None, reset=False):
     # 1. EPB
     with open(PATH_MAIN / 'level1' / 'EPB.csv', 'r', encoding='utf-8', errors='ignore') as f:
         minion = read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')

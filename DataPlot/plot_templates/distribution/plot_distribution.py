@@ -259,7 +259,7 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     # ax2
     # ax2 = ax1.twinx()
     for i, state in enumerate(dist2.keys()):
-        b, = ax2.plot(dp, dist2[state], ls='solid', color=color_choose[state][1], lw=2, alpha=0.8,
+        b, = ax2.plot(dp, dist2[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
                      label=f'{state}')
 
 
@@ -280,7 +280,7 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     ax3.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
     ax3.tick_params(axis='y', color=c.get_color())
     ax3.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True, useLocale=True)
-    legend = ax1.legend(loc='upper left', prop={'weight': 'bold'})
+    legend = ax2.legend(loc='upper left', prop={'weight': 'bold'})
     title = kwargs.get('title') or ''
     # plt.title(title, family='Times New Roman', weight='bold', size=20)
     ax3.semilogx()

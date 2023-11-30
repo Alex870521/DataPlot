@@ -2,10 +2,9 @@ from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.decorator import save_to_csv, timer
 
-PATH_MAIN = Path(__file__).parent.parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data'
 
 
-@timer
 @save_to_csv(PATH_MAIN / 'Level1' / 'IMPACT.csv')
 def impact_process(filename=None, reset=False):
     if filename.exists() & (~reset):

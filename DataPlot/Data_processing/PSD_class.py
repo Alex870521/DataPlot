@@ -5,6 +5,7 @@ from pathlib import Path
 from scipy.signal import find_peaks
 from DataPlot.Data_processing import psd_reader, chemical_reader
 from DataPlot.Data_processing.Mie_plus import Mie_PESD
+from DataPlot.Data_processing.decorator import timer
 
 
 class DataTypeError(Exception):
@@ -152,11 +153,13 @@ class SizeDist:  # 可以加入一些錯誤的raise
                              'GSD_ext_ex': ext_prop2['GSD'],
                              'mode_ext_ex': ext_prop2['mode'], })
 
+    @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
         result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index)
         result_df.to_csv(self.path.parent / filename)
         return result_df
 
+    @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
         result_df = pd.concat([self.extinction_internal(), self.extinction_external(), ], axis=1).reindex(self.index)
         result_df.to_csv(self.path.parent / filename)
