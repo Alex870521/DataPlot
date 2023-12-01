@@ -238,7 +238,7 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{state}_Ext_dist', transparent=True)
 
 
-@set_figure(figsize=(12, 4), fs=12)
+@set_figure(figsize=(10, 4), fs=12)
 def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
     ls_lst = ['dotted', 'dashed', 'solid']
@@ -256,8 +256,8 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     ax1.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
     ax1.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax1.semilogx()
+
     # ax2
-    # ax2 = ax1.twinx()
     for i, state in enumerate(dist2.keys()):
         b, = ax2.plot(dp, dist2[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
                      label=f'{state}')
@@ -267,23 +267,24 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     ylabel = kwargs.get('ylabel') or r'$\bf dS/dlogdp$'
     ax2.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
     ax2.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
+    ax2.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax2.semilogx()
+    ax2.legend(loc='upper left', prop={'weight': 'bold'})
+
     # ax3
-    # ax3 = ax1.twinx()
-    ax3.spines['right'].set_position(('outward', 60))
     for i, state in enumerate(dist3.keys()):
         c, = ax3.plot(dp, dist3[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
                       label='__nolegend__')
 
-    ylim = kwargs.get('ylim') or (0, 1.5e11)
+    ylim = kwargs.get('ylim') or (0, 1.5e10)
     ylabel = kwargs.get('ylabel') or r'$\bf dV/dlogdp$'
     ax3.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-    ax3.tick_params(axis='y', color=c.get_color())
     ax3.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True, useLocale=True)
-    legend = ax2.legend(loc='upper left', prop={'weight': 'bold'})
-    title = kwargs.get('title') or ''
-    # plt.title(title, family='Times New Roman', weight='bold', size=20)
+    ax3.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax3.semilogx()
+
+    title = kwargs.get('title') or ''
+    fig.suptitle(title,)
     plt.show()
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 

@@ -7,9 +7,9 @@ import matplotlib.ticker as mticker
 
 from pandas import read_csv, concat
 from matplotlib.collections import PolyCollection
-from Data_processing import integrate
+from DataPlot.Data_processing import main
 from pathlib import Path
-from Data_processing.Mie_plus import Mie_PESD
+from DataPlot.Data_processing.Mie_plus import Mie_PESD
 from functools import lru_cache
 
 PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
@@ -55,7 +55,7 @@ def _get(reset=False):
         with open(PATH_MAIN / 'Level2' / 'distribution' / 'PVSD_dVdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
             PVSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-        df = integrate(reset=False)
+        df = main(reset=False)
 
         x_bin = [f'E_{x}' for x in np.arange(1, 11) * 10]
 
