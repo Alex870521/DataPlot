@@ -23,13 +23,13 @@ def plot_function(dp, observed, fit_curve, **kwargs):
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
     ax.set_title('Surface-based PSDs', pad=15)
     ax.legend(loc='best', frameon=False)
-
+    figname = kwargs.get('figname') or ''
     plt.semilogx()
-    plt.savefig('CurveFit_EventPSSDs.png', transparent=True, bbox_inches="tight")
+    plt.savefig(f'CurveFit_{figname}.png', transparent=True, bbox_inches="tight")
     plt.show()
 
 
-def curvefit(dp, dist, mode=None):
+def curvefit(dp, dist, mode=None, **kwargs):
     Num = np.sum(dist * log(dp))
     norm_data = dist / Num
 
@@ -91,4 +91,4 @@ def curvefit(dp, dist, mode=None):
     print(tab)
 
     # plot result
-    plot_function(dp, dist, Num * lognorm_func(dp, *params))
+    plot_function(dp, dist, Num * lognorm_func(dp, *params), **kwargs)

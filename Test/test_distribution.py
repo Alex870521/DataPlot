@@ -67,6 +67,6 @@ if __name__ == '__main__':
     dp = np.array(PNSD.columns, dtype='float')
 
     # fitting(dp, Ext_amb_dis['Clean'], mode=5)
-    curvefit(dp, Ext_amb_dis['Transition'], mode=4)
+    curvefit(dp, Ext_amb_dis['Transition'], mode=4, figname='ext_trans')
     # fitting(dp, Ext_amb_dis['Event'], mode=5)
 
