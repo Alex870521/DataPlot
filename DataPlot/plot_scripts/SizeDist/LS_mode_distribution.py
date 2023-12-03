@@ -6,15 +6,14 @@ from DataPlot.plot_templates import set_figure
 @set_figure
 def LS_mode():
     print(f'Plot: LS_mode')
-    fig, ax = plt.subplots(figsize=(6, 6), dpi=150, constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(6, 6))
     geoMean = [0.2, 0.5, 2.5]
     geoStdv = [2.2, 1.5, 2.0]
     color = ['g', 'r', 'b']
     for _geoMean, _geoStdv, _color in zip(geoMean, geoStdv, color):
         x = np.geomspace(0.001, 20, 10000)
-        y = np.log(x)
         # 用logdp畫 才會讓最大值落在geoMean上
-        pdf = (np.exp(-(y - np.log(_geoMean))**2 / (2 * np.log(_geoStdv)**2))
+        pdf = (np.exp(-(np.log(x) - np.log(_geoMean))**2 / (2 * np.log(_geoStdv)**2))
                / (np.log(_geoStdv) * np.sqrt(2 * np.pi)))
 
         ax.semilogx(x, pdf, linewidth=2, color=_color)

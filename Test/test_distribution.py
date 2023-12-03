@@ -54,10 +54,19 @@ if __name__ == '__main__':
     # plot_dist(Ext_amb_dis, title=r'$\bf Ambient\ Extinction\ Distribution$', enhancement=False, figname='Amb_Ext_Dist')
     # plot_dist(PSD_amb_dis, ylim=(0, 1.5e5), ylabel=r'$\bf dN/dlogdp\ (1/Mm)$', title=r'$\bf Ambient\ Particle\ Number\ Distribution$')
 
-    plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')
+    # plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')
 
     # plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std)
 
     # dist1, diat_std1 = Ext_amb_df.dropna().iloc[:, 2:].mean(),  Ext_amb_df.dropna().iloc[:, 2:].std()
     # dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
     # fig, ax = plot_dist_cp(dist1, diat_std1, dist2, diat_std2)
+
+    from DataPlot.plot_scripts.SizeDist.curve_fitting import curvefit
+
+    dp = np.array(PNSD.columns, dtype='float')
+
+    # fitting(dp, Ext_amb_dis['Clean'], mode=5)
+    curvefit(dp, Ext_amb_dis['Transition'], mode=4)
+    # fitting(dp, Ext_amb_dis['Event'], mode=5)
+

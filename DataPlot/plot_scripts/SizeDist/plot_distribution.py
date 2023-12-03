@@ -3,57 +3,6 @@ import numpy as np
 import pandas as pd
 from DataPlot.plot_templates import set_figure
 from DataPlot.Data_processing import SizeDist
-from scipy.signal import find_peaks
-
-
-def fitting(dp, dist, cut):
-    import numpy as np
-    from scipy.stats import lognorm
-    from scipy.optimize import curve_fit
-
-    # 假設您的兩個峰值資訊為 peak1 和 peak2
-    peak, _ = find_peaks(np.concatenate(([min(dist)], dist, [min(dist)])), distance=6)
-
-    peak1 = dp[peak[0]-1]
-    peak2 = dp[peak[1]-1]
-
-    Num = np.sum(dist * np.log(dp)[:-cut])
-    data = dist / Num
-
-    # 定義兩個對數常態分佈的函數
-    def lognorm_func(dp, N1, mu1, sigma1, N2, mu2, sigma2):
-        return (N1 / (np.log(sigma1) * np.sqrt(2 * np.pi)) * np.exp(-(np.log(dp) - np.log(mu1)) ** 2 / (2 * np.log(sigma1) ** 2)) +
-                N2 / (np.log(sigma2) * np.sqrt(2 * np.pi)) * np.exp(-(np.log(dp) - np.log(mu2)) ** 2 / (2 * np.log(sigma2) ** 2)))
-
-    # 使用 curve_fit 函數進行擬合
-    x = np.arange(1, len(data) + 1)
-    popt, pcov = curve_fit(lognorm_func, dp, data, bounds=(0, 1000))
-
-    # 獲取擬合的參數
-    N1, mu1, sigma1_fit, N2, mu2, sigma2_fit = popt
-
-    print("擬合結果:")
-    print("第一個對數常態分佈:")
-    print("Number 1:", N1)
-    print("平均值 (mu1):", mu1)
-    print("標準差 (sigma1):", sigma1_fit)
-    print()
-    print("第二個對數常態分佈:")
-    print("Number 2:", N2)
-    print("平均值 (mu2):", mu2)
-    print("標準差 (sigma2):", sigma2_fit)
-
-    plt.plot(dp, data, 'bo', label='Data')  # 原始數據
-    plt.plot(dp, lognorm_func(dp, N1, mu1, sigma1_fit, N2, mu2, sigma2_fit), 'r-', label='Fitted Curve')  # 擬合曲線
-    plt.xlabel('Index')
-    plt.ylabel('Value')
-    plt.semilogx()
-    plt.legend()
-    plt.show()
-
-
-# fitting(dp[:-50], PSSD_amb_dis['Clean'][:-50], cut=30)
-# fitting(dp[:-1], Ext_amb_dis['Clean'][:-1], cut=1)
 
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
@@ -249,7 +198,7 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
 
     # figure_set
     xlim = kwargs.get('xlim') or (11.8, 2500)
-    ylim = kwargs.get('ylim') or (0, 2e5)
+    ylim = kwargs.get('ylim') or (0, 1.5e5)
     xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
     ylabel = kwargs.get('ylabel') or r'$\bf dN/dlogdp $'
     ax1.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
@@ -276,7 +225,7 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
         c, = ax3.plot(dp, dist3[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
                       label='__nolegend__')
 
-    ylim = kwargs.get('ylim') or (0, 1.5e10)
+    ylim = kwargs.get('ylim') or (0, 1e11)
     ylabel = kwargs.get('ylabel') or r'$\bf dV/dlogdp$'
     ax3.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
     ax3.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True, useLocale=True)
