@@ -66,7 +66,4 @@ if __name__ == '__main__':
 
     dp = np.array(PNSD.columns, dtype='float')
 
-
     curvefit(dp, Ext_amb_dis['Transition'], mode=4, figname='ext_trans')
-
-

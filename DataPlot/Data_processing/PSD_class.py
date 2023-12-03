@@ -64,6 +64,11 @@ class SizeDist:  # 可以加入一些錯誤的raise
     psd_process(filename='PSD.csv')
         Process and save overall PSD properties.
 
+    Raises
+    ------
+    ValueError
+        If the PSD data is empty or missing.
+
     """
 
     default_path = Path(__file__).parent.parent.parent / 'Data' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
