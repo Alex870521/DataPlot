@@ -30,6 +30,31 @@ def plot_function(dp, observed, fit_curve, **kwargs):
 
 
 def curvefit(dp, dist, mode=None, **kwargs):
+    """
+    Fit a log-normal distribution to the given data and plot the result.
+
+    Parameters
+    ----------
+    - dp (array): Array of diameter values.
+    - dist (array): Array of distribution values corresponding to each diameter.
+    - mode (int, optional): Number of log-normal distributions to fit (default is None).
+    - **kwargs: Additional keyword arguments to be passed to the plot_function.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    - The function fits a sum of log-normal distributions to the input data.
+    - The number of distributions is determined by the 'mode' parameter.
+    - Additional plotting customization can be done using the **kwargs.
+
+    Example
+    -------
+    >>> curvefit(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
+    """
+
     Num = np.sum(dist * log(dp))
     norm_data = dist / Num
 
