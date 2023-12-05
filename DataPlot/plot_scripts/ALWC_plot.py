@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from Data_processing import integrate
-from config.custom import setFigure, unit, getColor
-from config.scatterPlot import scatter
-from config.violinPlot import violin
-import config.piePlot as piePlot
-from Data_classify import state_classify, season_classify
+from DataPlot.Data_processing import main
+from DataPlot.plot_templates import set_figure, unit, getColor
+from DataPlot.plot_templates import scatter, violin, pie_ext
+
+from DataPlot.Data_processing.Data_classify import state_classify, season_classify
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
 textprops = {'fontsize': 14, 'fontfamily': 'Times New Roman', 'fontweight': 'bold'}
@@ -36,23 +35,16 @@ def outer_pct(pct, symbol=True):
 
 if __name__ == '__main__':
     print('--- building data ---')
-    df = integrate()['2020-10-01':'2021-05-06']
-
+    df = main()
     dic_grp_sta = state_classify(df)
-    dic_grp_sta['Clean']['fRH_PNSD'].mean()
-    dic_grp_sta['Transition']['fRH_PNSD'].mean()
-    dic_grp_sta['Event']['fRH_PNSD'].mean()
-    # scatter(df, x='RH', y='ALWC', c='PM25', y_range=[0, 200], c_range=[0, 60])
-    # scatter(df, x='RH', y='ALWC', c='Extinction', y_range=[0, 200], c_range=[0, 200])
-    # scatter(df, x='RH', y='gRH', c='ALWC_mass_ratio', y_range=[1, 3], c_range=[0, 4])
-    tar = 'kappa'
+
+    tar = 'NOx'  # fRH_PNSD
     a = dic_grp_sta['Event'][tar].dropna().values
     b = dic_grp_sta['Transition'][tar].dropna().values
     c = dic_grp_sta['Clean'][tar].dropna().values
-    # violin([1.38, 1.31, 1.36], [a, b, c], title='')
 
     Species3 = ['AS_ext', 'AN_ext', 'OM_ext', 'Soil_ext', 'SS_ext', 'EC_ext']
-    items = ['AS_mass', 'AN_mass', 'OM_mass', 'Soil_mass', 'SS_mass', 'EC_mass', 'gRH']
+    items = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'gRH']
     States1 = ['Total', 'Clean', 'Transition', 'Event']
 
 
@@ -63,7 +55,7 @@ if __name__ == '__main__':
         df_RH_group = df.groupby('RH_cut')
         dic = {}
         for _grp, _df in df_RH_group:
-            print(_df['gRH'].mean(), _df['gRH'].std())
+            print('gRH: ',_df['gRH'].mean(), '+', _df['gRH'].std())
             # dic_grp_sta = state_classify(_df)
             # dic[_grp] = {state: [dic_grp_sta[state][specie].mean() for specie in Species3] for state in States1}
             dic[_grp] = [_df[specie].mean() for specie in items]
@@ -73,7 +65,7 @@ if __name__ == '__main__':
     dic = RH_based()
 
 
-    @setFigure()
+    @set_figure
     def dyr_ALWC_gRH(data_set, labels, gRH=1, title='', symbol=True):
         label_colors = colors1
 
@@ -98,7 +90,7 @@ if __name__ == '__main__':
 
         ax.axis('equal')
         ax.set_title(rf'$\bf {title}$')
-        fig.savefig(f'gRH_{title}', transparent=True)
+        # fig.savefig(f'gRH_{title}', transparent=True)
         plt.show()
 
 
