@@ -1,5 +1,5 @@
 from pathlib import Path
-from pandas import read_csv, concat
+from pandas import read_csv, concat, date_range
 from DataPlot.Data_processing import main
 from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
 from datetime import datetime
@@ -11,19 +11,18 @@ import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.plot_templates import set_figure, unit, getColor, color_maker
 
-PATH_MAIN = Path("C:/Users/alex/PycharmProjects/DataPlot/Data")
-PATH_DIST = Path("C:/Users/alex/PycharmProjects/DataPlot/Data/Level2/distribution")
+PATH_MAIN = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
 
-with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_DIST / 'PSSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PSSD_dSdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PSSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_DIST / 'PVSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PVSD_dVdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PVSD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-with open(PATH_DIST / 'PESDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
+with open(PATH_MAIN / 'PESD_dextdlogdp_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PESD = read_csv(f, parse_dates=['Time']).set_index('Time')
 
 # Time Series
@@ -85,7 +84,7 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
         cbar2.ax.ticklabel_format(axis='y', scilimits=(-2, 3), useMathText=True)
         cbar2.ax.yaxis.set_offset_position('left')
         cbar2.ax.yaxis.offsetText.set_fontproperties(dict(size=12))
-        fig.savefig(f'time1_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
+        # fig.savefig(f'time1_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
         plt.show()
 
 
@@ -159,14 +158,98 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
         ax4_2 = inset_axes(ax6, width="30%", height="5%", loc='upper left')
         color_bar2 = plt.colorbar(sc_6, cax=ax4_2, orientation='horizontal')
         color_bar2.set_label(label=r'$\bf PM_{1}/PM_{2.5} $')
-        fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
+        # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
         plt.show()
 
 
-    timeSeries()
-    timeSeries2()
+    # timeSeries()
+    # timeSeries2()
+
+
+    def extinction_timeseries(df):
+        # 消光 PM1 PM2.5 整年度時序
+        fig2, (axes1, axes2) = plt.subplots(2, 1, figsize=(12, 5), dpi=150, constrained_layout=True)
+        sc = axes1.scatter(df.index, df.Extinction, c=df.PM25, norm=plt.Normalize(vmin=0, vmax=50), cmap='jet',
+                           marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
+
+        axes1.set_title('Extinction & $\mathregular{PM_{2.5}}$ Sequence Diagram')
+        axes1.set_xlabel('')
+        axes1.set_ylabel('Ext (1/Mm)')
+        axes1.set_ylim(0., 600)
+        axes1.set_xlim(18506., 18871.)
+
+        axins = inset_axes(axes1, width="40%", height="5%", loc=1)
+        color_bar = plt.colorbar(sc, cax=axins, orientation='horizontal')
+        color_bar.set_label(label='$\mathregular{PM_{2.5}}$' + ' ($\mathregular{\mu}$g/$\mathregular{m^3}$)',
+                            family='Times New Roman', weight='bold', size=14)
+
+        color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int), size=14)
+        ###
+        sc2 = axes2.scatter(df.index, df.Extinction, c=df.PM1, norm=plt.Normalize(vmin=0, vmax=30), cmap='jet',
+                            marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
+
+        axes2.set_title('Extinction & $\mathregular{PM_{1.0}}$ Sequence Diagram')
+        axes2.set_xlabel('')
+        axes2.set_ylabel('Ext (1/Mm)')
+        axes2.set_ylim(0., 600)
+        axes2.set_xlim(18506., 18871.)
+
+        axins2 = inset_axes(axes2, width="40%", height="5%", loc=1)
+        color_bar2 = plt.colorbar(sc2, cax=axins2, orientation='horizontal')
+        color_bar2.set_label(label='$\mathregular{PM_{1.0}}$' + ' ($\mathregular{\mu}$g/$\mathregular{m^3}$)',
+                             family='Times New Roman', weight='bold', size=14)
+        color_bar2.ax.set_xticklabels(color_bar2.ax.get_xticks().astype(int), size=14)
+        plt.show()
+
+    def extinction_month(df_group_season):
+        # 消光散光吸光逐月or逐季 時序
+        for _key, _df in df_group_season:
+            print(f'Plot : {_df.Season[0]}')
+            st_tm, fn_tm = _df.index[0], _df.index[-1]
+            tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
+
+            fig, (ax2, ax1) = plt.subplots(2, 1, figsize=(11, 5), dpi=150)
+
+            sc1 = ax1.scatter(_df.index, _df.Scatter,
+                              marker='o', s=15, facecolor="g", edgecolor='k', linewidths=0.3, alpha=0.9)
+            sc2 = ax1.scatter(_df.index, _df.Absorption,
+                              marker='o', s=15, facecolor="r", edgecolor='k', linewidths=0.3, alpha=0.9)
+
+            ax1.set_xlabel('Date')
+            ax1.set_ylabel('Scattering & \n Absorption (1/Mm)')
+            ax1.set_xticks(tick_time)
+            ax1.set_xticklabels(tick_time.strftime('%m/%d'))
+            ax1.set_ylim(0, _df.Scatter.max() + 10)
+            ax1.set_xlim(st_tm, fn_tm)
+            [ax1.spines[axis].set_visible(False) for axis in ['top']]
+
+            sc3 = ax2.scatter(_df.index, _df.Extinction,
+                              marker='o', s=15, facecolor="b", edgecolor='k', linewidths=0.3, alpha=0.9)
+            therosold = ax2.plot(_df.index, np.full(len(_df.index), _df.Extinction.quantile([0.90])), color='r',
+                                 ls='--', lw=2)
+            ax2.set_ylabel('Extinction (1/Mm)', loc='bottom')
+            ax2.set_xticks(tick_time)
+            ax2.set_xticklabels(tick_time.strftime(''))
+            ax2.set_ylim(0, _df.Scatter.max() + 10)
+            ax2.set_xlim(st_tm, fn_tm)
+
+            ax2.set_title(str(_df.Season[0]) + ' Sequence Diagram')
+
+            ax2.yaxis.set_label_position("right")
+            ax2.yaxis.tick_right()
+
+            [ax2.spines[axis].set_visible(False) for axis in ['bottom']]
+            ax2.get_xaxis().set_visible(False)
+
+            ax2.legend(handles=[sc1, sc2, sc3], labels=['Scattering', 'Absorption', 'Extinction'],
+                       bbox_to_anchor=(0, 1.), loc='upper left')
+            plt.subplots_adjust(hspace=0.0)
+            # fig.savefig(pth(f"Optical{_df.Season[0]}"))
+            plt.show()
 
 if __name__ == '__main__':
     print('0')
     # timeSeries()
     # timeSeries2()
+    extinction_timeseries(df)
+
