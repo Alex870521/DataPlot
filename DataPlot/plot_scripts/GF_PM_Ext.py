@@ -18,7 +18,8 @@ df = main()
 
 @set_figure
 def gf_pm_ext():
-    fig, ax = plt.subplots(figsize=(8, 6), constrained_layout=0)
+    fig, ax = plt.subplots(2, 1, figsize=(8, 6), constrained_layout=0)
+
     ax.set_position([0.125,0.125,0.65,0.8])
 
     npoints=1000
@@ -66,3 +67,7 @@ def gf_pm_ext():
     color_bar.set_label(label='Extinction (1/Mm)',family='Times New Roman', weight='bold',size=16)
     color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int), size=16)
     plt.show()
+
+gf_pm_ext()
+
+plt.scatter()

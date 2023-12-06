@@ -1,15 +1,13 @@
-from pathlib import Path
-from pandas import read_csv, concat, date_range
-from DataPlot.Data_processing import main
-from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
-from datetime import datetime
 import pandas as pd
-import matplotlib.ticker
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.plot_templates import set_figure, unit, getColor, color_maker
+from pathlib import Path
+from pandas import read_csv, concat, date_range
+from DataPlot.Data_processing import main
+from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
 
 PATH_MAIN = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
 
@@ -49,43 +47,9 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
     dp = PNSD.keys().astype(float)
 
     # 數據平滑
-    df_ = df_.rolling(3).mean()
+    df_ = df_.rolling(3).mean(numeric_only=True)
     # df_.Extinction = df_.Extinction.fillna(0)  # 使用0填充NaN值
     # df_.Extinction = df_.Extinction.replace([np.inf, -np.inf], 0)
-
-    @set_figure(fs=12)
-    def timeSeries():
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 3))
-        pco1 = ax1.pcolormesh(time, dp, PNSD_data.interpolate(limit=2).T,
-                              cmap='jet',
-                              shading='auto',
-                              norm=colors.PowerNorm(gamma=0.6, vmax=PNSD_data.max(axis=0).quantile(0.8)))
-        ax1.set(yscale='log', ylim=(11.8, 1000))
-        ax1.set_ylabel(r'$\bf dp\ (nm)$', fontsize=12, weight='bold', )
-        ax1.axes.xaxis.set_visible(False)
-
-        cbar = plt.colorbar(pco1, ax=ax1, pad=0.01)
-        cbar.set_label(r'$\bf dN/dlogdp$', fontsize=12, weight='bold', labelpad=5)
-        cbar.ax.ticklabel_format(axis='y', scilimits=(-2, 3), useMathText=True)
-        cbar.ax.yaxis.set_offset_position('left')
-        cbar.ax.yaxis.offsetText.set_fontproperties(dict(size=12))
-
-        pco2 = ax2.pcolormesh(time, dp, PSSD_data.interpolate(limit=2).T,
-                              cmap='jet',
-                              shading='auto',
-                              norm=colors.PowerNorm(gamma=0.6, vmax=PSSD_data.max(axis=0).quantile(0.8)))
-        # ax2.config(time, PSSD_data.idxmax(axis=0).ewm(span=6).mean(), ls='dashed', lw=1.5, color='gray')
-        ax2.set(yscale='log', ylim=(11.8, 2500))
-        ax2.set_ylabel(r'$\bf dp\ (nm)$')
-        ax2.axes.xaxis.set_visible(False)
-
-        cbar2 = plt.colorbar(pco2, ax=ax2, pad=0.01)
-        cbar2.set_label(r'$\bf dS/dlogdp$', fontsize=12, weight='bold', )
-        cbar2.ax.ticklabel_format(axis='y', scilimits=(-2, 3), useMathText=True)
-        cbar2.ax.yaxis.set_offset_position('left')
-        cbar2.ax.yaxis.offsetText.set_fontproperties(dict(size=12))
-        # fig.savefig(f'time1_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
-        plt.show()
 
 
     @set_figure(fs=12)
@@ -249,7 +213,6 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
 
 if __name__ == '__main__':
     print('0')
-    # timeSeries()
     # timeSeries2()
-    extinction_timeseries(df)
+    # extinction_timeseries(df)
 
