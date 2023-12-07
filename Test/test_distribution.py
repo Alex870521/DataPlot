@@ -62,6 +62,6 @@ if __name__ == '__main__':
 
     dp = np.array(PNSD.columns, dtype='float')
 
-    curvefit(dp, Ext_amb_dis['Transition'], mode=10, figname='ext_trans')
-    # heatmap(PNSD.index, dp, PNSD)
-    plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')
+    # curvefit(dp, Ext_amb_dis['Transition'], mode=10, figname='ext_trans')
+    heatmap(PNSD.index, dp, PNSD)
+    # plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')

@@ -98,8 +98,7 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
     if cbar:
         # Set the figure keywords
         cbar_kws = dict(dict(label=r'$dN/dlogD_p\ (\# / cm^{-3})$'), **cbar_kws)
-        cbar = plt.colorbar(pco1, pad=0.01, **cbar_kws)
-        cbar.ax.yaxis.offsetText.set_fontproperties(dict(size=12))
+        clb = plt.colorbar(pco1, pad=0.01, **cbar_kws)
 
     # fig.savefig(f'time1_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
 
