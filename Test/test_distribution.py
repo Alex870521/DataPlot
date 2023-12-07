@@ -1,15 +1,11 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-from pandas import read_csv, concat
-from PyMieScatt.Mie import AutoMieQ
-from DataPlot.Data_processing.Mie_plus import Mie_Q
+from pandas import concat
 from DataPlot.Data_processing import main
 from DataPlot.Data_processing.Data_classify import state_classify
 from DataPlot.Data_processing import sizedist_reader, extdist_reader, dry_extdist_reader
-from DataPlot.plot_templates import set_figure, unit
-from DataPlot.plot_scripts.SizeDist.plot_distribution import plot_dist, plot_NSV_dist, plot_dist_with_STD, plot_dist_cp, plot_dist_fRH
+from DataPlot.plot_scripts.SizeDist.plot import *
+from DataPlot.plot_scripts.SizeDist.curve_fitting import *
 
 
 PATH_MAIN = Path(__file__).parent.parent / 'Data'
@@ -54,7 +50,7 @@ if __name__ == '__main__':
     # plot_dist(Ext_amb_dis, title=r'$\bf Ambient\ Extinction\ Distribution$', enhancement=False, figname='Amb_Ext_Dist')
     # plot_dist(PSD_amb_dis, ylim=(0, 1.5e5), ylabel=r'$\bf dN/dlogdp\ (1/Mm)$', title=r'$\bf Ambient\ Particle\ Number\ Distribution$')
 
-    # plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')
+
 
     # plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std)
 
@@ -62,8 +58,10 @@ if __name__ == '__main__':
     # dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
     # fig, ax = plot_dist_cp(dist1, diat_std1, dist2, diat_std2)
 
-    from DataPlot.plot_scripts.SizeDist.curve_fitting import curvefit
+
 
     dp = np.array(PNSD.columns, dtype='float')
 
     curvefit(dp, Ext_amb_dis['Transition'], mode=10, figname='ext_trans')
+    # heatmap(PNSD.index, dp, PNSD)
+    plot_NSV_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')

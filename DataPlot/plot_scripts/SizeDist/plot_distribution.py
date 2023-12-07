@@ -43,13 +43,6 @@ def plot_dist(dist, enhancement=False, figname='', **kwargs):
             ax2 = ax.twinx()
             d, = ax2.plot(dp, (Transition_line / Clean_line), ls='dashed', color='k', lw=3)
             e, = ax2.plot(dp, (Event_line / Transition_line), ls='dashed', color='gray', lw=3)
-            # peak
-            # arr1 = Transition_line / Clean_line
-            # arr2 = Event_line / Transition_line
-            # peaks1, _ = find_peaks(np.concatenate(([min(arr1)], arr1, [min(arr1)])), distance=20)
-            # peaks2, _ = find_peaks(np.concatenate(([min(arr2)], arr2, [min(arr2)])), distance=20)
-            # print(dp[peaks1-1])
-            # print(dp[peaks2-1])
 
             plt.xlim(11.8, 2500)
             plt.ylim(0.5, 6)
@@ -187,55 +180,7 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{state}_Ext_dist', transparent=True)
 
 
-@set_figure(figsize=(10, 4), fs=12)
-def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    ls_lst = ['dotted', 'dashed', 'solid']
-    label_lst = ['Number', 'Surface', 'Volume']
-    for i, state in enumerate(dist.keys()):
-        a, = ax1.plot(dp, dist[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
-                     label='__nolegend__')
 
-    # figure_set
-    xlim = kwargs.get('xlim') or (11.8, 2500)
-    ylim = kwargs.get('ylim') or (0, 1.5e5)
-    xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
-    ylabel = kwargs.get('ylabel') or r'$\bf dN/dlogdp $'
-    ax1.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-    ax1.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
-    ax1.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax1.semilogx()
-
-    # ax2
-    for i, state in enumerate(dist2.keys()):
-        b, = ax2.plot(dp, dist2[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
-                     label=f'{state}')
-
-
-    ylim = kwargs.get('ylim') or (0, 1.5e9)
-    ylabel = kwargs.get('ylabel') or r'$\bf dS/dlogdp$'
-    ax2.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-    ax2.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True)
-    ax2.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax2.semilogx()
-    ax2.legend(loc='upper left', prop={'weight': 'bold'})
-
-    # ax3
-    for i, state in enumerate(dist3.keys()):
-        c, = ax3.plot(dp, dist3[state], ls='solid', color=color_choose[state][0], lw=2, alpha=0.8,
-                      label='__nolegend__')
-
-    ylim = kwargs.get('ylim') or (0, 1e11)
-    ylabel = kwargs.get('ylabel') or r'$\bf dV/dlogdp$'
-    ax3.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-    ax3.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2), useMathText=True, useLocale=True)
-    ax3.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax3.semilogx()
-
-    title = kwargs.get('title') or ''
-    fig.suptitle(title,)
-    plt.show()
-    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
 # dealing
