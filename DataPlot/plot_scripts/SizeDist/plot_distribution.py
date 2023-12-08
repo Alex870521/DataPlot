@@ -2,71 +2,73 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from DataPlot.plot_templates import set_figure
-from DataPlot.Data_processing import SizeDist
 
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
                 'Transition': ['#4a9f1d', '#a7e984'],
                 'Event': ['#9f1d4a', '#e984a7']}
 
-dp = SizeDist().dp
+
+def dist_fillbetween():
+    pass
 
 
-@set_figure(figsize=(6, 6))
-def plot_dist(dist, enhancement=False, figname='', **kwargs):
-    if isinstance(dist, dict):
-        Clean_line = dist['Clean']
-        Transition_line = dist['Transition']
-        Event_line = dist['Event']
+@set_figure
+def plot_dist(dp, dist, ax=None, enhancement=False, fig_kws={}, plot_kws={}, **kwargs):
+    breakpoint()
+    Clean_line = dist['Clean']
+    Transition_line = dist['Transition']
+    Event_line = dist['Event']
 
-        alpha = 0.8
-        fig, ax = plt.subplots(1, 1)
-        a, = ax.plot(dp, Clean_line, ls='solid', color='#1d4a9f', lw=3, alpha=alpha)
-        b, = ax.plot(dp, Transition_line, ls='solid', color='#4a9f1d', lw=3, alpha=alpha)
-        c, = ax.plot(dp, Event_line, ls='solid', color='#9f1d4a', lw=3, alpha=alpha)
+    alpha = 0.8
+    fig, ax = plt.subplots()
+    a, = ax.plot(dp, Clean_line, ls='solid', color='#1d4a9f', lw=3, alpha=alpha)
+    b, = ax.plot(dp, Transition_line, ls='solid', color='#4a9f1d', lw=3, alpha=alpha)
+    c, = ax.plot(dp, Event_line, ls='solid', color='#9f1d4a', lw=3, alpha=alpha)
 
-        # Area
-        ax.fill_between(dp, y1=0, y2=Clean_line, alpha=0.5, color='#84a7e9')
-        ax.fill_between(dp, y1=Clean_line, y2=Transition_line, alpha=0.5, color='#a7e984')
-        ax.fill_between(dp, y1=Transition_line, y2=Event_line, alpha=0.5, color='#e984a7')
+    # Area
+    ax.fill_between(dp, y1=0, y2=Clean_line, alpha=0.5, color='#84a7e9')
+    ax.fill_between(dp, y1=Clean_line, y2=Transition_line, alpha=0.5, color='#a7e984')
+    ax.fill_between(dp, y1=Transition_line, y2=Event_line, alpha=0.5, color='#e984a7')
 
-        # figure_set
-        xlim = kwargs.get('xlim') or (11.8, 2500)
-        ylim = kwargs.get('ylim') or (0, 650)
-        xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
-        ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
-        ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-        plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
+    # figure_set
+    xlim = kwargs.get('xlim') or (11.8, 2500)
+    ylim = kwargs.get('ylim') or (0, 650)
+    xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
+    ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
+    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+    plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
 
-        if enhancement:
-            ax2 = ax.twinx()
-            d, = ax2.plot(dp, (Transition_line / Clean_line), ls='dashed', color='k', lw=3)
-            e, = ax2.plot(dp, (Event_line / Transition_line), ls='dashed', color='gray', lw=3)
+    if enhancement:
+        ax2 = ax.twinx()
+        d, = ax2.plot(dp, (Transition_line / Clean_line), ls='dashed', color='k', lw=3)
+        e, = ax2.plot(dp, (Event_line / Transition_line), ls='dashed', color='gray', lw=3)
 
-            plt.xlim(11.8, 2500)
-            plt.ylim(0.5, 6)
-            plt.xlabel(r'$\bf Diameter\ (nm)$')
-            plt.ylabel(r'$\bf Enhancement\ ratio$')
+        plt.xlim(11.8, 2500)
+        plt.ylim(0.5, 6)
+        plt.xlabel(r'$\bf Diameter\ (nm)$')
+        plt.ylabel(r'$\bf Enhancement\ ratio$')
 
-            legend = ax.legend([a, b, c, d, e],
-                               [r'$\bf Clean$', r'$\bf Transition$', r'$\bf Event$',
-                                r'$\bf Number\ Enhancement\ 1$', r'$\bf Number\ Enhancement\ 2$'],
-                               loc='upper left')
-        else:
-            legend = ax.legend([a, b, c],
-                               [r'$\bf Clean$', r'$\bf Transition$', r'$\bf Event$'],
-                               loc='upper left')
+        legend = ax.legend([a, b, c, d, e],
+                           [r'$\bf Clean$', r'$\bf Transition$', r'$\bf Event$',
+                            r'$\bf Number\ Enhancement\ 1$', r'$\bf Number\ Enhancement\ 2$'],
+                           loc='upper left')
+    else:
+        legend = ax.legend([a, b, c],
+                           [r'$\bf Clean$', r'$\bf Transition$', r'$\bf Event$'],
+                           loc='upper left')
 
     title = kwargs.get('title') or ''
-    plt.title(title, family='Times New Roman', weight='bold', size=20)
+    plt.title(title)
     plt.semilogx()
-    plt.show()
-    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
+
+    # fig.savefig(f'{figname}')
+    return ax
 
 
 @set_figure(figsize=(8, 6), fs=16)
-def plot_dist_example(PSSD, PSSD_std, Q_ext, PESD, PESD_std, **kwargs):
+def plot_dist_example(dp, PSSD, PSSD_std, Q_ext, PESD, PESD_std, **kwargs):
     fig, ax = plt.subplots(1, 1)
     a, = ax.plot(dp, PSSD, ls='solid', color='#14336d', lw=2)
     ax.fill_between(dp, y1=PSSD-PSSD_std, y2=PSSD+PSSD_std, alpha=0.8, color='#d4ecf8')
@@ -118,7 +120,7 @@ def plot_dist_example(PSSD, PSSD_std, Q_ext, PESD, PESD_std, **kwargs):
 
 
 @set_figure(figsize=(8, 6))
-def plot_dry_amb_dist_test(dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
+def plot_dry_amb_dist_test(dp, dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
     fig, ax = plt.subplots(1, 1)
     widths = np.diff(dp)
     widths = np.append(widths, widths[-1])
@@ -146,7 +148,7 @@ def plot_dry_amb_dist_test(dry_dp, ndp, dry_ndp, new_dry_ndp, **kwargs):
 
 
 @set_figure(figsize=(6, 6))
-def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Clean', **kwargs):
+def plot_dist_with_STD(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, state='Clean', **kwargs):
     fig, ax = plt.subplots(1, 1)
     for state in Ext_amb_dis.keys():
 
@@ -185,7 +187,7 @@ def plot_dist_with_STD(Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_st
 
 # dealing
 @set_figure(figsize=(8, 6))
-def plot_dist_fRH(dist, dist2, figname='', **kwargs):
+def plot_dist_fRH(dp, dist, dist2, figname='', **kwargs):
     if isinstance(dist, dict):
         cut = 10
         Clean_line = dist['Clean'][:-cut]
@@ -212,7 +214,6 @@ def plot_dist_fRH(dist, dist2, figname='', **kwargs):
         ax.ticklabel_format(style='sci', axis='y', scilimits=(-1, 2))
         plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
-
     title = kwargs.get('title') or ''
     plt.title(title, family='Times New Roman', weight='bold', size=20)
     plt.semilogx()
@@ -220,8 +221,8 @@ def plot_dist_fRH(dist, dist2, figname='', **kwargs):
     # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')
 
 
-@set_figure(figsize=(8, 6))
-def compare(dist, std1, dist2, std2, ax=None, **kwargs):
+@set_figure(figsize=(6, 6))
+def compare(dp, dist, std1, dist2, std2, ax=None, **kwargs):
     PESD, PESD_std = dist, std1
     PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167, )*0.2
     PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
@@ -238,12 +239,11 @@ def compare(dist, std1, dist2, std2, ax=None, **kwargs):
     percentage_error = np.divide(abs_difference, exact) * 100
     percentage_error = np.array(pd.DataFrame(percentage_error).ewm(span=10).mean()).reshape(167, )
 
-
-    fig, ax = plt.subplots(1, 1)
-    a, = ax.plot(dp, PESD, ls='solid', color=color_choose['Clean'][0], lw=2)
-    b, = ax.plot(dp, PESD_dry, ls='solid', color=color_choose['Transition'][0], lw=2)
-    c = ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.3, color=color_choose['Clean'][0], edgecolor=None)
-    d = ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.3, color=color_choose['Transition'][0], edgecolor=None)
+    fig, ax = plt.subplots()
+    a, = ax.plot(dp, PESD, ls='solid', color=color_choose['Clean'][0], lw=2, label=r'$\bf Internal$')
+    b, = ax.plot(dp, PESD_dry, ls='solid', color=color_choose['Transition'][0], lw=2, label=r'$\bf External$')
+    c = ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.3, color=color_choose['Clean'][0], edgecolor=None, label='__nolegend__')
+    d = ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.3, color=color_choose['Transition'][0], edgecolor=None, label='__nolegend__')
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     # figure_set
     xlim = kwargs.get('xlim') or (11.8, 2500)
@@ -254,15 +254,12 @@ def compare(dist, std1, dist2, std2, ax=None, **kwargs):
     plt.semilogx()
 
     ax2 = ax.twinx()
-    c = ax2.scatter(dp, percentage_error, color='white', edgecolor='k')
+    c = ax2.scatter(dp, percentage_error, color='white', edgecolor='k', label=r'$\bf Error$')
     ax2.set_ylabel(r'$\bf Error\ (\%)$')
 
-    legend = ax.legend([a, b, c],
-                       [r'$\bf Internal$', r'$\bf External$', r'$\bf Error$'],
-                       loc='upper left')
+    ax.legend(loc='upper left')
+    ax2.legend(loc='upper left')
     title = kwargs.get('title') or r'$\bf Extinction\ Distribution$'
-    plt.title(title, family='Times New Roman', weight='bold', size=20)
-
-    plt.show()
+    plt.title(title)
 
     return ax

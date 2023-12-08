@@ -47,7 +47,7 @@ def set_figure(func=None, *, figsize=None, fs=None, fw=None, titlesize=None):
             # plt.rcParams['legend.fontweight'] = 'bold'  #key error
             plt.rcParams['legend.handlelength'] = 1.5
 
-            plt.rcParams['figure.figsize'] = figsize or (8, 8)
+            plt.rcParams['figure.figsize'] = figsize or (6, 6)
             plt.rcParams['figure.autolayout'] = True
             # plt.rcParams['figure.constrained_layout.use'] = True
             plt.rcParams['figure.dpi'] = 150
