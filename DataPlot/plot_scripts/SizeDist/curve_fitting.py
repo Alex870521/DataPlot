@@ -6,6 +6,8 @@ from numpy import log, exp, pi, sqrt
 from tabulate import tabulate
 from DataPlot.plot_templates import set_figure
 
+__all__ = ['curvefit']
+
 
 @set_figure
 def plot_function(dp, observed, fit_curve, **kwargs):
@@ -54,14 +56,9 @@ def curvefit(dp, dist, mode=None, **kwargs):
     -------
     >>> curvefit(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
     """
-
-    Num = np.sum(dist * log(dp))
-    norm_data = dist / Num
-
-    # 定義多個對數常態分佈的函數
-    # def lognorm_func(dp, N1, mu1, sigma1, N2, mu2, sigma2):
-    #     return (N1 / (log(sigma1) * sqrt(2 * pi)) * exp(-(log(dp) - log(mu1)) ** 2 / (2 * log(sigma1) ** 2)) +
-    #             N2 / (log(sigma2) * sqrt(2 * pi)) * exp(-(log(dp) - log(mu2)) ** 2 / (2 * log(sigma2) ** 2)))
+    # Calculate total number concentration and normalize distribution
+    num = np.sum(dist * log(dp))
+    norm_data = dist / num
 
     def lognorm_func(x, *params):
         num_distributions = len(params) // 3
@@ -107,7 +104,7 @@ def curvefit(dp, dist, mode=None, **kwargs):
     for i in range(mode):
         offset = i * 3
         num, mu, sigma = params[offset:offset + 3]
-        table.append([f'log-{i + 1}', num * Num, mu, sigma])
+        table.append([f'log-{i + 1}', num * num, mu, sigma])
 
     formatted_data = [[item if not isinstance(item, float) else f"{item:.3f}" for item in row] for row in table]
 
@@ -116,4 +113,4 @@ def curvefit(dp, dist, mode=None, **kwargs):
     print(tab)
 
     # plot result
-    plot_function(dp, dist, Num * lognorm_func(dp, *params), **kwargs)
+    plot_function(dp, dist, num * lognorm_func(dp, *params), **kwargs)

@@ -78,7 +78,7 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
     plot_kws = dict(dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap), **plot_kws)
 
     # Set the figure keywords
-    fig_kws = dict(dict(figsize=(10, 5)), **fig_kws)
+    fig_kws = dict(dict(figsize=(10, 4)), **fig_kws)
 
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
@@ -88,7 +88,12 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
                          **plot_kws)
 
     # Set the ylabel and ylim
-    ax.set(ylabel=r'$\bf dp\ (nm)$', ylim=(y.min(), y.max()))
+    ax.set(ylabel=r'$\bf D_p\ (nm)$', ylim=(y.min(), y.max()))
+
+    # Set title
+    st_tm, fn_tm = x[0], x[-1]
+    title = kwargs.get('title') or f'{st_tm.strftime("%Y/%m/%d")} - {fn_tm.strftime("%Y/%m/%d")}'
+    ax.set_title(title)
 
     # Set the axis to be log in the y-axis
     if logy:
@@ -100,7 +105,7 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
         cbar_kws = dict(dict(label=r'$dN/dlogD_p\ (\# / cm^{-3})$'), **cbar_kws)
         clb = plt.colorbar(pco1, pad=0.01, **cbar_kws)
 
-    # fig.savefig(f'time1_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
+    # fig.savefig(f'heatmap_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
 
     return ax
 
@@ -110,7 +115,7 @@ def histplot():
 
 
 @set_figure(figsize=(10, 4), fs=12)
-def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
+def plot_NSV_dist(dp, dist, dist2, dist3, ax=None, **kwargs):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
     ls_lst = ['dotted', 'dashed', 'solid']
     label_lst = ['Number', 'Surface', 'Volume']
@@ -155,6 +160,5 @@ def plot_NSV_dist(dist, dist2, dist3, figname='', **kwargs):
     ax3.semilogx()
 
     title = kwargs.get('title') or ''
-    fig.suptitle(title,)
+    fig.suptitle(title)
     plt.show()
-    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'{figname}')

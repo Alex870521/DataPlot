@@ -221,7 +221,7 @@ def plot_dist_fRH(dist, dist2, figname='', **kwargs):
 
 
 @set_figure(figsize=(8, 6))
-def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
+def compare(dist, std1, dist2, std2, ax=None, **kwargs):
     PESD, PESD_std = dist, std1
     PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167, )*0.2
     PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
@@ -237,7 +237,7 @@ def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     abs_difference = np.absolute(difference)
     percentage_error = np.divide(abs_difference, exact) * 100
     percentage_error = np.array(pd.DataFrame(percentage_error).ewm(span=10).mean()).reshape(167, )
-    print(percentage_error)
+
 
     fig, ax = plt.subplots(1, 1)
     a, = ax.plot(dp, PESD, ls='solid', color=color_choose['Clean'][0], lw=2)
@@ -264,5 +264,5 @@ def plot_dist_cp(dist, std1, dist2, std2, figname='', **kwargs):
     plt.title(title, family='Times New Roman', weight='bold', size=20)
 
     plt.show()
-    # fig.savefig(PATH_MAIN.parent / 'dist_plot' / f'000_Ext_dist', transparent=True)
-    return fig, ax
+
+    return ax
