@@ -4,8 +4,7 @@ from pandas import concat
 from DataPlot.Data_processing import main
 from DataPlot.Data_processing.Data_classify import state_classify
 from DataPlot.Data_processing import sizedist_reader, extdist_reader, dry_extdist_reader
-from DataPlot.plot_scripts.SizeDist.plot import *
-from DataPlot.plot_scripts.SizeDist.curve_fitting import *
+from DataPlot.size_dist import *
 from DataPlot.Data_processing import SizeDist
 
 PATH_MAIN = Path(__file__).parent.parent / 'Data'
@@ -48,13 +47,13 @@ PVSD_amb_dis, PVSD_amb_dis_std = get_statistic(PVSD_amb_df.dropna().groupby('Sta
 
 if __name__ == '__main__':
     dp = SizeDist().dp
-    # overlay_dist(dp, Ext_amb_dis_internal, enhancement=True)
-    # separate_dist(dp, PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis)
-    # curvefit(dp, Ext_amb_dis_internal['Transition'], mode=10, figname='ext_trans')
-    heatmap(PNSD.index, dp, PNSD)
+    plot.overlay_dist(dp, Ext_amb_dis_internal, enhancement=True)
+    plot.separate_dist(dp, PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis)
+    plot.heatmap(PNSD.index, dp, PNSD)
+    plot.dist_with_std(dp, Ext_amb_dis_internal, Ext_amb_dis_std_internal, Ext_dry_dis_internal, Ext_dry_dis_std_internal)
 
-    # plot_dist_with_STD(dp, Ext_amb_dis_internal, Ext_amb_dis_std_internal, Ext_dry_dis_internal, Ext_dry_dis_std_internal)
+    dist1, diat_std1 = Ext_amb_df_internal.dropna().iloc[:, 2:].mean(),  Ext_amb_df_internal.dropna().iloc[:, 2:].std()
+    dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
+    plot.compare(dp, dist1, diat_std1, dist2, diat_std2)
 
-    # dist1, diat_std1 = Ext_amb_df_internal.dropna().iloc[:, 2:].mean(),  Ext_amb_df_internal.dropna().iloc[:, 2:].std()
-    # dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
-    # compare(dp, dist1, diat_std1, dist2, diat_std2)
+    fit.curvefit(dp, Ext_amb_dis_internal['Transition'], mode=3)

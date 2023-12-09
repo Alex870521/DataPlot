@@ -6,12 +6,10 @@ from numpy import log, exp, pi, sqrt
 from tabulate import tabulate
 from DataPlot.plot_templates import set_figure
 
-__all__ = ['curvefit']
-
 
 @set_figure
 def plot_function(dp, observed, fit_curve, **kwargs):
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+    fig, ax = plt.subplots()
 
     plt.plot(dp, fit_curve, color='#c41b1b', label='Fitting curve', lw=2.5)
     plt.plot(dp, observed, color='b', label='Observed curve', lw=2.5)
@@ -23,11 +21,11 @@ def plot_function(dp, observed, fit_curve, **kwargs):
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
-    ax.set_title('Surface-based PSDs', pad=15)
+    ax.set_title('')
     ax.legend(loc='best', frameon=False)
     figname = kwargs.get('figname') or ''
     plt.semilogx()
-    plt.savefig(f'CurveFit_{figname}.png', transparent=True, bbox_inches="tight")
+    # plt.savefig(f'CurveFit_{figname}.png')
     plt.show()
 
 
@@ -57,8 +55,8 @@ def curvefit(dp, dist, mode=None, **kwargs):
     >>> curvefit(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
     """
     # Calculate total number concentration and normalize distribution
-    num = np.sum(dist * log(dp))
-    norm_data = dist / num
+    total_num = np.sum(dist * log(dp))
+    norm_data = dist / total_num
 
     def lognorm_func(x, *params):
         num_distributions = len(params) // 3
@@ -113,4 +111,4 @@ def curvefit(dp, dist, mode=None, **kwargs):
     print(tab)
 
     # plot result
-    plot_function(dp, dist, num * lognorm_func(dp, *params), **kwargs)
+    plot_function(dp, dist, total_num * lognorm_func(dp, *params), **kwargs)

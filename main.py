@@ -1,7 +1,7 @@
-from Test.test_cpc import cpc_vs
-# from Test.test_distribution import test
 
 
-cpc_vs()
-# test_save_decorator()
+from DataPlot.size_dist import *
+
+plot.ls_mode()
+
 
