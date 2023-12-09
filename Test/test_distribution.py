@@ -6,7 +6,6 @@ from DataPlot.Data_processing.Data_classify import state_classify
 from DataPlot.Data_processing import sizedist_reader, extdist_reader, dry_extdist_reader
 from DataPlot.plot_scripts.SizeDist.plot import *
 from DataPlot.plot_scripts.SizeDist.curve_fitting import *
-from DataPlot.plot_scripts.SizeDist.plot_distribution import *
 from DataPlot.Data_processing import SizeDist
 
 PATH_MAIN = Path(__file__).parent.parent / 'Data'
@@ -38,8 +37,8 @@ def get_statistic(group):
     return _avg, _std
 
 
-Ext_amb_dis, Ext_amb_dis_std = get_statistic(Ext_amb_df_internal.dropna().groupby('State'))
-Ext_dry_dis, Ext_dry_dis_std = get_statistic(Ext_dry_df.dropna().groupby('State'))
+Ext_amb_dis_internal, Ext_amb_dis_std_internal = get_statistic(Ext_amb_df_internal.dropna().groupby('State'))
+Ext_dry_dis_internal, Ext_dry_dis_std_internal = get_statistic(Ext_dry_df.dropna().groupby('State'))
 Ext_amb_dis_external, Ext_amb_dis_std_external = get_statistic(Ext_amb_df_external.dropna().groupby('State'))
 
 PNSD_amb_dis, PNSD_amb_dis_std = get_statistic(PNSD_amb_df.dropna().groupby('State'))
@@ -49,17 +48,13 @@ PVSD_amb_dis, PVSD_amb_dis_std = get_statistic(PVSD_amb_df.dropna().groupby('Sta
 
 if __name__ == '__main__':
     dp = SizeDist().dp
-    plot_dist(dp, Ext_amb_dis, title=r'$\bf Ambient\ Extinction\ Distribution$', enhancement=False, figname='Amb_Ext_Dist')
-    # plot_dist(dp, PSSD_amb_dis, ylim=(0, 1.5e5), ylabel=r'$\bf dN/dlogdp\ (1/Mm)$', title=r'$\bf Ambient\ Particle\ Number\ Distribution$')
+    # overlay_dist(dp, Ext_amb_dis_internal, enhancement=True)
+    # separate_dist(dp, PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis)
+    # curvefit(dp, Ext_amb_dis_internal['Transition'], mode=10, figname='ext_trans')
+    heatmap(PNSD.index, dp, PNSD)
 
-    # plot_dist_with_STD(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std)
+    # plot_dist_with_STD(dp, Ext_amb_dis_internal, Ext_amb_dis_std_internal, Ext_dry_dis_internal, Ext_dry_dis_std_internal)
 
     # dist1, diat_std1 = Ext_amb_df_internal.dropna().iloc[:, 2:].mean(),  Ext_amb_df_internal.dropna().iloc[:, 2:].std()
     # dist2, diat_std2 = Ext_amb_df_external.dropna().iloc[:, 2:].mean(),  Ext_amb_df_external.dropna().iloc[:, 2:].std()
     # compare(dp, dist1, diat_std1, dist2, diat_std2)
-
-
-    # curvefit(dp, Ext_amb_dis['Transition'], mode=10, figname='ext_trans')
-    # heatmap(PNSD.index, dp, PNSD)
-
-    # plot_NSV_dist(dp, PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis, title=r'$\bf Particle\ Size\ Distribution$', figname='NumSurf_dist')

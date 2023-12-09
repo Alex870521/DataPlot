@@ -7,9 +7,34 @@ from DataPlot.plot_templates import set_figure
 
 
 @set_figure(fs=10, titlesize=12)
-def size_distribution_test():
-    # 設定隨機數種子，以確保每次產生的隨機數相同
-    np.random.seed(123)
+def sizedist_example(ax=None, **kwargs):
+    """
+    Plot various particle size distributions to illustrate log-normal distributions and transformations.
+
+    Parameters
+    ----------
+    ax : AxesSubplot, optional
+        Matplotlib AxesSubplot. If not provided, a new subplot will be created.
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Returns
+    -------
+    ax : AxesSubplot
+        Matplotlib AxesSubplot.
+
+    Examples
+    --------
+    Example 1: Plot default particle size distributions
+    >>> sizedist_example()
+    """
+
+    if ax is None:
+        fig, axes = plt.subplots(3, 2, figsize=(12, 12))
+        axes = axes.flatten()
+    else:
+        fig = ax.figure
+        axes = [ax, None, None, None, None, None]
 
     # 给定的幾何平均粒徑和幾何平均標準差
     gmean = 1
@@ -19,9 +44,7 @@ def size_distribution_test():
     sigma = np.log(gstd)
 
     normpdf = lambda x, mu, sigma: (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(x - mu)**2 / (2 * sigma**2))
-
     lognormpdf = lambda x, gmean, gstd: (1 / (np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(-(np.log(x) - np.log(gmean))**2 / (2 * np.log(gstd)**2))
-
     lognormpdf2 = lambda x, gmean, gstd: (1 / (x * np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(-(np.log(x) - np.log(gmean))**2 / (2 * np.log(gstd)**2))
 
     # 生成常態分布
@@ -95,9 +118,3 @@ def size_distribution_test():
     plot_distribution(ax6, x, lognormpdf(x, gmean=0.8, gstd=1.5), 'r-', linewidth=2)
     ax6.set_xlim(0.01, 20)
     ax6.semilogx()
-
-    plt.show()
-
-
-if __name__ == '__main__':
-    size_distribution_test()
