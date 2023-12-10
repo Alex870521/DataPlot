@@ -8,13 +8,12 @@ from matplotlib.ticker import ScalarFormatter
 from DataPlot.plot_templates import set_figure
 
 __all__ = ["heatmap",
-           "histplot",
            "overlay_dist",
            "separate_dist",
            "dist_with_std",
            "compare",
            "ls_mode",
-           "sizedist_example"
+           "psd_example"
            ]
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
@@ -66,6 +65,8 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
 
     """
     # Copy to avoid modifying original data
+    if fig_kws is None:
+        fig_kws = {}
     z = z.copy().to_numpy()
     z = nan_to_num(z)
 
@@ -109,10 +110,6 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
     # fig.savefig(f'heatmap_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
 
     return ax
-
-
-def histplot():
-    pass
 
 
 @set_figure
@@ -299,6 +296,7 @@ def separate_dist(dp, dist, dist2, dist3, ax=None, fig_kws={}, plot_kws={}, **kw
     ax3.semilogx()
 
     return ax
+
 
 @set_figure
 def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, ax=None, fig_kws={}, **kwargs):
@@ -504,7 +502,7 @@ def ls_mode(ax=None, **kwargs):
 
 
 @set_figure(fs=10, titlesize=12)
-def sizedist_example(ax=None, **kwargs):
+def psd_example(ax=None, **kwargs):
     """
     Plot various particle size distributions to illustrate log-normal distributions and transformations.
 
@@ -523,7 +521,7 @@ def sizedist_example(ax=None, **kwargs):
     Examples
     --------
     Example 1: Plot default particle size distributions
-    >>> sizedist_example()
+    >>> psd_example()
     """
 
     if ax is None:

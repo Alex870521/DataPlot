@@ -107,9 +107,9 @@ for quadrant in ['1', '2', '3', '4']:
 #四象限 violine----------------------------------------------------------------------------------------------------------
 for col, x in zip(['MEE','MSE','MAE'], label_[-4:-2]):  #自己打要的欄位跟label
     fig, axes = plt.subplots(1, 1, figsize=(8, 5), dpi=150, constrained_layout=True)
-    plt.title(col+' violin config', font_label_bold)
-    plt.xlabel('', font_label_bold)
-    plt.ylabel(x, font_label_bold)
+    plt.title(col+' violin config')
+    plt.xlabel('')
+    plt.ylabel(x)
     violin = sns.violinplot(data=[dic_four['1'][col], dic_four['2'][col], dic_four['3'][col], dic_four['4'][col]],
                             scale='area', palette='husl', inner='quartile')
     for violin, alpha in zip(axes.collections[:], [0.8, 0.8, 0.8, 0.8]):
@@ -131,8 +131,6 @@ for col, x in zip(['MEE','MSE','MAE'], label_[-4:-2]):  #自己打要的欄位�
                                        dic_four['3'][col].quantile(0.1), dic_four['4'][col].quantile(0.1)],
                         marker='o', s=50, facecolor="green", edgecolor="black")
     plt.legend(handles=[Event, Mean, Clean], labels=['Event', 'Mean', 'Clean'], loc='best', prop=prop_legend)
-    plt.show()
-    fig.savefig(pth(f"4_{col}"))
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ from pathlib import Path
 from DataPlot.Data_processing.Mie_plus import Mie_PESD
 from functools import lru_cache
 
-PATH_MAIN = Path("/Data-Code-example")
+PATH_MAIN = Path(__file__).parents[2] / "Data-example"
 
 with open(PATH_MAIN / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')

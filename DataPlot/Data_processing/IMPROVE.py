@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, read_json, concat
 from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data-Code-example'
+PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 
 with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_json(f)
@@ -23,7 +23,7 @@ def f_RH(RH, version=None):
     return val
 
 
-def original_IMPROVE(_df):
+def original(_df):
     _df['AS_ext_dry'] = (3 * 1 * _df['AS'])
     _df['AN_ext_dry'] = (3 * 1 * _df['AN'])
     _df['OM_ext_dry'] = (4 * _df['OM'])
@@ -47,7 +47,7 @@ def original_IMPROVE(_df):
     return _df['AS_ext_dry':]
 
 
-def revised_IMPROVE(_df):
+def revised(_df):
     def mode(Mass):
         if Mass < 20:
             L_mode = Mass ** 2 / 20
@@ -88,7 +88,7 @@ def revised_IMPROVE(_df):
     return _df['AS_ext_dry':]
 
 
-def modify_IMPROVE(_df):
+def modified(_df):
     _df['AS_ext_dry'] = (3 * 1 * _df['AS'])
     _df['AN_ext_dry'] = (3 * 1 * _df['AN'])
     _df['OM_ext_dry'] = (4 * _df['OM'])
@@ -115,7 +115,7 @@ def modify_IMPROVE(_df):
     return _df['AS_ext_dry':]
 
 
-def gas_IMPROVE(_df):
+def gas(_df):
     _df['ScatteringByGas'] = (11.4 * 293 / (273 + _df['AT']))
     _df['AbsorptionByGas'] = (0.33 * _df['NO2'])
     _df['ExtinctionByGas'] = _df['ScatteringByGas'] + _df['AbsorptionByGas']
@@ -143,16 +143,16 @@ def improve_process(reset=False, version='revised', filename=None):
     IMPROVE_input_df = concat([df[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']],df['NH4_status'].mask(df['NH4_status'] == 'Deficiency'), df['RH']], axis=1)
 
     if version == 'original':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(original_IMPROVE, axis=1)
-
-    if version == 'modify':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(modify_IMPROVE, axis=1)
+        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(original, axis=1)
 
     if version == 'revised':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(revised_IMPROVE, axis=1)
+        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(revised, axis=1)
+
+    if version == 'modify':
+        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(modified, axis=1)
 
     # gas contribution
-    df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(gas_IMPROVE, axis=1)
+    df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(gas, axis=1)
 
     return concat([df_IMPROVE, df_ext_gas], axis=1).reindex(df.index.copy())
 

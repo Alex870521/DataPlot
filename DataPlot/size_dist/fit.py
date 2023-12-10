@@ -7,28 +7,6 @@ from tabulate import tabulate
 from DataPlot.plot_templates import set_figure
 
 
-@set_figure
-def plot_function(dp, observed, fit_curve, **kwargs):
-    fig, ax = plt.subplots()
-
-    plt.plot(dp, fit_curve, color='#c41b1b', label='Fitting curve', lw=2.5)
-    plt.plot(dp, observed, color='b', label='Observed curve', lw=2.5)
-
-    xlim = kwargs.get('xlim') or (11.8, 2500)
-    ylim = kwargs.get('ylim') or (0, None)
-    xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
-    ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-    plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
-    ax.set_title('')
-    ax.legend(loc='best', frameon=False)
-    figname = kwargs.get('figname') or ''
-    plt.semilogx()
-    # plt.savefig(f'CurveFit_{figname}.png')
-    plt.show()
-
-
 def curvefit(dp, dist, mode=None, **kwargs):
     """
     Fit a log-normal distribution to the given data and plot the result.
@@ -109,6 +87,27 @@ def curvefit(dp, dist, mode=None, **kwargs):
     # 使用 tabulate 來建立表格並印出
     tab = tabulate(formatted_data, headers=["log-", "number", "mu", "sigma"], floatfmt=".3f", tablefmt="fancy_grid")
     print(tab)
+
+    @set_figure
+    def plot_function(dp, observed, fit_curve, **kwargs):
+        fig, ax = plt.subplots()
+
+        plt.plot(dp, fit_curve, color='#c41b1b', label='Fitting curve', lw=2.5)
+        plt.plot(dp, observed, color='b', label='Observed curve', lw=2.5)
+
+        xlim = kwargs.get('xlim') or (11.8, 2500)
+        ylim = kwargs.get('ylim') or (0, None)
+        xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
+        ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
+        ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+        plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
+        ax.set_title('')
+        ax.legend(loc='best', frameon=False)
+        figname = kwargs.get('figname') or ''
+        plt.semilogx()
+        # plt.savefig(f'CurveFit_{figname}.png')
+        plt.show()
 
     # plot result
     plot_function(dp, dist, total_num * lognorm_func(dp, *params), **kwargs)

@@ -8,21 +8,9 @@ from DataPlot.Data_processing.Mie_plus import Mie_PESD
 from DataPlot.Data_processing.decorator import timer
 
 
-class DataTypeError(Exception):
-    """ make sure the input data unit is dN/dlogdp """
-
-
-class SizeDist:  # 可以加入一些錯誤的raise
+class SizeDist:
     """
     A class for processing particle size distribution (PSD) data.
-
-    # Examples
-    --------
-    Example 1: Use default path and filename
-    >>> psd_data = SizeDist()
-
-    Example 2: Specify custom path and filename
-    >>> custom_psd_data = SizeDist(path=Path('custom/path'), filename='custom_PSD.csv')
 
     Parameters
     ----------
@@ -69,9 +57,20 @@ class SizeDist:  # 可以加入一些錯誤的raise
     ValueError
         If the PSD data is empty or missing.
 
+    DataTypeError
+        The input data unit must be dN/dlogdp.
+
+    Examples
+    --------
+    Example 1: Use default path and filename
+    >>> psd_data = SizeDist()
+
+    Example 2: Specify custom path and filename
+    >>> custom_psd_data = SizeDist(path=Path('custom/path'), filename='custom_PSD.csv')
+
     """
 
-    default_path = Path(__file__).parent.parent.parent / 'Data-Code-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
+    default_path = Path(__file__).parents[3] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
 
     def __init__(self, path=None, filename=None):
         self.path = path or self.default_path.parent
