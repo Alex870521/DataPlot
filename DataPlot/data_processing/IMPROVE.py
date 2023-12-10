@@ -1,6 +1,5 @@
 from pathlib import Path
 from pandas import read_csv, read_json, concat
-from DataPlot.data_processing.decorator.csv_decorator import save_to_csv
 from DataProcessorBase import DataProcessorBase
 
 PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
@@ -10,56 +9,12 @@ with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='igno
 
 
 def f_RH(RH, version=None):
-    """
-    :param RH: int
-    :param version: str, (fRH, fRHs, fRHl, fRHss)
-    :return: float
-    """
-
     if RH > 95:
         val = frh[version][95]
     else:
         val = frh[version][int(RH)]
 
     return val
-
-
-
-
-
-@save_to_csv(PATH_MAIN / 'level2' / 'IMPROVE' / 'revised_IMPROVE.csv')
-def improve_process(reset=False, version='revised', filename=None):
-    if filename.exists() & (~reset):
-        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
-            return read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(PATH_MAIN / 'level1' / 'EPB.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        minion = read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
-
-    with open(PATH_MAIN / 'level1' / 'IMPACT.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        impact = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(PATH_MAIN / 'level2' / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        chemical = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    df = concat([minion, impact, chemical], axis=1)
-
-    # particle contribution '銨不足不納入計算'
-    IMPROVE_input_df = concat([df[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']],df['NH4_status'].mask(df['NH4_status'] == 'Deficiency'), df['RH']], axis=1)
-
-    if version == 'original':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(original, axis=1)
-
-    if version == 'revised':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(revised, axis=1)
-
-    if version == 'modify':
-        df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(modified, axis=1)
-
-    # gas contribution
-    df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(gas, axis=1)
-
-    return concat([df_IMPROVE, df_ext_gas], axis=1).reindex(df.index.copy())
 
 
 class ImproveProcessor(DataProcessorBase):
@@ -167,6 +122,10 @@ class ImproveProcessor(DataProcessorBase):
         _df['ExtinctionByGas'] = _df['ScatteringByGas'] + _df['AbsorptionByGas']
         return _df['ScatteringByGas':]
 
+    @staticmethod
+    def f_RH(RH, version=None):
+        pass
+
     def process_data(self):
         if self.path.exists() & (~self.reset):
             with open(self.path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -212,6 +171,4 @@ class ImproveProcessor(DataProcessorBase):
 
 
 if __name__ == '__main__':
-    # df = improve_process(reset=True)
-
     result = ImproveProcessor(filename='revised_IMPROVE.csv', version='revised').main()
