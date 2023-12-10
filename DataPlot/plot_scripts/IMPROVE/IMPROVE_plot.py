@@ -1,19 +1,20 @@
-from pathlib import Path
-from scipy.optimize import curve_fit
-from Data_processing import integrate
-from Data_classify import state_classify, season_classify, Seasons
-from config.custom import setFigure, unit, getColor
-
-from config.violinPlot import violin
-from config.barPlot import barplot_concen, barplot_combine
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
-from config.scatterPlot import scatter, scatter_mutiReg, box_scatter
-import config.piePlot as piePlot
-import config.barPlot as barPlot
-import config.violinPlot as violinPlot
+from pathlib import Path
+from DataPlot.Data_processing import main
+from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
+from DataPlot.plot_templates import set_figure, unit, getColor
+from DataPlot.plot_templates import violin
+from DataPlot.plot_templates import barplot_concen, barplot_combine
+from DataPlot.plot_templates import scatter, scatter_mutiReg
+
+import DataPlot.plot_templates as pt
+import DataPlot.plot_templates.basic.pie_plot as piePlot
+import DataPlot.plot_templates.basic.bar_plot as barPlot
+import DataPlot.plot_templates.basic.violin_plot as violinPlot
+
 
 colors1 = getColor(kinds='1')
 colors2 = getColor(kinds='2')
@@ -23,7 +24,7 @@ colors3c = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#
 colors4 = getColor(kinds='4')
 colors5 = getColor(kinds='5')
 
-df = integrate()['2020-09-04':'2021-05-06']
+df = main()['2020-09-04':'2021-05-06']
 dic_grp_sea = season_classify(df)
 dic_grp_sta = state_classify(df)
 
@@ -105,7 +106,7 @@ if __name__ == '__main__':
                        title='TRENDS',
                        )
 
-        @setFigure(figsize=(8, 6))
+        @set_figure(figsize=(8, 6))
         def aaaa():
             ext = np.array(list(dic_grp_mean.keys()))
             val = np.array(list(dic_grp_mean.values()))
@@ -158,7 +159,7 @@ if __name__ == '__main__':
                             title=label)
 
 
-    @setFigure(figsize=(10, 6))
+    @set_figure(figsize=(10, 6))
     def chemical_enhancement():
         fig, ax = plt.subplots(1, 1)
 
@@ -301,4 +302,4 @@ if __name__ == '__main__':
         # scatter(aaa, x='GMDs', y='MSE', c='AS_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
         # scatter(aaa, x='GMDs', y='MSE', c='AN_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
         # scatter(aaa, x='Ox', y='SOC_mass', y_range=[0, 10], title=state)
-    box_scatter(df, x='Extinction', y='SSA', c='EC_mass_ratio', s='PM25', y_range=[0, 1], c_range=[0, 0.07], title="")
+    scatter(df, x='Extinction', y='SSA', c='EC_mass_ratio', s='PM25', y_range=[0, 1], c_range=[0, 0.07], box=True, title="")

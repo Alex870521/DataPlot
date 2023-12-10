@@ -4,9 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.optimize import curve_fit
-from plot_templates import set_figure
+from DataPlot.plot_templates import set_figure
 
-Path_Data = Path('/Data-Code-example')
+Path_Data = Path('/Data-example')
 df = pd.read_excel(Path_Data / 'Koschmieder.xlsx', sheet_name=0)
 # x = Visibility, y = Extinction, log-log fit!!
 
