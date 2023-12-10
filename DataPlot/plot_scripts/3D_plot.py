@@ -39,7 +39,6 @@ def Mie_SurfaceLognormal(m, wavelength, geoMean, geoStdDev, numberOfParticles, n
     return Bext, Bsca, Babs
 
 
-
 def _get(reset=False):
     if ((PATH_MAIN / '3D_plot.pkl').exists()) & (~reset):
         with open(PATH_MAIN / '3D_plot.pkl', 'rb') as f:
@@ -117,12 +116,12 @@ if __name__ == '__main__':
 
     X, Y = np.meshgrid(RI, GMD)
     Z, Y = np.meshgrid(GSD, GMD)
-    Z = function(X, Y, Z)
+    K = function(X, Y, Z)
 
     # fig 2 -> RI, GMD, Ext
     fig = plt.figure()
     ax = plt.axes(projection='3d')
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=plt.get_cmap('jet'), edgecolor='none')
+    ax.plot_surface(X, Y, K, rstride=1, cstride=1, cmap=plt.get_cmap('jet'), edgecolor='none')
 
     ax.set_title(r'$\bf Sensitive\ test\ of\ Extinction$')
     ax.set_xlabel(r'$\bf Real\ part\ (n)$', labelpad=10)
