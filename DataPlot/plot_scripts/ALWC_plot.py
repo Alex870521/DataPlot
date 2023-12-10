@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from DataPlot.Data_processing import main
+from DataPlot.data_processing import main
 from DataPlot.plot_templates import set_figure, unit, getColor
 from DataPlot.plot_templates import scatter, violin, pie_ext
 
-from DataPlot.Data_processing.Data_classify import state_classify, season_classify
+from DataPlot.data_processing.Data_classify import state_classify, season_classify
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
 textprops = {'fontsize': 14, 'fontfamily': 'Times New Roman', 'fontweight': 'bold'}

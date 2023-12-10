@@ -1,6 +1,6 @@
 
 
-from DataPlot.size_dist import *
+from DataPlot.distribution import *
 
 plot.ls_mode()
 

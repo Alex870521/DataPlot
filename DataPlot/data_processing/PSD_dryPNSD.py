@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
-from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
-from DataPlot.Data_processing.core._reader import psd_reader, chemical_reader
+from DataPlot.data_processing.decorator.csv_decorator import save_to_csv
+from DataPlot.data_processing.core._reader import psd_reader, chemical_reader
 
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data-example' / 'Level2'

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pathlib import Path
-from DataPlot.Data_processing.Mie_plus import Mie_Q, Mie_MEE
+from DataPlot.data_processing.Mie_plus import Mie_Q, Mie_MEE
 from DataPlot.plot_templates import set_figure
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}

@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
-import DataPlot.Data_processing as dataproc
+from DataPlot.data_processing.decorator.csv_decorator import save_to_csv
+import DataPlot.data_processing as dataproc
 
 PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 

@@ -7,9 +7,9 @@ import matplotlib.ticker as mticker
 
 from pandas import read_csv, concat
 from matplotlib.collections import PolyCollection
-from DataPlot.Data_processing import main
+from DataPlot.data_processing import main
 from pathlib import Path
-from DataPlot.Data_processing.Mie_plus import Mie_PESD
+from DataPlot.data_processing.Mie_plus import Mie_PESD
 from functools import lru_cache
 
 PATH_MAIN = Path(__file__).parents[2] / "Data-example"

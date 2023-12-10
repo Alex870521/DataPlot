@@ -1,11 +1,11 @@
 import numpy as np
 from pathlib import Path
 from pandas import concat
-from DataPlot.Data_processing import main
-from DataPlot.Data_processing.Data_classify import state_classify
-from DataPlot.Data_processing import sizedist_reader, extdist_reader, dry_extdist_reader
-from DataPlot.size_dist import *
-from DataPlot.Data_processing import SizeDist
+from DataPlot.data_processing import main
+from DataPlot.data_processing.Data_classify import state_classify
+from DataPlot.data_processing import sizedist_reader, extdist_reader, dry_extdist_reader
+from DataPlot.distribution import *
+from DataPlot.data_processing import SizeDist
 
 PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
 PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'

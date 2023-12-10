@@ -3,9 +3,9 @@ import math
 import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
-from DataPlot.Data_processing import psd_reader, chemical_reader
-from DataPlot.Data_processing.Mie_plus import Mie_PESD
-from DataPlot.Data_processing.decorator import timer
+from DataPlot.data_processing import psd_reader, chemical_reader
+from DataPlot.data_processing.Mie_plus import Mie_PESD
+from DataPlot.data_processing.decorator import timer
 
 
 class SizeDist:

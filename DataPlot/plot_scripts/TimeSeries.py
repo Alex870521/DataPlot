@@ -6,8 +6,8 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.plot_templates import set_figure, unit, getColor, color_maker
 from pathlib import Path
 from pandas import read_csv, concat, date_range
-from DataPlot.Data_processing import main
-from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
+from DataPlot.data_processing import main
+from DataPlot.data_processing.Data_classify import state_classify, season_classify, Seasons
 
 PATH_MAIN = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution'
 

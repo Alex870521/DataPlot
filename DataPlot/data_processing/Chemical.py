@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas import read_csv, concat
 from pathlib import Path
-from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
+from DataPlot.data_processing.decorator.csv_decorator import save_to_csv
 
 PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 

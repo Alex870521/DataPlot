@@ -1,6 +1,6 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from DataPlot.Data_processing.decorator import save_to_csv, timer
+from DataPlot.data_processing.decorator import save_to_csv, timer
 
 PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 
