@@ -9,7 +9,7 @@ from pandas import read_csv, concat, date_range
 from DataPlot.Data_processing import main
 from DataPlot.Data_processing.Data_classify import state_classify, season_classify, Seasons
 
-PATH_MAIN = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
+PATH_MAIN = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution'
 
 with open(PATH_MAIN / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
 PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'
 
 with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:

@@ -71,7 +71,7 @@ class SizeDist:  # 可以加入一些錯誤的raise
 
     """
 
-    default_path = Path(__file__).parent.parent.parent / 'Data' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
+    default_path = Path(__file__).parent.parent.parent / 'Data-Code-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
 
     def __init__(self, path=None, filename=None):
         self.path = path or self.default_path.parent

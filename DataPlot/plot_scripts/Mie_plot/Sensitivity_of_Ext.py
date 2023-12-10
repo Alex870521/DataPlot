@@ -11,8 +11,8 @@ from Data_processing import integrate
 import matplotlib.pyplot as plt
 
 
-PATH_MAIN = Path("/Data")
-PATH_DIST = Path("/Data/Level2/distribution")
+PATH_MAIN = Path("/Data-Code-example")
+PATH_DIST = Path("/Data-Code-example/Level2/distribution")
 
 with open(PATH_DIST / 'PNSDist.csv', 'r', encoding='utf-8', errors='ignore') as f:
     PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')

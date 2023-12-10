@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.Data_processing.decorator import save_to_csv, timer
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data-Code-example'
 
 
 @save_to_csv(PATH_MAIN / 'Level1' / 'IMPACT.csv')

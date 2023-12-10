@@ -3,7 +3,7 @@ from pandas import read_csv
 
 
 def psd_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
+    default_path = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
     file_path = file_path or default_path
 
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -11,7 +11,7 @@ def psd_reader(file_path=None):
 
 
 def chemical_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data' / 'Level2' / 'chemical.csv'
+    default_path = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'chemical.csv'
     file_path = file_path or default_path
 
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -21,7 +21,7 @@ def chemical_reader(file_path=None):
 
 
 def sizedist_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
+    default_path = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution'
     file_path = file_path or default_path
 
     with open(file_path / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
@@ -37,7 +37,7 @@ def sizedist_reader(file_path=None):
 
 
 def extdist_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
+    default_path = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution'
     file_path = file_path or default_path
 
     with open(file_path / 'PESD_dextdlogdp_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
@@ -50,7 +50,7 @@ def extdist_reader(file_path=None):
 
 
 def dry_extdist_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data' / 'Level2' / 'distribution'
+    default_path = Path(__file__).parents[3] / 'Data-Code-example' / 'Level2' / 'distribution'
     file_path = file_path or default_path
 
     with open(file_path / 'PESD_dextdlogdp_dry_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:

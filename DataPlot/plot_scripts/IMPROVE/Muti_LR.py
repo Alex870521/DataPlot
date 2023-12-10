@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
 
     # config
-    PATH_MAIN = Path("/Data")
+    PATH_MAIN = Path("/Data-Code-example")
     with open(PATH_MAIN / 'level2' / 'modify_IMPROVE.csv', 'r', encoding='utf-8', errors='ignore') as f:
         modify_IMPROVE = read_csv(f, parse_dates=['Time']).set_index('Time')['total_ext_dry'].rename('Modified')
     with open(PATH_MAIN / 'level2' / 'revised_IMPROVE.csv', 'r', encoding='utf-8', errors='ignore') as f:

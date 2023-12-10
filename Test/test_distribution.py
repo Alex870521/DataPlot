@@ -7,7 +7,7 @@ from DataPlot.Data_processing import sizedist_reader, extdist_reader, dry_extdis
 from DataPlot.size_dist import *
 from DataPlot.Data_processing import SizeDist
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data'
+PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
 PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'
 
 PNSD, PSSD, PVSD = sizedist_reader()

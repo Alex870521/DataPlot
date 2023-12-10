@@ -6,7 +6,7 @@ from pathlib import Path
 from scipy.optimize import curve_fit
 from plot_templates import set_figure
 
-Path_Data = Path('C:/Users/Alex/PycharmProjects/DataPlot/Data')
+Path_Data = Path('/Data-Code-example')
 df = pd.read_excel(Path_Data / 'Koschmieder.xlsx', sheet_name=0)
 # x = Visibility, y = Extinction, log-log fit!!
 

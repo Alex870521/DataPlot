@@ -4,7 +4,7 @@ from pandas import read_csv, concat
 from pathlib import Path
 from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data-Code-example'
 
 # Note
 # df['ALWC'] 不要加到 df_volume裡面

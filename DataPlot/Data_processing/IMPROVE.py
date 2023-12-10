@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, read_json, concat
 from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data-Code-example'
 
 with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_json(f)

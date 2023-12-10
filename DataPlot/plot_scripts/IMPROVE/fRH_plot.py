@@ -3,7 +3,7 @@ from pandas import read_csv, read_json
 import matplotlib.pyplot as plt
 from DataPlot.plot_templates import set_figure, unit, getColor
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data'
+PATH_MAIN = Path(__file__).parents[2] / 'Data-Code-example'
 
 with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_json(f)

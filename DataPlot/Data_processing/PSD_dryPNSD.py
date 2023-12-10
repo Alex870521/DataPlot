@@ -6,7 +6,7 @@ from DataPlot.Data_processing.decorator.csv_decorator import save_to_csv
 from DataPlot.Data_processing.core._reader import psd_reader, chemical_reader
 
 
-PATH_MAIN = Path(__file__).parent.parent.parent / 'Data' / 'Level2'
+PATH_MAIN = Path(__file__).parent.parent.parent / 'Data-Code-example' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'
 
 
@@ -90,7 +90,7 @@ def score():
     with open(PATH_MAIN / 'PESD_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
         PESD_dry = read_csv(f, parse_dates=['Time']).set_index('Time')
 
-    with open(Path("C:/Users/alex/PycharmProjects/DataPlot/Data") / 'All_data.csv', 'r', encoding='utf-8', errors='ignore') as f:
+    with open(Path("/Data-Code-example") / 'All_data.csv', 'r', encoding='utf-8', errors='ignore') as f:
         Measurement = read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')[['Extinction', 'gRH']]
 
     df = concat([Measurement, PESD_dry], axis=1)
