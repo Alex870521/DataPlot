@@ -8,13 +8,14 @@ with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='igno
     frh = read_json(f)
 
 
-def f_RH(RH, version=None):
-    if RH > 95:
-        val = frh[version][95]
-    else:
-        val = frh[version][int(RH)]
+def fRH(_RH):
+    if _RH is not None:
+        if _RH > 95:
+            _RH = 95
+        _RH = round(_RH)
+        return frh.loc[_RH].values.T
 
-    return val
+    return 1, 1, 1, 1
 
 
 class ImproveProcessor(DataProcessorBase):
@@ -22,30 +23,6 @@ class ImproveProcessor(DataProcessorBase):
         super().__init__(reset)
         self.path = super().PATH_MAIN / 'Level2' / 'IMPROVE' / filename
         self.version = version
-
-    @staticmethod
-    def original(_df):
-        _df['AS_ext_dry'] = (3 * 1 * _df['AS'])
-        _df['AN_ext_dry'] = (3 * 1 * _df['AN'])
-        _df['OM_ext_dry'] = (4 * _df['OM'])
-        _df['Soil_ext_dry'] = (1 * _df['Soil'])
-        _df['EC_ext_dry'] = (10 * _df['EC'])
-        _df['total_ext_dry'] = sum(_df['AS_ext_dry':'EC_ext_dry'])
-
-        _df['AS_ext'] = (3 * f_RH(_df['RH'], version='fRH') * _df['AS'])
-        _df['AN_ext'] = (3 * f_RH(_df['RH'], version='fRH') * _df['AN'])
-        _df['OM_ext'] = (4 * _df['OM'])
-        _df['Soil_ext'] = (1 * _df['Soil'])
-        _df['EC_ext'] = (10 * _df['EC'])
-        _df['total_ext'] = sum(_df['AS_ext':'EC_ext'])
-
-        _df['ALWC_AS_ext'] = _df['AS_ext'] - _df['AS_ext_dry']
-        _df['ALWC_AN_ext'] = _df['AN_ext'] - _df['AN_ext_dry']
-        _df['ALWC_ext'] = _df['total_ext'] - _df['total_ext_dry']
-
-        _df['fRH_IMPR'] = _df['total_ext'] / _df['total_ext_dry']
-
-        return _df['AS_ext_dry':]
 
     @staticmethod
     def revised(_df):
@@ -59,23 +36,25 @@ class ImproveProcessor(DataProcessorBase):
 
             return L_mode, S_mode
 
+        _frh, _frhss, _frhs, _frhl = fRH(_df['RH'])
+
         L_AS, S_AS = mode(_df['AS'])
         L_AN, S_AN = mode(_df['AN'])
         L_OM, S_OM = mode(_df['OM'])
 
-        _df['AS_ext_dry'] = (2.2 * 1 * S_AS + 4.8 * 1 * L_AS)
-        _df['AN_ext_dry'] = (2.4 * 1 * S_AN + 5.1 * 1 * L_AN)
-        _df['OM_ext_dry'] = (2.8 * S_OM + 6.1 * L_OM)
-        _df['Soil_ext_dry'] = (1 * _df['Soil'])
-        _df['SS_ext_dry'] = (1.7 * 1 * _df['SS'])
-        _df['EC_ext_dry'] = (10 * _df['EC'])
+        _df['AS_ext_dry'] = 2.2 * 1 * S_AS + 4.8 * 1 * L_AS
+        _df['AN_ext_dry'] = 2.4 * 1 * S_AN + 5.1 * 1 * L_AN
+        _df['OM_ext_dry'] = 2.8 * S_OM + 6.1 * L_OM
+        _df['Soil_ext_dry'] = 1 * _df['Soil']
+        _df['SS_ext_dry'] = 1.7 * 1 * _df['SS']
+        _df['EC_ext_dry'] = 10 * _df['EC']
         _df['total_ext_dry'] = sum(_df['AS_ext_dry':'EC_ext_dry'])
 
-        _df['AS_ext'] = (2.2 * f_RH(_df['RH'], version='fRHs') * S_AS + 4.8 * f_RH(_df['RH'], version='fRHl') * L_AS)
-        _df['AN_ext'] = (2.4 * f_RH(_df['RH'], version='fRHs') * S_AN + 5.1 * f_RH(_df['RH'], version='fRHl') * L_AN)
-        _df['OM_ext'] = (2.8 * S_OM + 6.1 * L_OM)
+        _df['AS_ext'] = (2.2 * _frhs * S_AS) + (4.8 * _frhl * L_AS)
+        _df['AN_ext'] = (2.4 * _frhs * S_AN) + (5.1 * _frhl * L_AN)
+        _df['OM_ext'] = (2.8 * S_OM) + (6.1 * L_OM)
         _df['Soil_ext'] = (1 * _df['Soil'])
-        _df['SS_ext'] = (1.7 * f_RH(_df['RH'], version='fRHSS') * _df['SS'])
+        _df['SS_ext'] = (1.7 * _frhss * _df['SS'])
         _df['EC_ext'] = (10 * _df['EC'])
         _df['total_ext'] = sum(_df['AS_ext':'EC_ext'])
 
@@ -90,19 +69,21 @@ class ImproveProcessor(DataProcessorBase):
 
     @staticmethod
     def modified(_df):
-        _df['AS_ext_dry'] = (3 * 1 * _df['AS'])
-        _df['AN_ext_dry'] = (3 * 1 * _df['AN'])
-        _df['OM_ext_dry'] = (4 * _df['OM'])
-        _df['Soil_ext_dry'] = (1 * _df['Soil'])
-        _df['SS_ext_dry'] = (1.7 * 1 * _df['SS'])
-        _df['EC_ext_dry'] = (10 * _df['EC'])
+        _frh, _frhss, _frhs, _frhl = fRH(_df['RH'])
+
+        _df['AS_ext_dry'] = 3 * 1 * _df['AS']
+        _df['AN_ext_dry'] = 3 * 1 * _df['AN']
+        _df['OM_ext_dry'] = 4 * _df['OM']
+        _df['Soil_ext_dry'] = 1 * _df['Soil']
+        _df['SS_ext_dry'] = 1.7 * 1 * _df['SS']
+        _df['EC_ext_dry'] = 10 * _df['EC']
         _df['total_ext_dry'] = sum(_df['AS_ext_dry':'EC_ext_dry'])
 
-        _df['AS_ext'] = (3 * f_RH(_df['RH'], version='fRH') * _df['AS'])
-        _df['AN_ext'] = (3 * f_RH(_df['RH'], version='fRH') * _df['AN'])
+        _df['AS_ext'] = (3 * _frh * _df['AS'])
+        _df['AN_ext'] = (3 * _frh * _df['AN'])
         _df['OM_ext'] = (4 * _df['OM'])
         _df['Soil_ext'] = (1 * _df['Soil'])
-        _df['SS_ext'] = (1.7 * f_RH(_df['RH'], version='fRHSS') * _df['SS'])
+        _df['SS_ext'] = (1.7 * _frhs * _df['SS'])
         _df['EC_ext'] = (10 * _df['EC'])
         _df['total_ext'] = sum(_df['AS_ext':'EC_ext'])
 
@@ -147,9 +128,6 @@ class ImproveProcessor(DataProcessorBase):
             [df[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']], df['NH4_status'].mask(df['NH4_status'] == 'Deficiency'),
              df['RH']], axis=1)
 
-        if self.version == 'original':
-            df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(self.original, axis=1)
-
         if self.version == 'revised':
             df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(self.revised, axis=1)
 
@@ -171,4 +149,4 @@ class ImproveProcessor(DataProcessorBase):
 
 
 if __name__ == '__main__':
-    result = ImproveProcessor(filename='revised_IMPROVE.csv', version='revised').main()
+    result = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').main()
