@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from scipy.optimize import curve_fit
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot_templates import set_figure, unit, getColor, color_maker
+from DataPlot.templates import set_figure, unit, getColor, color_maker
 
 
 df = main()

@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from DataPlot.data_processing import main
-from DataPlot.plot_templates import set_figure, unit, getColor
-from DataPlot.plot_templates import scatter, violin, pie_ext
+from DataPlot.templates import set_figure, unit, getColor
+from DataPlot.templates import scatter, violin, pie_ext
 
 from DataPlot.data_processing.Data_classify import state_classify, season_classify
 

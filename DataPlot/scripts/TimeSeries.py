@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot_templates import set_figure, unit, getColor, color_maker
+from DataPlot.templates import set_figure, unit, getColor, color_maker
 from pathlib import Path
 from pandas import read_csv, concat, date_range
 from DataPlot.data_processing import main

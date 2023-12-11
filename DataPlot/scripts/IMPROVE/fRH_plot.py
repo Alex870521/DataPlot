@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import read_csv, read_json
 import matplotlib.pyplot as plt
-from DataPlot.plot_templates import set_figure, unit, getColor
+from DataPlot.templates import set_figure, unit, getColor
 
 PATH_MAIN = Path(__file__).parents[3] / 'Data-example'
 

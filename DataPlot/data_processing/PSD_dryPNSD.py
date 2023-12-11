@@ -58,8 +58,8 @@ def dry_PNSD_process(**kwargs):
         # ax.bar(dp, ndp, width=widths, alpha=0.3)
         # ax.bar(dp, new_dry_ndp, width=widths, color='g', alpha=0.3)
         # plt.semilogx()
-        # ax.config(dp, ndp, ls='solid', color='b', lw=2)
-        # ax.config(dp[:np.size(dry_ndp)], dry_ndp, ls='solid', color='r', lw=2)
+        # ax.core(dp, ndp, ls='solid', color='b', lw=2)
+        # ax.core(dp[:np.size(dry_ndp)], dry_ndp, ls='solid', color='r', lw=2)
         # xlim = kwargs.get('xlim') or (11.8, 2500)
         # ylim = kwargs.get('ylim') or (0, 2e5)
         # xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'

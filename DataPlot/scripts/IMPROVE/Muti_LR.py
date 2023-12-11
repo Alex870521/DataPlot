@@ -92,7 +92,7 @@ if __name__ == '__main__':
             df_cal['Localized'] = df_cal[['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'EC_mass']].mul([2.74, 4.41, 11.5, 7.34, 12.27]).sum(axis=1)
 
 
-    # config
+    # core
     PATH_MAIN = Path("/Data-Code-example")
     with open(PATH_MAIN / 'level2' / 'modify_IMPROVE.csv', 'r', encoding='utf-8', errors='ignore') as f:
         modify_IMPROVE = read_csv(f, parse_dates=['Time']).set_index('Time')['total_ext_dry'].rename('Modified')

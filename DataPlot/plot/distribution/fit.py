@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from numpy import log, exp, pi, sqrt
 from tabulate import tabulate
-from DataPlot.plot_templates import set_figure
+from DataPlot.templates import set_figure
 
 
 def curvefit(dp, dist, mode=None, **kwargs):

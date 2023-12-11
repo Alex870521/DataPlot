@@ -6,7 +6,7 @@ from pathlib import Path
 from pandas import read_csv, concat
 from matplotlib.collections import PolyCollection
 from matplotlib.ticker import FuncFormatter
-from DataPlot.plot_templates import set_figure
+from DataPlot.templates import set_figure
 from DataPlot.data_processing import main
 from DataPlot.data_processing.Mie_plus import Mie_PESD
 

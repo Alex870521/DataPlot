@@ -3,7 +3,7 @@
 ## Structure
 ```plaintext
 DataPlot/
-├── Data_processing (ContainerHandle)/
+├── data_processing (ContainerHandle)/
 │   ├── __init__.py
 │   ├── __main__.py
 │   ├── Chemical.py
@@ -13,15 +13,15 @@ DataPlot/
 │   ├── decorator/
 │   ├── script/
 │   └── ...
-├── Mie_plot (PyMieScatt)/
+├── plot/
+│   ├── distribution/
+│   ├── templates/
+│   └── ...
+├── scripts/
 │   ├── Module1.py
 │   ├── Module2.py
 │   └── ...
-├── Plot_scripts/
-│   ├── Module1.py
-│   ├── Module2.py
-│   └── ...
-├── Plot_templates/
+├── Plot_/
 │   ├── basic/
 │   │   ├── scatter_plot.py
 │   │   ├── bar_plot.py

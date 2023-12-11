@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot_templates import set_figure, unit, getColor
+from DataPlot.templates import set_figure, unit, getColor
 
 
 # Read file
@@ -42,7 +42,7 @@ def din():
     fig, ax = plt.subplots(1, 1, figsize=(6, 6))
     linecolors = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange', 'tab:brown', 'tab:grey', 'tab:pink', 'tab:olive']
     ax.plot(Hour, df_mean, 'r', linewidth=2)
-    # ax.config(Hour, df_mean1, 'g', linewidth=2)
+    # ax.core(Hour, df_mean1, 'g', linewidth=2)
     ax.fill_between(Hour, y1=df_mean + df_std, y2=df_mean - df_std, alpha=0.5, color=linecolors[0], linewidth=2, edgecolor=None)
     # ax.fill_between(Hour, y1=df_mean1 + df_std1, y2=df_mean1 - df_std1, alpha=0.3, color=linecolors[2], linewidth=2, edgecolor=None)
 

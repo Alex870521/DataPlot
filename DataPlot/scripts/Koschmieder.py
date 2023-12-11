@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.optimize import curve_fit
-from DataPlot.plot_templates import set_figure
+from DataPlot.templates import set_figure
 
 Path_Data = Path('/Data-example')
 df = pd.read_excel(Path_Data / 'Koschmieder.xlsx', sheet_name=0)
@@ -91,8 +91,8 @@ def kos_naked(df):
 
     # Plot lines (ref & Measurement)
     x_fit = np.linspace(0.1, 70, 1000)
-    # line1, = axes.config(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
-    # line2, = axes.config(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
+    # line1, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
+    # line2, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
     line1, = axes.plot(x_fit, func(x_fit, *para_coeff[0]), c='b', lw=3)
     line2, = axes.plot(x_fit, func(x_fit, *para_coeff[1]), c='g', lw=3)
 
@@ -169,8 +169,8 @@ def kos_LPV(df,):
 
     # func = lambda x, a: a / x
     x_fit = np.linspace(0.1, 70, 1000)
-    # line1, = axes.config(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
-    # line2, = axes.config(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
+    # line1, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
+    # line2, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
     line1, = axes.plot(x_fit, func(x_fit, *para_coeff[0]), c='b', lw=3)
     line2, = axes.plot(x_fit, func(x_fit, *para_coeff[1]), c='g', lw=3)
 

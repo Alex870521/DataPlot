@@ -5,15 +5,15 @@ import matplotlib.colors as plc
 from pathlib import Path
 from DataPlot.data_processing import main
 from DataPlot.data_processing.Data_classify import state_classify, season_classify, Seasons
-from DataPlot.plot_templates import set_figure, unit, getColor
-from DataPlot.plot_templates import violin
-from DataPlot.plot_templates import barplot_concen, barplot_combine
-from DataPlot.plot_templates import scatter, scatter_mutiReg
+from DataPlot.templates import set_figure, unit, getColor
+from DataPlot.templates import violin
+from DataPlot.templates import barplot_concen, barplot_combine
+from DataPlot.templates import scatter, scatter_mutiReg
 
-import DataPlot.plot_templates as pt
-import DataPlot.plot_templates.basic.pie_plot as piePlot
-import DataPlot.plot_templates.basic.bar_plot as barPlot
-import DataPlot.plot_templates.basic.violin_plot as violinPlot
+import DataPlot.templates as pt
+import DataPlot.templates.basic.pie_plot as piePlot
+import DataPlot.templates.basic.bar_plot as barPlot
+import DataPlot.templates.basic.violin_plot as violinPlot
 
 
 colors1 = getColor(kinds='1')
@@ -116,7 +116,7 @@ if __name__ == '__main__':
             line1, _, __ = ax.errorbar(ext, val[:, 0], std[:, 0], color='#115162', linestyle='None', marker='o',
                                        label='$ VC (m^2/s)$')
             ax.fill_between(x=ext, y1=val[:, 0] - std[:, 0], y2=val[:, 0] + std[:, 0])
-            # line1, = ax.config(ext, val[:, 0], 'o-', linewidth=2, color='#115162', label=r'$\rm VC$')
+            # line1, = ax.core(ext, val[:, 0], 'o-', linewidth=2, color='#115162', label=r'$\rm VC$')
             ax.set_xticks(bins)
             ax.set_xlabel(unit('Extinction'))
             ax.set_ylabel(unit('VC'))
@@ -128,7 +128,7 @@ if __name__ == '__main__':
             ax2 = ax.twinx()
             line2, _, __ = ax2.errorbar(ext, val[:, 1], std[:, 1], color='#7FAE80', linestyle='None', marker='o',
                                         label='$PM_{2.5}$')
-            # line2, = ax2.config(ext, val[:, 1], 'o-', linewidth=2, color='#7FAE80', label='$PM_{2.5}$')
+            # line2, = ax2.core(ext, val[:, 1], 'o-', linewidth=2, color='#7FAE80', label='$PM_{2.5}$')
             ax2.set_ylabel(unit('PM25'))
             ax2.tick_params(axis='y', colors=line2.get_color())
             ax2.yaxis.label.set_color(line2.get_color())
@@ -284,7 +284,7 @@ if __name__ == '__main__':
     # pdf = count / sum(count)
     # cdf = np.cumsum(pdf)
     #
-    # plt.config(bins_count[1:], pdf, label="CDF")
+    # plt.core(bins_count[1:], pdf, label="CDF")
     # plt.xlabel('a')
     # plt.ylabel(r'$\bf Cumulative\ Distribution$')
     # plt.xlim(0,)

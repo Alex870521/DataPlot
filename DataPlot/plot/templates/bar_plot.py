@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot_templates import set_figure, unit
+from DataPlot.templates import set_figure, unit
 
 __all__ = ['barplot_extend',
            'barplot_concen',
@@ -42,7 +42,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
     symbol : bool
         Whether to display values for each species.
     orientation : str
-        The orientation of the config.
+        The orientation of the core.
 
     Returns
     -------
@@ -117,7 +117,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
     symbol : bool
         Whether to display values for each species.
     orientation : str
-        The orientation of the config.
+        The orientation of the core.
 
     Returns
     -------

@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter, FuncFormatter
 import seaborn as sns
-from DataPlot.plot_templates import set_figure, unit, getColor, linecolor
+from DataPlot.templates import set_figure, unit, getColor, linecolor
 from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html

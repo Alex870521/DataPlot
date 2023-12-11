@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from DataPlot.plot_templates import scatter
+from DataPlot.templates import scatter
 
 from DataPlot.data_processing import Mie_PESD
 from DataPlot.data_processing import main

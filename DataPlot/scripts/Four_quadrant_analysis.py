@@ -1,5 +1,5 @@
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot_templates import set_figure, unit, getColor
+from DataPlot.templates import set_figure, unit, getColor
 from DataPlot.data_processing import main
 
 import pandas as pd
@@ -107,7 +107,7 @@ for quadrant in ['1', '2', '3', '4']:
 #四象限 violine----------------------------------------------------------------------------------------------------------
 for col, x in zip(['MEE','MSE','MAE'], label_[-4:-2]):  #自己打要的欄位跟label
     fig, axes = plt.subplots(1, 1, figsize=(8, 5), dpi=150, constrained_layout=True)
-    plt.title(col+' violin config')
+    plt.title(col+' violin core')
     plt.xlabel('')
     plt.ylabel(x)
     violin = sns.violinplot(data=[dic_four['1'][col], dic_four['2'][col], dic_four['3'][col], dic_four['4'][col]],
