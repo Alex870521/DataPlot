@@ -2,7 +2,7 @@ from DataPlot.data_processing.core._reader import *
 
 from DataPlot.data_processing.IMPACT import impact_process
 from DataPlot.data_processing.Chemical import ChemicalProcessor
-from DataPlot.data_processing.IMPROVE import improve_process
+from DataPlot.data_processing.IMPROVE import ImproveProcessor
 from DataPlot.data_processing.PSD_class import SizeDist
 from DataPlot.data_processing.Mie_plus import Mie_PESD
 
@@ -19,7 +19,7 @@ __all__ = ['psd_reader',
 
            'impact_process',
            'ChemicalProcessor',
-           'improve_process',
+           'ImproveProcessor',
            'SizeDist',
            'Mie_PESD',
 

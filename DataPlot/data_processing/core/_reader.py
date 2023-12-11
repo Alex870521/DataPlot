@@ -6,9 +6,8 @@ class Processor():
     process_name = None
 
 
-
 def psd_reader(file_path=None):
-    default_path = Path(__file__).parents[3] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
+    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
     file_path = file_path or default_path
 
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pandas import read_csv, concat
-from DataProcessorBase import DataProcessorBase
+from DataPlot.data_processing.DataProcessorBase import DataProcessorBase
 
 
 # Note

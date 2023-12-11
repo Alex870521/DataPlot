@@ -70,7 +70,7 @@ class SizeDist:
 
     """
 
-    default_path = Path(__file__).parents[3] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
+    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
 
     def __init__(self, path=None, filename=None):
         self.path = path or self.default_path.parent

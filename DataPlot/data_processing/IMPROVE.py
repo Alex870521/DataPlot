@@ -1,8 +1,8 @@
 from pathlib import Path
 from pandas import read_csv, read_json, concat
-from DataProcessorBase import DataProcessorBase
+from DataPlot.data_processing.DataProcessorBase import DataProcessorBase
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
+PATH_MAIN = Path(__file__).parents[1] / 'Data-example'
 
 with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_json(f)

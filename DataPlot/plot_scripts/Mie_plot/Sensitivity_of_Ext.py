@@ -1,10 +1,9 @@
 import numpy as np
-import math
 import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from DataPlot.plot_templates.basic.scatter_plot import scatter
+from DataPlot.plot_templates import scatter
 
 from DataPlot.data_processing import Mie_PESD
 from DataPlot.data_processing import main
@@ -54,8 +53,6 @@ def Fixed_ext_process():
 
 if __name__ == '__main__':
     # result = Fixed_ext_process()
-    # with open(PATH_MAIN / 'fixed_PNSD_RI.pkl', 'wb') as f:
-    #     pickle.dump(result, f)
 
     with open(PATH_MAIN.parent / 'fixed_PNSD_RI.pkl', 'rb') as f:
         result = pickle.load(f)
