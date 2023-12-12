@@ -14,25 +14,25 @@ DataPlot/
 │   ├── script/
 │   └── ...
 ├── plot/
+│   ├── core/
+│   │   ├── color_handler.py
+│   │   ├── rcParams_decorator.py
+│   │   ├── unit_handler.py
+│   │   ├── unit.json
+│   │   └── ...
 │   ├── distribution/
 │   ├── templates/
-│   └── ...
-├── scripts/
-│   ├── Module1.py
-│   ├── Module2.py
-│   └── ...
-├── Plot_/
-│   ├── basic/
 │   │   ├── scatter_plot.py
 │   │   ├── bar_plot.py
 │   │   ├── pie_plot.py
 │   │   ├── violin_plot.py
 │   │   └── ...
-│   ├── config.py
-│   │   ├── color_handler.py
-│   │   ├── rcParams_decorator.py
-│   │   ├── unit_handler.py
-│   │   ├── unit.json
+│   └── ...
+├── scripts/
+│   ├── Module1.py
+│   ├── Module2.py
+│   └── ...
+
 │   │   └── ...
 │   └── ...
 └── ...
@@ -46,13 +46,6 @@ DataPlot/
 > and Pandas, this toolkit simplifies the process of creating 
 > insightful visualizations for various datasets.
 
-Here are some example using DataPlot:
-
-- [`abc`](https://github.com/noffle/collide-2d-aabb-aabb)
-- [`123`](https://github.com/noffle/goertzel)
-- [`xyz`](https://github.com/noffle/twitter-kv)
-
-*([Submit a pull request](https://github.com/noffle/common-readme/pulls) and add yours here!)*
 
 ## Usage
 
