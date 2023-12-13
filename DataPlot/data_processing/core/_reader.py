@@ -1,9 +1,21 @@
 from pathlib import Path
-from pandas import read_csv
+from pandas import read_csv, read_json, read_table
 
 
-class Processor():
-    process_name = None
+class DataReader:
+    def __init__(self, file_path=None, default_path=None):
+        self.file_path = file_path or default_path
+
+    def read_csv(self):
+        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            return read_csv(f, parse_dates=['Time']).set_index('Time')
+
+    def read_json(self):
+        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            return read_json(f)
+
+    def read_table(self, **kwargs):
+        return read_table(self.file_path, **kwargs)
 
 
 def psd_reader(file_path=None):
