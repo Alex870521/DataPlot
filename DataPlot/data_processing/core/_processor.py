@@ -1,16 +1,15 @@
 from pathlib import Path
 from pandas import read_csv, DataFrame
-from core import DataReader
+from ._reader import DataReader
 import pkg_resources
 path_meta = Path(pkg_resources.resource_filename('DataPlot', 'Data-example'))
 
 
-class DataProcessorBase:
-    PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
+class DataProcessor:
+    DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
     def __init__(self, reset=False):
-
-        self.PATH_MAIN = self.PATH_MAIN
+        self.DEFAULT_PATH = self.DEFAULT_PATH
         self.reset = reset
 
     def load_data(self):

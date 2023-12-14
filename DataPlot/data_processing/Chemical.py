@@ -1,17 +1,18 @@
 import numpy as np
 import pandas as pd
 from pandas import read_csv, concat
-from DataPlot.data_processing.DataProcessorBase import DataProcessorBase
+from core import DataProcessor
+from core import DataReader
 
 
 # Note
 # df['ALWC'] 不要加到 df_volume裡面
 
 
-class ChemicalProcessor(DataProcessorBase):
+class ChemicalProcessor(DataProcessor):
     def __init__(self, reset=False, filename=None):
         super().__init__(reset)
-        self.path = super().PATH_MAIN / 'Level2' / filename
+        self.file_path = list(super().DEFAULT_PATH.glob('**/' + filename))[0]
 
     @staticmethod
     def mass(_df):  # Series like
@@ -125,12 +126,11 @@ class ChemicalProcessor(DataProcessorBase):
         return _df['n_dry':]
 
     def process_data(self):
-        if self.path.exists() and not self.reset:
-            with open(self.path, 'r', encoding='utf-8', errors='ignore') as f:
+        if self.file_path.exists() and not self.reset:
+            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 return read_csv(f, parse_dates=['Time']).set_index('Time')
 
-        # 直接调用父类的属性
-        df = concat([super().minion, super().impact], axis=1)
+        df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv')], axis=1)
 
         df_mass = df[['NH4+', 'SO42-', 'NO3-', 'O_OC', 'Fe', 'Na+', 'O_EC', 'PM25']].dropna().copy().apply(self.mass,
                                                                                                            axis=1)
@@ -149,7 +149,7 @@ class ChemicalProcessor(DataProcessorBase):
 
     def save_result(self, data):
         # Your logic to save the result to a CSV file
-        data.to_csv(self.path)
+        data.to_csv(self.file_path)
 
 
 if __name__ == '__main__':

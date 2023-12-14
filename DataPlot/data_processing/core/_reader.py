@@ -3,6 +3,24 @@ from pandas import read_csv, read_json, read_excel, read_table
 
 
 class DataReader:
+    """
+    A class for reading data files with different extensions (.csv, .json, .xls, .xlsx).
+
+    Parameters
+    ----------
+        filename (str): The name of the file to be read.
+
+    Attributes
+    ----------
+        file_path (Path): The full path to the file.
+
+    Examples
+    --------
+    >>> psd = DataReader('PNSD_dNdlogdp.csv')
+
+    >>> chemical = DataReader('chemical.csv')
+    """
+
     DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
     def __new__(cls, filename):
@@ -44,26 +62,8 @@ class DataReader:
         return read_excel(file_path, parse_dates=['Time'])
 
 
-psd_reader = DataReader('PNSD_dNdlogdp.csv')
-print(psd_reader)
-breakpoint()
-
-def psd_reader(file_path=None):
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
-    file_path = file_path or default_path
-
-    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-        return read_csv(f, parse_dates=['Time']).set_index('Time')
 
 
-def chemical_reader(file_path=None):
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'chemical.csv'
-    file_path = file_path or default_path
-
-    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-        return read_csv(f, parse_dates=['Time']).set_index('Time')[
-               ['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb', 'density', 'AS_volume_ratio', 'AN_volume_ratio',
-                'OM_volume_ratio', 'Soil_volume_ratio', 'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]
 
 
 def sizedist_reader(file_path=None):
