@@ -1,28 +1,52 @@
 from pathlib import Path
-from pandas import read_csv, read_json, read_table
+from pandas import read_csv, read_json, read_excel, read_table
 
 
 class DataReader:
-    def __init__(self, file_path=None, default_path=None):
-        self.file_path = file_path or default_path
+    DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
-    def read_csv(self):
-        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-            return read_csv(f, parse_dates=['Time']).set_index('Time')
+    def __new__(cls, filename):
+        file_path = list(cls.DEFAULT_PATH.glob('**/' + filename))[0]
+        if not file_path:
+            print(f"File '{filename}' not found.")
+            return None
+        else:
+            return cls.read_data(file_path)
 
-    def read_json(self):
-        with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
+    def __init__(self, filename):
+        self.file_path = list(self.DEFAULT_PATH.glob('**/' + filename))[0]
+
+    @classmethod
+    def read_data(cls, file_path):
+        file_extension = file_path.suffix.lower()
+
+        if file_extension == '.csv':
+            return cls.read_csv(file_path)
+        elif file_extension == '.json':
+            return cls.read_json(file_path)
+        elif file_extension in ['.xls', '.xlsx']:
+            return cls.read_excel(file_path)
+        else:
+            raise ValueError(f"Unsupported file format: {file_extension}")
+
+    @staticmethod
+    def read_csv(file_path):
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            return read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
+
+    @staticmethod
+    def read_json(file_path):
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             return read_json(f)
 
-    def read_table(self, **kwargs):
-        return read_table(self.file_path, **kwargs)
+    @staticmethod
+    def read_excel(file_path):
+        return read_excel(file_path, parse_dates=['Time'])
 
 
-class PSDReader(DataReader):
-    def __init__(self, file_path=None):
-        default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
-        super().__init__(file_path, default_path)
-
+psd_reader = DataReader('PNSD_dNdlogdp.csv')
+print(psd_reader)
+breakpoint()
 
 def psd_reader(file_path=None):
     default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
