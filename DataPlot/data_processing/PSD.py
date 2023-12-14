@@ -3,12 +3,12 @@ import math
 import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
-from DataPlot.data_processing import psd_reader, chemical_reader
+from core import DataReader, DataProcessor
 from DataPlot.data_processing.Mie_theory import Mie_PESD
 from DataPlot.data_processing.decorator import timer
 
 
-class SizeDist:
+class SizeDist(DataProcessor):
     """
     A class for processing particle size distribution (PSD) data.
 
@@ -72,10 +72,14 @@ class SizeDist:
 
     default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
 
+    def __init__(self, reset=False, filename=None):
+        super().__init__(reset)
+        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
+
     def __init__(self, path=None, filename=None):
         self.path = path or self.default_path.parent
         self.filename = filename or self.default_path.name
-        self.data = psd_reader(self.path / self.filename).dropna()
+        self.data = DataReader('PNSD_dNdlogdp.csv')
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
@@ -118,7 +122,7 @@ class SizeDist:
                              'cont_v': vol_prop['contribution']})
 
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
-        ext_data = pd.concat([self.data, chemical_reader()], axis=1).dropna()
+        ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
 
         result_dic = ext_data.apply(self.__internal_ext_dist, axis=1, result_type='expand')
 
@@ -138,7 +142,7 @@ class SizeDist:
                              'mode_ext_in': ext_prop['mode'], })
 
     def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
-        ext_data = pd.concat([self.data, chemical_reader()], axis=1).dropna()
+        ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
 
         result_dic2 = ext_data.apply(self.__external_ext_dist, axis=1, result_type='expand')
 
