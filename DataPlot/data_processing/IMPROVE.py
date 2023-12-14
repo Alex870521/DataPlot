@@ -1,28 +1,57 @@
-from pathlib import Path
-from pandas import read_csv, read_json, concat
-from DataPlot.data_processing.DataProcessorBase import DataProcessorBase
-
-PATH_MAIN = Path(__file__).parents[1] / 'Data-example'
-
-with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
-    frh = read_json(f)
+from pandas import read_csv, concat
+from core import DataProcessor, DataReader
 
 
-def fRH(_RH):
-    if _RH is not None:
-        if _RH > 95:
-            _RH = 95
-        _RH = round(_RH)
-        return frh.loc[_RH].values.T
+class ImproveProcessor(DataProcessor):
+    """
+    A class for processing improved chemical data.
 
-    return 1, 1, 1, 1
+    Parameters:
+    -----------
+    reset : bool, optional
+        If True, resets the processing. Default is False.
+    filename : str, optional
+        The name of the file to process. Default is None.
+    version : str, optional
+        The version of the data processing. Should be one of 'revised' or 'modified'.
+        Default is None.
 
+    Methods:
+    --------
+    revised(_df):
+        Calculate revised version of particle contribution.
 
-class ImproveProcessor(DataProcessorBase):
-    def __init__(self, reset=False, filename=None, version='revised'):
+    modified(_df):
+        Calculate modified version of particle contribution.
+
+    gas(_df):
+        Calculate gas contribution.
+
+    frh(_RH, version=None):
+        Helper function to get frh values based on relative humidity (RH) and version.
+
+    process_data():
+        Process data and save the result.
+
+    Attributes:
+    -----------
+    DEFAULT_PATH : Path
+        The default path for data files.
+
+    Examples:
+    ---------
+    >>> df = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
+
+    """
+
+    def __init__(self, reset=False, filename=None, version=None):
         super().__init__(reset)
-        self.path = super().PATH_MAIN / 'Level2' / 'IMPROVE' / filename
-        self.version = version
+        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
+
+        if version not in ['revised', 'modified']:
+            raise ValueError("Invalid data_type. Allowed values are 'revised' and 'modified'.")
+        else:
+            self.version = version or 'revised'
 
     @staticmethod
     def revised(_df):
@@ -36,7 +65,7 @@ class ImproveProcessor(DataProcessorBase):
 
             return L_mode, S_mode
 
-        _frh, _frhss, _frhs, _frhl = fRH(_df['RH'])
+        _frh, _frhss, _frhs, _frhl = ImproveProcessor.frh(_df['RH'], 'revised')
 
         L_AS, S_AS = mode(_df['AS'])
         L_AN, S_AN = mode(_df['AN'])
@@ -69,7 +98,7 @@ class ImproveProcessor(DataProcessorBase):
 
     @staticmethod
     def modified(_df):
-        _frh, _frhss, _frhs, _frhl = fRH(_df['RH'])
+        _frh, _frhss, _frhs, _frhl = ImproveProcessor.frh(_df['RH'], 'modified')
 
         _df['AS_ext_dry'] = 3 * 1 * _df['AS']
         _df['AN_ext_dry'] = 3 * 1 * _df['AN']
@@ -104,49 +133,37 @@ class ImproveProcessor(DataProcessorBase):
         return _df['ScatteringByGas':]
 
     @staticmethod
-    def f_RH(RH, version=None):
+    def frh(_RH, version=None):
+        frh = DataReader('fRH.json')
+        if _RH is not None:
+            if _RH > 95:
+                _RH = 95
+            _RH = round(_RH)
+            return frh.loc[_RH].values.T
+
+        return 1, 1, 1, 1
         pass
 
     def process_data(self):
-        if self.path.exists() & (~self.reset):
-            with open(self.path, 'r', encoding='utf-8', errors='ignore') as f:
+        if self.file_path.exists() and not self.reset:
+            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 return read_csv(f, parse_dates=['Time']).set_index('Time')
+        else:
+            df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv'), DataReader('chemical.csv')], axis=1)
 
-        with open(PATH_MAIN / 'level1' / 'EPB.csv', 'r', encoding='utf-8', errors='ignore') as f:
-            minion = read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
+            # particle contribution '銨不足不納入計算'
+            improve_input_df = df.loc[df['NH4_status'] != 'Deficiency', ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'RH']]
 
-        with open(PATH_MAIN / 'level1' / 'IMPACT.csv', 'r', encoding='utf-8', errors='ignore') as f:
-            impact = read_csv(f, parse_dates=['Time']).set_index('Time')
+            if self.version == 'revised':
+                df_improve = improve_input_df.dropna().copy().apply(self.revised, axis=1)
 
-        with open(PATH_MAIN / 'level2' / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
-            chemical = read_csv(f, parse_dates=['Time']).set_index('Time')
+            if self.version == 'modified':
+                df_improve = improve_input_df.dropna().copy().apply(self.modified, axis=1)
 
-        df = concat([minion, impact, chemical], axis=1)
+            # gas contribution
+            df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(self.gas, axis=1)
 
-        # particle contribution '銨不足不納入計算'
-        IMPROVE_input_df = concat(
-            [df[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']], df['NH4_status'].mask(df['NH4_status'] == 'Deficiency'),
-             df['RH']], axis=1)
+            _df = concat([df_improve, df_ext_gas], axis=1).reindex(df.index.copy())
+            _df.to_csv(self.file_path)
 
-        if self.version == 'revised':
-            df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(self.revised, axis=1)
-
-        if self.version == 'modify':
-            df_IMPROVE = IMPROVE_input_df.dropna().copy().apply(self.modified, axis=1)
-
-        # gas contribution
-        df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(self.gas, axis=1)
-
-        return concat([df_IMPROVE, df_ext_gas], axis=1).reindex(df.index.copy())
-
-    def main(self):
-        _df = self.process_data()
-        self.save_result(_df)
-        return _df
-
-    def save_result(self, data):
-        data.to_csv(self.path)
-
-
-if __name__ == '__main__':
-    result = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').main()
+            return _df

@@ -1,18 +1,51 @@
 import numpy as np
 import pandas as pd
 from pandas import read_csv, concat
-from core import DataProcessor
-from core import DataReader
+from core import DataProcessor, DataReader
 
 
-# Note
-# df['ALWC'] 不要加到 df_volume裡面
+# Note: df['ALWC'] 不要加到 df_volume裡面
 
 
 class ChemicalProcessor(DataProcessor):
+    """
+    A class for processing chemical data.
+
+    Parameters:
+    -----------
+    reset : bool, optional
+        If True, resets the processing. Default is False.
+    filename : str, optional
+        The name of the file to process. Default is None.
+
+    Methods:
+    --------
+    mass(_df):
+        Calculate mass-related parameters.
+
+    volume(_df):
+        Calculate volume-related parameters.
+
+    volume_average_mixing(_df):
+        Calculate volume average mixing parameters.
+
+    process_data():
+        Process data and save the result.
+
+    Attributes:
+    -----------
+    DEFAULT_PATH : Path
+        The default path for data files.
+
+    Examples:
+    ---------
+    >>> df = ChemicalProcessor(reset=True, filename='chemical.csv').process_data()
+
+    """
+
     def __init__(self, reset=False, filename=None):
         super().__init__(reset)
-        self.file_path = list(super().DEFAULT_PATH.glob('**/' + filename))[0]
+        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
 
     @staticmethod
     def mass(_df):  # Series like
@@ -129,28 +162,17 @@ class ChemicalProcessor(DataProcessor):
         if self.file_path.exists() and not self.reset:
             with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 return read_csv(f, parse_dates=['Time']).set_index('Time')
+        else:
+            df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv')], axis=1)
 
-        df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv')], axis=1)
+            df_mass = df[['NH4+', 'SO42-', 'NO3-', 'O_OC', 'Fe', 'Na+', 'O_EC', 'PM25']].dropna().copy().apply(self.mass,
+                                                                                                               axis=1)
+            df_volume = df_mass[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'total_mass']].dropna().copy().apply(self.volume,
+                                                                                                            axis=1)
+            df_volume['ALWC'] = df['ALWC']
+            df_vam = df_volume.copy().apply(self.volume_average_mixing, axis=1)
 
-        df_mass = df[['NH4+', 'SO42-', 'NO3-', 'O_OC', 'Fe', 'Na+', 'O_EC', 'PM25']].dropna().copy().apply(self.mass,
-                                                                                                           axis=1)
-        df_volume = df_mass[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'total_mass']].dropna().copy().apply(self.volume,
-                                                                                                        axis=1)
-        df_volume['ALWC'] = df['ALWC']
-        df_vam = df_volume.copy().apply(self.volume_average_mixing, axis=1)
+            _df = concat([df_mass, df_volume.drop(['ALWC'], axis=1), df_vam], axis=1).reindex(df.index.copy())
+            _df.to_csv(self.file_path)
 
-        return concat([df_mass, df_volume.drop(['ALWC'], axis=1), df_vam], axis=1).reindex(df.index.copy())
-
-    def main(self):
-        # Your main processing logic here
-        _df = self.process_data()
-        self.save_result(_df)
-        return _df
-
-    def save_result(self, data):
-        # Your logic to save the result to a CSV file
-        data.to_csv(self.file_path)
-
-
-if __name__ == '__main__':
-    result = ChemicalProcessor(reset=False, filename='chemical.csv').main()
+            return _df

@@ -14,6 +14,10 @@ class DataReader:
     ----------
         file_path (Path): The full path to the file.
 
+    Returns
+    -------
+        pandas.DataFrame: data
+
     Examples
     --------
     >>> psd = DataReader('PNSD_dNdlogdp.csv')
@@ -60,44 +64,3 @@ class DataReader:
     @staticmethod
     def read_excel(file_path):
         return read_excel(file_path, parse_dates=['Time'])
-
-
-
-
-
-
-def sizedist_reader(file_path=None):
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution'
-    file_path = file_path or default_path
-
-    with open(file_path / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(file_path / 'PSSD_dSdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PSSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(file_path / 'PVSD_dVdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PVSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    return PNSD, PSSD, PVSD
-
-
-def extdist_reader(file_path=None):
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution'
-    file_path = file_path or default_path
-
-    with open(file_path / 'PESD_dextdlogdp_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD_internal = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(file_path / 'PESD_dextdlogdp_external.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD_external = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    return PESD_internal, PESD_external
-
-
-def dry_extdist_reader(file_path=None):
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution'
-    file_path = file_path or default_path
-
-    with open(file_path / 'PESD_dextdlogdp_dry_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        return read_csv(f, parse_dates=['Time']).set_index('Time')
