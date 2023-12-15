@@ -4,8 +4,8 @@ import pandas as pd
 from pathlib import Path
 from scipy.signal import find_peaks
 from core import DataReader, DataProcessor
-from DataPlot.data_processing.Mie_theory import Mie_PESD
-from DataPlot.data_processing.decorator import timer
+from Mie_theory import Mie_PESD
+from decorator import timer
 
 
 class SizeDist(DataProcessor):
@@ -63,22 +63,14 @@ class SizeDist(DataProcessor):
     Examples
     --------
     Example 1: Use default path and filename
-    >>> psd_data = SizeDist()
-
-    Example 2: Specify custom path and filename
-    >>> custom_psd_data = SizeDist(path=Path('custom/path'), filename='custom_PSD.csv')
+    >>> psd_data = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
 
     """
 
-    default_path = Path(__file__).parents[2] / 'Data-example' / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv'
-
     def __init__(self, reset=False, filename=None):
         super().__init__(reset)
-        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
+        self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
 
-    def __init__(self, path=None, filename=None):
-        self.path = path or self.default_path.parent
-        self.filename = filename or self.default_path.name
         self.data = DataReader('PNSD_dNdlogdp.csv')
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
@@ -244,5 +236,5 @@ class SizeDist(DataProcessor):
 
 
 if __name__ == '__main__':
-    PNSD_data = SizeDist()
-    PNSD_data.ext_process()
+    PNSD_data = SizeDist(reset=True)
+
