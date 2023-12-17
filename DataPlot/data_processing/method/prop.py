@@ -20,10 +20,11 @@ def geometric(dp, dlogdp, ser):
 
 
 def peak_mode(dp, ser):
+    # 3 mode
     min_value = np.array([min(ser)])
     extend_ser = np.concatenate([min_value, ser, min_value])
     _mode, _ = find_peaks(extend_ser, distance=20)
-    return dp[_mode - 1]
+    return dp[_mode - 1][:3]
 
 
 def mode_cont(dp, dlogdp, ser):
@@ -38,4 +39,6 @@ def mode_cont(dp, dlogdp, ser):
     accum_num = np.sum(num[accum_range])
     coars_num = np.sum(num[coarse_range])
 
-    return [(ultra_num / total_num), (accum_num / total_num), (coars_num / total_num)]
+    return [np.round(ultra_num/total_num, 2),
+            np.round(accum_num/total_num, 2),
+            np.round(coars_num/total_num, 2)]

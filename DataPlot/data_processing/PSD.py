@@ -2,7 +2,7 @@ from pandas import DataFrame
 from pathlib import Path
 from core import DataReader, DataProcessor
 from decorator import timer
-from methods import *
+from method import *
 
 
 class SizeDist(DataProcessor):
@@ -64,7 +64,7 @@ class SizeDist(DataProcessor):
         super().__init__(reset)
         self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
 
-        self.data: DataFrame = DataReader(filename)
+        self.data: DataFrame = DataReader(filename).dropna()
 
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
@@ -79,7 +79,7 @@ class SizeDist(DataProcessor):
                              'GMDn': num_prop['GMD'],
                              'GSDn': num_prop['GSD'],
                              'mode_n': num_prop['mode'],
-                             'cont_n': num_prop['contribution']})
+                             'cont_n': num_prop['cont']})
 
     def surface(self, filename='PSSD_dSdlogdp.csv'):
         surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1,
@@ -92,7 +92,7 @@ class SizeDist(DataProcessor):
                              'GMDs': surf_prop['GMD'],
                              'GSDs': surf_prop['GSD'],
                              'mode_s': surf_prop['mode'],
-                             'cont_s': surf_prop['contribution']})
+                             'cont_s': surf_prop['cont']})
 
     def volume(self, filename='PVSD_dVdlogdp.csv'):
         vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1,
@@ -105,13 +105,13 @@ class SizeDist(DataProcessor):
                              'GMDv': vol_prop['GMD'],
                              'GSDv': vol_prop['GSD'],
                              'mode_v': vol_prop['mode'],
-                             'cont_v': vol_prop['contribution']})
+                             'cont_v': vol_prop['cont']})
 
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
         ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
 
         result_dic = ext_data.apply(internal_ext_dist, axis=1, result_type='expand')
-
+        breakpoint()
         ext_dist = pd.DataFrame(result_dic['ext'].tolist(), index=result_dic['ext'].index).set_axis(self.dp, axis=1)
         sca_dist = pd.DataFrame(result_dic['sca'].tolist(), index=result_dic['sca'].index).set_axis(self.dp, axis=1)
         abs_dist = pd.DataFrame(result_dic['abs'].tolist(), index=result_dic['abs'].index).set_axis(self.dp, axis=1)
