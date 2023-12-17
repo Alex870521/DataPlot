@@ -1,5 +1,6 @@
+from typing import Union
 from pathlib import Path
-from pandas import read_csv, read_json, read_excel, read_table
+from pandas import read_csv, read_json, read_excel, DataFrame
 
 
 class DataReader:
@@ -27,7 +28,7 @@ class DataReader:
 
     DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
-    def __new__(cls, filename):
+    def __new__(cls, filename: str) -> Union[DataFrame, None]:
         file_path = list(cls.DEFAULT_PATH.glob('**/' + filename))[0]
         if not file_path:
             print(f"File '{filename}' not found.")
@@ -37,9 +38,10 @@ class DataReader:
 
     def __init__(self, filename):
         self.file_path = list(self.DEFAULT_PATH.glob('**/' + filename))[0]
+        self.data: DataFrame = self.read_data(self.file_path)
 
     @classmethod
-    def read_data(cls, file_path):
+    def read_data(cls, file_path) -> DataFrame:
         file_extension = file_path.suffix.lower()
 
         if file_extension == '.csv':

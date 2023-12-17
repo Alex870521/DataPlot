@@ -1,11 +1,8 @@
-import numpy as np
-import math
-import pandas as pd
+from pandas import DataFrame
 from pathlib import Path
-from scipy.signal import find_peaks
 from core import DataReader, DataProcessor
-from Mie_theory import Mie_PESD
 from decorator import timer
+from methods import *
 
 
 class SizeDist(DataProcessor):
@@ -14,18 +11,14 @@ class SizeDist(DataProcessor):
 
     Parameters
     ----------
-    path : Path, optional
-        The directory path where the PSD data file is located.
     filename : str, optional
         The name of the PSD data file.
         Defaults to 'PNSD_dNdlogdp.csv' in the default path.
 
     Attributes
     ----------
-    path : Path
+    file_path : Path
         The directory path where the PSD data file is located.
-    filename : str
-        The name of the PSD data file.
     data : DataFrame
         The processed PSD data stored as a pandas DataFrame.
     index : DatetimeIndex
@@ -71,7 +64,8 @@ class SizeDist(DataProcessor):
         super().__init__(reset)
         self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
 
-        self.data = DataReader('PNSD_dNdlogdp.csv')
+        self.data: DataFrame = DataReader(filename)
+
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
@@ -92,7 +86,7 @@ class SizeDist(DataProcessor):
                                     result_type='broadcast')
         surf_prop = surf_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        surf_dist.reindex(self.index).to_csv(self.path / filename)
+        surf_dist.reindex(self.index).to_csv(self.file_path / filename)
 
         return pd.DataFrame({'Surface': surf_dist.apply(np.sum, axis=1) * 0.014,
                              'GMDs': surf_prop['GMD'],
@@ -105,7 +99,7 @@ class SizeDist(DataProcessor):
                                    result_type='broadcast')
         vol_prop = vol_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        vol_dist.reindex(self.index).to_csv(self.path / filename)
+        vol_dist.reindex(self.index).to_csv(self.file_path / filename)
 
         return pd.DataFrame({'Volume': vol_dist.apply(np.sum, axis=1) * 0.014,
                              'GMDv': vol_prop['GMD'],
@@ -116,7 +110,7 @@ class SizeDist(DataProcessor):
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
         ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
 
-        result_dic = ext_data.apply(self.__internal_ext_dist, axis=1, result_type='expand')
+        result_dic = ext_data.apply(internal_ext_dist, axis=1, result_type='expand')
 
         ext_dist = pd.DataFrame(result_dic['ext'].tolist(), index=result_dic['ext'].index).set_axis(self.dp, axis=1)
         sca_dist = pd.DataFrame(result_dic['sca'].tolist(), index=result_dic['sca'].index).set_axis(self.dp, axis=1)
@@ -124,7 +118,7 @@ class SizeDist(DataProcessor):
 
         ext_prop = ext_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        ext_dist.reindex(self.index).to_csv(self.path / filename)
+        ext_dist.reindex(self.index).to_csv(self.file_path / filename)
 
         return pd.DataFrame({'Bext_internal': ext_dist.apply(np.sum, axis=1) * 0.014,
                              'Bsca_internal': sca_dist.apply(np.sum, axis=1) * 0.014,
@@ -136,7 +130,7 @@ class SizeDist(DataProcessor):
     def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
         ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
 
-        result_dic2 = ext_data.apply(self.__external_ext_dist, axis=1, result_type='expand')
+        result_dic2 = ext_data.apply(external_ext_dist, axis=1, result_type='expand')
 
         ext_dist2 = pd.DataFrame(result_dic2['ext'].tolist(), index=result_dic2['ext'].index).set_axis(self.dp, axis=1)
         sca_dist2 = pd.DataFrame(result_dic2['sca'].tolist(), index=result_dic2['sca'].index).set_axis(self.dp, axis=1)
@@ -144,7 +138,7 @@ class SizeDist(DataProcessor):
 
         ext_prop2 = ext_dist2.apply(self.__dist_prop, axis=1, result_type='expand')
 
-        ext_dist2.reindex(self.index).to_csv(self.path / filename)
+        ext_dist2.reindex(self.index).to_csv(self.file_path / filename)
 
         return pd.DataFrame({'Bext_external': ext_dist2.apply(np.sum, axis=1) * 0.014,
                              'Bsca_external': sca_dist2.apply(np.sum, axis=1) * 0.014,
@@ -156,85 +150,22 @@ class SizeDist(DataProcessor):
     @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
         result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index)
-        result_df.to_csv(self.path.parent / filename)
+        result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
     @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
         result_df = pd.concat([self.extinction_internal(), self.extinction_external(), ], axis=1).reindex(self.index)
-        result_df.to_csv(self.path.parent / filename)
+        result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
-    def __geometric_prop(self, ser):
-        """ First change the distribution into dN """
-        num = np.array(ser) * self.dlogdp
-        total_num = num.sum()
-
-        _dp = np.log(self.dp)
-        _gmd = (((num * _dp).sum()) / total_num.copy())
-
-        _dp_mesh, _gmd_mesh = np.meshgrid(_dp, _gmd)
-        _gsd = ((((_dp_mesh - _gmd_mesh) ** 2) * num).sum() / total_num.copy()) ** .5
-
-        return np.exp(_gmd), np.exp(_gsd)
-
-    def __mode_prop(self, ser):
-        min_value = np.array([min(ser)])
-        extend_ser = np.concatenate([min_value, ser, min_value])
-        _mode, _ = find_peaks(extend_ser, distance=20)
-        return self.dp[_mode - 1]
-
-    def __mode_contribution(self, ser):
-        num = np.array(ser) * self.dlogdp
-        total_num = num.sum()
-
-        ultra_range = (self.dp >= 11.8) & (self.dp < 100)
-        accum_range = (self.dp >= 100) & (self.dp < 1000)
-        coarse_range = (self.dp >= 1000) & (self.dp < 2500)
-
-        ultra_num = np.sum(num[ultra_range])
-        accum_num = np.sum(num[accum_range])
-        coars_num = np.sum(num[coarse_range])
-
-        return [(ultra_num / total_num), (accum_num / total_num), (coars_num / total_num)]
-
     def __dist_prop(self, ser):
-        gmd, gsd = self.__geometric_prop(ser)
-        mode = self.__mode_prop(ser)
-        contribution = self.__mode_contribution(ser)
+        gmd, gsd = geometric(self.dp, self.dlogdp, ser)
+        mode = peak_mode(self.dp, ser)
+        cont = mode_cont(self.dp, self.dlogdp, ser)
 
-        return dict(GMD=gmd, GSD=gsd, mode=mode, contribution=contribution, )
-
-    def __internal_ext_dist(self, ser):
-        m = ser['n_amb'] + 1j * ser['k_amb']
-        ndp = np.array(ser[:np.size(self.dp)])
-        ext_dist, sca_dist, abs_dist = Mie_PESD(m, 550, self.dp, self.dlogdp, ndp)
-        return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
-
-    def __external_ext_dist(self, ser):
-        refractive_dic = {'AS': 1.53 + 0j,
-                          'AN': 1.55 + 0j,
-                          'OM': 1.54 + 0j,
-                          'Soil': 1.56 + 0.01j,
-                          'SS': 1.54 + 0j,
-                          'BC': 1.80 + 0.54j,
-                          'water': 1.333 + 0j}
-
-        ext_dist, sca_dist, abs_dist = np.zeros((167,)), np.zeros((167,)), np.zeros((167,))
-        ndp = np.array(ser[:np.size(self.dp)])
-
-        for _m, _specie in zip(refractive_dic.values(),
-                               ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
-                                'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']):
-            _ndp = ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp
-            _Ext_dist, _Sca_dist, _Abs_dist = Mie_PESD(_m, 550, self.dp, self.dlogdp, _ndp)
-            ext_dist += _Ext_dist
-            sca_dist += _Sca_dist
-            abs_dist += _Abs_dist
-
-        return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
+        return dict(GMD=gmd, GSD=gsd, mode=mode, cont=cont)
 
 
 if __name__ == '__main__':
-    PNSD_data = SizeDist(reset=True)
-
+    psd_data1 = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
