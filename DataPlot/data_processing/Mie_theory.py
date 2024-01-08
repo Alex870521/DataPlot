@@ -4,12 +4,31 @@ import math
 
 
 def Mie_Q(m, wavelength, dp):
-    """  Single-particle extinction efficiency and others parameter
+    """
+    Calculate Mie scattering efficiency (Q) for a distribution of spherical particles.
 
-    :param m: refractive index
-    :param wavelength: incident wavelength
-    :param dp: list of particle sizes or a single value
-    :return:
+    Parameters
+    ----------
+    m : complex
+        The complex refractive index of the particles.
+    wavelength : float
+        The wavelength of the incident light.
+    dp : ndarray
+        The array of particle diameters.
+
+    Returns
+    -------
+    Q : ndarray
+        The Mie scattering efficiency for each particle diameter.
+
+    Examples
+    --------
+    Example usage of the Mie_Q function:
+
+    >>> m = 1.5 + 0.02j
+    >>> wavelength = 550  # in nm
+    >>> dp = np.array([0.1, 0.2, 0.5, 1.0])  # particle diameters in micrometers
+    >>> result = Mie_Q(m, wavelength, dp)
     """
     nMedium = 1.0
     m /= nMedium
@@ -27,13 +46,34 @@ def Mie_Q(m, wavelength, dp):
 
 
 def Mie_MEE(m, wavelength, dp, density):
-    """ Mass extinction efficiency and others parameter
+    """
+    Calculate mass extinction efficiency and other parameters.
 
-    :param m: refractive index
-    :param wavelength: incident wavelength
-    :param dp: list of particle sizes or a single value
-    :param density: density
-    :return:
+    Parameters
+    ----------
+    m : complex
+        The complex refractive index of the particles.
+    wavelength : float
+        The wavelength of the incident light.
+    dp : list or float
+        List of particle sizes or a single value.
+    density : float
+        The density of particles.
+
+    Returns
+    -------
+    result : ...
+        Description of the result.
+
+    Examples
+    --------
+    Example usage of the mass_extinction_efficiency function:
+
+    >>> m = 1.5 + 0.02j
+    >>> wavelength = 550  # in nm
+    >>> dp = [0.1, 0.2, 0.5, 1.0]  # list of particle diameters in micrometers
+    >>> density = 1.2  # density of particles
+    >>> result = Mie_MEE(m, wavelength, dp, density)
     """
     nMedium = 1.0
     m /= nMedium
@@ -51,15 +91,41 @@ def Mie_MEE(m, wavelength, dp, density):
 
 
 def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
-    """ Simultaneous calculation of "extinction distribution" and "integrated results" using the --Mie_Q-- method
+    """
+    Simultaneously calculate "extinction distribution" and "integrated results" using the MIE_Q method.
 
-    :param m: refractive index
-    :param wavelength: incident wavelength
-    :param dp: list of particle sizes
-    :param dlogdp: list of dlogdp
-    :param ndp: number concentration from SMPS or APS in the units of dN/dlogdp
-    :param output_dist:
-    :return:
+    Parameters
+    ----------
+    m : complex
+        The complex refractive index of the particles.
+    wavelength : float
+        The wavelength of the incident light.
+    dp : list
+        List of particle sizes.
+    dlogdp : list
+        List of logarithmic particle diameter bin widths.
+    ndp : list
+        Number concentration from SMPS or APS in the units of dN/dlogdp.
+    output_dist : str or None, optional
+        Output distribution type ('extinction', 'scattering', 'absorption', 'all', None).
+        Defaults to None.
+
+    Returns
+    -------
+    result : ...
+        Description of the result.
+
+    Examples
+    --------
+    Example usage of the calculate_extinction_distribution function:
+
+    >>> m = 1.5 + 0.02j
+    >>> wavelength = 550  # in nm
+    >>> dp = [0.1, 0.2, 0.5, 1.0]  # list of particle diameters in micrometers
+    >>> dlogdp = [0.05, 0.1, 0.2, 0.5]  # list of dlogdp
+    >>> ndp = [100, 50, 30, 20]  # number concentration of particles
+    >>> output_dist = 'all'
+    >>> result = Mie_PESD(m, wavelength, dp, dlogdp, ndp, output_dist)
     """
 
     # Q

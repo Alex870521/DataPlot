@@ -71,7 +71,21 @@ class SizeDist(DataProcessor):
         self.dlogdp = np.full_like(self.dp, 0.014)
 
     def number(self):
-        """ dN/dlogdp """
+        """
+        Calculate number distribution.
+
+        Returns
+        -------
+        result : ...
+            Description of the result.
+
+        Examples
+        --------
+        Example usage of the number method:
+
+        >>> psd = SizeDist()
+        >>> result = psd.number()
+        """
         num_dist = self.data
         num_prop = num_dist.apply(self.__dist_prop, axis=1, result_type='expand')
 
@@ -108,10 +122,10 @@ class SizeDist(DataProcessor):
                              'cont_v': vol_prop['cont']})
 
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
-        ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
+        ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna(subset=['n_amb', 'k_amb'])
 
-        result_dic = ext_data.apply(internal_ext_dist, axis=1, result_type='expand')
-        breakpoint()
+        result_dic = ext_data.apply(internal_ext_dist, args=(self.dp, self.dlogdp), axis=1, result_type='expand')
+
         ext_dist = pd.DataFrame(result_dic['ext'].tolist(), index=result_dic['ext'].index).set_axis(self.dp, axis=1)
         sca_dist = pd.DataFrame(result_dic['sca'].tolist(), index=result_dic['sca'].index).set_axis(self.dp, axis=1)
         abs_dist = pd.DataFrame(result_dic['abs'].tolist(), index=result_dic['abs'].index).set_axis(self.dp, axis=1)
@@ -128,9 +142,12 @@ class SizeDist(DataProcessor):
                              'mode_ext_in': ext_prop['mode'], })
 
     def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
-        ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna()
+        fil_col = ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
+                   'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']
+        ext_data = pd.concat([self.data, DataReader('chemical.csv')[['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
+                   'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]], axis=1).dropna()
 
-        result_dic2 = ext_data.apply(external_ext_dist, axis=1, result_type='expand')
+        result_dic2 = ext_data.apply(external_ext_dist, args=(self.dp, self.dlogdp), axis=1, result_type='expand')
 
         ext_dist2 = pd.DataFrame(result_dic2['ext'].tolist(), index=result_dic2['ext'].index).set_axis(self.dp, axis=1)
         sca_dist2 = pd.DataFrame(result_dic2['sca'].tolist(), index=result_dic2['sca'].index).set_axis(self.dp, axis=1)
