@@ -92,12 +92,12 @@ class SizeDist(DataProcessor):
             [pd.DataFrame({'Number': num_dist.apply(np.sum, axis=1) * 0.014}), num_prop], axis=1)
         breakpoint()
         result_df = result_df.rename(columns={
-            'GMD': 'GMDn',
-            'GSD': 'GSDn',
-            'mode': 'mode_n',
-            'ultra': 'ultra_n',
-            'accum': 'accum_n',
-            'coarse': 'coarse_n' })
+                                            'GMD'   : 'GMDn',
+                                            'GSD'   : 'GSDn',
+                                            'mode'  : 'mode_n',
+                                            'ultra' : 'ultra_n',
+                                            'accum' : 'accum_n',
+                                            'coarse': 'coarse_n'})
         return result_df
 
     def surface(self, filename='PSSD_dSdlogdp.csv'):
@@ -179,8 +179,9 @@ class SizeDist(DataProcessor):
     def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
         fil_col = ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
                    'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']
-        ext_data = pd.concat([self.data, DataReader('chemical.csv')[['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
-                   'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]], axis=1).dropna()
+        ext_data = pd.concat([self.data, DataReader('chemical.csv')[
+            ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
+             'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]], axis=1).dropna()
 
         result_dic2 = ext_data.apply(external_ext_dist, args=(self.dp, self.dlogdp), axis=1, result_type='expand')
 
