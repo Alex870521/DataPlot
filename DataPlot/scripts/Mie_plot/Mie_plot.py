@@ -4,7 +4,7 @@ import numpy as np
 
 from pathlib import Path
 from DataPlot.data_processing.Mie_theory import Mie_Q, Mie_MEE
-from DataPlot.templates import set_figure
+from DataPlot.plot import set_figure
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
 textprops = {'fontname': 'Times New Roman', 'weight': 'bold', 'fontsize': 16}

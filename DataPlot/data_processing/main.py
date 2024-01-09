@@ -1,7 +1,6 @@
 from pathlib import Path
 from pandas import read_csv, concat
-from DataPlot.data_processing.decorator.csv_decorator import save_to_csv
-import DataPlot.data_processing as dataproc
+from DataPlot.data_processing import *
 
 PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 
@@ -9,23 +8,22 @@ PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
 @save_to_csv(PATH_MAIN / 'All_data.csv')
 def main(filename=None, reset=False):
     # 1. EPB
-    with open(PATH_MAIN / 'level1' / 'EPB.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        minion = read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
+    minion = DataReader('EPB.csv')
 
     # 2. IMPACT
-    impact = dataproc.impact_process(reset=False)
+    impact = ImpactProcessor(reset=True, filename='IMPACT.csv').process_data()
 
     # 3. Mass_volume
-    chemical = dataproc.chemical_process(reset=False)
+    chemical = ChemicalProcessor(reset=True, filename='chemical.csv').process_data()
 
     # 4. IMPROVE
-    improve = dataproc.improve_process(reset=False, version='revised')
-
+    improve = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
+    breakpoint()
     # 5. Number & Surface & volume distribution
-    PSD = dataproc.SizeDist().psd_process()
+    PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv').psd_process()
 
     # 6. Extinction distribution
-    PESD = dataproc.SizeDist().ext_process()
+    PESD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv').ext_process()
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
 
     # df = dataproc.other_process(df.copy())

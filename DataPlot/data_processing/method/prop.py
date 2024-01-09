@@ -1,7 +1,4 @@
 import numpy as np
-import math
-import pandas as pd
-from pathlib import Path
 from scipy.signal import find_peaks
 
 
@@ -28,17 +25,15 @@ def peak_mode(dp, ser):
 
 
 def mode_cont(dp, dlogdp, ser):
-    num = np.array(ser) * dlogdp
-    total_num = num.sum()
+    data = np.array(ser) * dlogdp
+    _total = data.sum()
 
-    ultra_range  = (dp >= 11.8) & (dp < 100)
-    accum_range  = (dp >= 100)  & (dp < 1000)
-    coarse_range = (dp >= 1000) & (dp < 2500)
+    ultra_range = (dp >= 11.8) & (dp < 100)
+    accum_range = (dp >= 100)  & (dp < 1000)
+    coars_range = (dp >= 1000) & (dp < 2500)
 
-    ultra_num = np.sum(num[ultra_range])
-    accum_num = np.sum(num[accum_range])
-    coars_num = np.sum(num[coarse_range])
+    _ultra = np.round(np.sum(data[ultra_range]) / _total, 2)
+    _accum = np.round(np.sum(data[accum_range]) / _total, 2)
+    _coars = np.round(np.sum(data[coars_range]) / _total, 2)
 
-    return [np.round(ultra_num/total_num, 2),
-            np.round(accum_num/total_num, 2),
-            np.round(coars_num/total_num, 2)]
+    return _ultra, _accum, _coars

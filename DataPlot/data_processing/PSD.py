@@ -64,7 +64,7 @@ class SizeDist(DataProcessor):
         super().__init__(reset)
         self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
 
-        self.data: DataFrame = DataReader(filename).dropna()
+        self.data: pd.DataFrame = DataReader(filename).dropna()
 
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
@@ -88,14 +88,34 @@ class SizeDist(DataProcessor):
         """
         num_dist = self.data
         num_prop = num_dist.apply(self.__dist_prop, axis=1, result_type='expand')
-
-        return pd.DataFrame({'Number': num_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDn': num_prop['GMD'],
-                             'GSDn': num_prop['GSD'],
-                             'mode_n': num_prop['mode'],
-                             'cont_n': num_prop['cont']})
+        result_df = pd.concat(
+            [pd.DataFrame({'Number': num_dist.apply(np.sum, axis=1) * 0.014}), num_prop], axis=1)
+        breakpoint()
+        result_df = result_df.rename(columns={
+            'GMD': 'GMDn',
+            'GSD': 'GSDn',
+            'mode': 'mode_n',
+            'ultra': 'ultra_n',
+            'accum': 'accum_n',
+            'coarse': 'coarse_n' })
+        return result_df
 
     def surface(self, filename='PSSD_dSdlogdp.csv'):
+        """
+        Calculate surface distribution.
+
+        Returns
+        -------
+        result : ...
+            Description of the result.
+
+        Examples
+        --------
+        Example usage of the number method:
+
+        >>> psd = SizeDist()
+        >>> result = psd.surface()
+        """
         surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1,
                                     result_type='broadcast')
         surf_prop = surf_dist.apply(self.__dist_prop, axis=1, result_type='expand')
@@ -109,6 +129,21 @@ class SizeDist(DataProcessor):
                              'cont_s': surf_prop['cont']})
 
     def volume(self, filename='PVSD_dVdlogdp.csv'):
+        """
+        Calculate volume distribution.
+
+        Returns
+        -------
+        result : ...
+            Description of the result.
+
+        Examples
+        --------
+        Example usage of the number method:
+
+        >>> psd = SizeDist()
+        >>> result = psd.volume()
+        """
         vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1,
                                    result_type='broadcast')
         vol_prop = vol_dist.apply(self.__dist_prop, axis=1, result_type='expand')
@@ -179,10 +214,11 @@ class SizeDist(DataProcessor):
     def __dist_prop(self, ser):
         gmd, gsd = geometric(self.dp, self.dlogdp, ser)
         mode = peak_mode(self.dp, ser)
-        cont = mode_cont(self.dp, self.dlogdp, ser)
+        ultra, accum, coarse = mode_cont(self.dp, self.dlogdp, ser)
 
-        return dict(GMD=gmd, GSD=gsd, mode=mode, cont=cont)
+        return dict(GMD=gmd, GSD=gsd, mode=mode,
+                    ultra=ultra, accum=accum, coarse=coarse)
 
 
 if __name__ == '__main__':
-    psd_data1 = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+    psd_data = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
