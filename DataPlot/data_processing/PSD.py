@@ -1,8 +1,9 @@
-from pandas import DataFrame
+from pandas import DataFrame, concat
 from pathlib import Path
 from core import DataReader, DataProcessor
 from decorator import timer
 from method import *
+from functools import partial
 
 
 class SizeDist(DataProcessor):
@@ -70,7 +71,7 @@ class SizeDist(DataProcessor):
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
 
-    def number(self):
+    def number(self, filename='PNSD_dSdlogdp.csv'):
         """
         Calculate number distribution.
 
@@ -87,18 +88,9 @@ class SizeDist(DataProcessor):
         >>> result = psd.number()
         """
         num_dist = self.data
-        num_prop = num_dist.apply(self.__dist_prop, axis=1, result_type='expand')
-        result_df = pd.concat(
-            [pd.DataFrame({'Number': num_dist.apply(np.sum, axis=1) * 0.014}), num_prop], axis=1)
-        breakpoint()
-        result_df = result_df.rename(columns={
-                                            'GMD'   : 'GMDn',
-                                            'GSD'   : 'GSDn',
-                                            'mode'  : 'mode_n',
-                                            'ultra' : 'ultra_n',
-                                            'accum' : 'accum_n',
-                                            'coarse': 'coarse_n'})
-        return result_df
+        num_prop = num_dist.apply(partial(self.__dist_prop, weighting='Number'), axis=1, result_type='expand')
+
+        return num_prop
 
     def surface(self, filename='PSSD_dSdlogdp.csv'):
         """
@@ -116,17 +108,12 @@ class SizeDist(DataProcessor):
         >>> psd = SizeDist()
         >>> result = psd.surface()
         """
-        surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1,
-                                    result_type='broadcast')
-        surf_prop = surf_dist.apply(self.__dist_prop, axis=1, result_type='expand')
+        surf_dist = self.data.apply(lambda col: math.pi * (self.dp ** 2) * np.array(col), axis=1, result_type='broadcast')
+        surf_prop = surf_dist.apply(partial(self.__dist_prop, weighting='Surface'), axis=1, result_type='expand')
 
         surf_dist.reindex(self.index).to_csv(self.file_path / filename)
 
-        return pd.DataFrame({'Surface': surf_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDs': surf_prop['GMD'],
-                             'GSDs': surf_prop['GSD'],
-                             'mode_s': surf_prop['mode'],
-                             'cont_s': surf_prop['cont']})
+        return surf_prop
 
     def volume(self, filename='PVSD_dVdlogdp.csv'):
         """
@@ -144,17 +131,12 @@ class SizeDist(DataProcessor):
         >>> psd = SizeDist()
         >>> result = psd.volume()
         """
-        vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1,
-                                   result_type='broadcast')
-        vol_prop = vol_dist.apply(self.__dist_prop, axis=1, result_type='expand')
+        vol_dist = self.data.apply(lambda col: math.pi / 6 * self.dp ** 3 * np.array(col), axis=1, result_type='broadcast')
+        vol_prop = vol_dist.apply(partial(self.__dist_prop, weighting='Volume'), axis=1, result_type='expand')
 
         vol_dist.reindex(self.index).to_csv(self.file_path / filename)
 
-        return pd.DataFrame({'Volume': vol_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMDv': vol_prop['GMD'],
-                             'GSDv': vol_prop['GSD'],
-                             'mode_v': vol_prop['mode'],
-                             'cont_v': vol_prop['cont']})
+        return vol_prop
 
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
         ext_data = pd.concat([self.data, DataReader('chemical.csv')], axis=1).dropna(subset=['n_amb', 'k_amb'])
@@ -212,14 +194,32 @@ class SizeDist(DataProcessor):
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
-    def __dist_prop(self, ser):
-        gmd, gsd = geometric(self.dp, self.dlogdp, ser)
-        mode = peak_mode(self.dp, ser)
-        ultra, accum, coarse = mode_cont(self.dp, self.dlogdp, ser)
+    def __dist_prop(self, ser, weighting):
+        dist = np.array(ser) * self.dlogdp
+        total = np.sum(dist)
 
-        return dict(GMD=gmd, GSD=gsd, mode=mode,
-                    ultra=ultra, accum=accum, coarse=coarse)
+        gmd, gsd = geometric(self.dp, dist, total)
+        _mode = mode(self.dp, dist)
+        ultra, accum, coarse = contribution(self.dp, dist, total)
+
+        weight_mapping = {
+            'Number': 'Number',
+            'Surface': 'Surface',
+            'Volume': 'Volume'
+        }
+
+        pleonasm_mapping = {
+            'Number': 'n',
+            'Surface': 's',
+            'Volume': 'v'
+        }
+
+        w = pleonasm_mapping[weighting]
+
+        return {weight_mapping[weighting]: total, f'GMD{w}': gmd, f'GSD{w}': gsd,
+                f'mode_{w}': _mode, f'ultra_{w}': ultra, f'accum_{w}': accum, f'coarse_{w}': coarse}
 
 
 if __name__ == '__main__':
-    psd_data = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+    psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+    psd.psd_process()
