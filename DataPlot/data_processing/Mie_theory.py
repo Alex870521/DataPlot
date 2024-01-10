@@ -92,8 +92,8 @@ def Mie_MEE(m, wavelength, dp, density):
 
 
 def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
-    """
-    Simultaneously calculate "extinction distribution" and "integrated results" using the MIE_Q method.
+    """ Mie_SD
+    Simultaneously calculate "extinction distribution" and "integrated results" using the Mie_Q method.
 
     Parameters
     ----------
@@ -122,8 +122,7 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
     >>> dp = [0.1, 0.2, 0.5, 1.0]  # list of particle diameters in micrometers
     >>> dlogdp = [0.05, 0.1, 0.2, 0.5]  # list of dlogdp
     >>> ndp = [100, 50, 30, 20]  # number concentration of particles
-    >>> output_dist = 'all'
-    >>> result = Mie_PESD(m, wavelength, dp, dlogdp, ndp, output_dist)
+    >>> result = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
     """
 
     # Q
