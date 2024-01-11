@@ -4,6 +4,8 @@ from core import DataReader, DataProcessor
 from decorator import timer
 from method import *
 from functools import partial
+import math
+import pandas as pd
 
 
 class SizeDist(DataProcessor):
@@ -121,53 +123,42 @@ class SizeDist(DataProcessor):
         return vol_prop
 
     def extinction_internal(self, filename='PESD_dextdlogdp_internal.csv'):
-        # data dropna
-        # apply internal
-        # to_csv
-        # return
         psd_data, m_data = self.data, DataReader('chemical.csv')[['n_amb', 'k_amb']]
-        ext_data = pd.concat([psd_data, m_data], axis=1).dropna()
+        data = pd.concat([psd_data, m_data], axis=1).dropna()
 
-        result_dic = ext_data.apply(partial(internal, dp=self.dp, dlogdp=self.dlogdp), axis=1, result_type='expand')
-        breakpoint()
-        ext_dist = pd.DataFrame(result_dic['ext'].tolist(), index=result_dic['ext'].index).set_axis(self.dp, axis=1)
-        sca_dist = pd.DataFrame(result_dic['sca'].tolist(), index=result_dic['sca'].index).set_axis(self.dp, axis=1)
-        abs_dist = pd.DataFrame(result_dic['abs'].tolist(), index=result_dic['abs'].index).set_axis(self.dp, axis=1)
+        muti_df = data.apply(partial(internal, dp=self.dp, dlogdp=self.dlogdp), axis=1, result_type='expand')
 
-        ext_prop = ext_dist.apply(partial(self.__dist_prop, weighting='Extinction'), axis=1, result_type='expand')
+        ext_dist = pd.DataFrame(muti_df['ext'].tolist(), index=muti_df['ext'].index).set_axis(self.dp, axis=1)
+        sca_dist = pd.DataFrame(muti_df['sca'].tolist(), index=muti_df['sca'].index).set_axis(self.dp, axis=1)
+        abs_dist = pd.DataFrame(muti_df['abs'].tolist(), index=muti_df['abs'].index).set_axis(self.dp, axis=1)
+
+        ext_prop = ext_dist.apply(partial(self.__dist_prop, weighting='Ext_internal'), axis=1, result_type='expand')
+        sca_prop = sca_dist.apply(partial(self.__dist_prop, weighting='Sca_internal'), axis=1, result_type='expand')
+        abs_prop = abs_dist.apply(partial(self.__dist_prop, weighting='Abs_internal'), axis=1, result_type='expand')
 
         ext_dist.reindex(self.index).to_csv(self.file_path / filename)
 
-        return pd.DataFrame({'Bext_internal': ext_dist.apply(np.sum, axis=1) * 0.014,
-                             'Bsca_internal': sca_dist.apply(np.sum, axis=1) * 0.014,
-                             'Babs_internal': abs_dist.apply(np.sum, axis=1) * 0.014,
-                             'GMD_ext_in': ext_prop['GMD'],
-                             'GSD_ext_in': ext_prop['GSD'],
-                             'mode_ext_in': ext_prop['mode'], })
+        return pd.concat([ext_prop, sca_prop['Bsca_internal'], abs_prop['Babs_internal']], axis=1)
 
     def extinction_external(self, filename='PESD_dextdlogdp_external.csv'):
-        fil_col = ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
-                   'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']
-        ext_data = pd.concat([self.data, DataReader('chemical.csv')[
+        psd_data, m_data = self.data, DataReader('chemical.csv')[
             ['AS_volume_ratio', 'AN_volume_ratio', 'OM_volume_ratio', 'Soil_volume_ratio',
-             'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]], axis=1).dropna()
+             'SS_volume_ratio', 'EC_volume_ratio', 'ALWC_volume_ratio']]
+        data = pd.concat([psd_data, m_data], axis=1).dropna()
 
-        result_dic2 = ext_data.apply(external, args=(self.dp, self.dlogdp), axis=1, result_type='expand')
+        muti_df = data.apply(external, args=(self.dp, self.dlogdp), axis=1, result_type='expand')
 
-        ext_dist2 = pd.DataFrame(result_dic2['ext'].tolist(), index=result_dic2['ext'].index).set_axis(self.dp, axis=1)
-        sca_dist2 = pd.DataFrame(result_dic2['sca'].tolist(), index=result_dic2['sca'].index).set_axis(self.dp, axis=1)
-        abs_dist2 = pd.DataFrame(result_dic2['abs'].tolist(), index=result_dic2['abs'].index).set_axis(self.dp, axis=1)
+        ext_dist = pd.DataFrame(muti_df['ext'].tolist(), index=muti_df['ext'].index).set_axis(self.dp, axis=1)
+        sca_dist = pd.DataFrame(muti_df['sca'].tolist(), index=muti_df['sca'].index).set_axis(self.dp, axis=1)
+        abs_dist = pd.DataFrame(muti_df['abs'].tolist(), index=muti_df['abs'].index).set_axis(self.dp, axis=1)
 
-        ext_prop = ext_dist2.apply(partial(self.__dist_prop, weighting='Extinction'), axis=1, result_type='expand')
+        ext_prop = ext_dist.apply(partial(self.__dist_prop, weighting='Ext_external'), axis=1, result_type='expand')
+        sca_prop = sca_dist.apply(partial(self.__dist_prop, weighting='Sca_external'), axis=1, result_type='expand')
+        abs_prop = abs_dist.apply(partial(self.__dist_prop, weighting='Abs_external'), axis=1, result_type='expand')
 
-        ext_dist2.reindex(self.index).to_csv(self.file_path / filename)
+        ext_dist.reindex(self.index).to_csv(self.file_path / filename)
 
-        return pd.DataFrame({'Bext_external': ext_dist2.apply(np.sum, axis=1) * 0.014,
-                             'Bsca_external': sca_dist2.apply(np.sum, axis=1) * 0.014,
-                             'Babs_external': abs_dist2.apply(np.sum, axis=1) * 0.014,
-                             'GMD_ext_ex': ext_prop['GMD'],
-                             'GSD_ext_ex': ext_prop['GSD'],
-                             'mode_ext_ex': ext_prop['mode'], })
+        return pd.concat([ext_prop, sca_prop['Bsca_external'], abs_prop['Babs_external']], axis=1)
 
     @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
@@ -177,7 +168,7 @@ class SizeDist(DataProcessor):
 
     @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
-        result_df = pd.concat([self.extinction_internal(), self.extinction_external(), ], axis=1).reindex(self.index)
+        result_df = pd.concat([self.extinction_internal(), ], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
@@ -193,15 +184,25 @@ class SizeDist(DataProcessor):
             'Number': 'Number',
             'Surface': 'Surface',
             'Volume': 'Volume',
-            'Extinction': 'Extinction'
+            'Ext_internal': 'Bext_internal',
+            'Sca_internal': 'Bsca_internal',
+            'Abs_internal': 'Babs_internal',
+            'Ext_external': 'Bext_external',
+            'Sca_external': 'Bsca_external',
+            'Abs_external': 'Babs_external',
         }
 
         pleonasm_mapping = {
             'Number': 'n',
             'Surface': 's',
             'Volume': 'v',
-            'Extinction_in': 'ext_in',
-            'Extinction_ex': 'ext_ex'
+            'Ext_internal': 'ext_in',
+            'Sca_internal': 'sca_in',
+            'Abs_internal': 'abs_in',
+            'Ext_external': 'ext_ex',
+            'Sca_external': 'sca_ex',
+            'Abs_external': 'abs_ex',
+
         }
 
         w = pleonasm_mapping[weighting]
@@ -213,3 +214,5 @@ class SizeDist(DataProcessor):
 if __name__ == '__main__':
     psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
     psd.ext_process()
+    # internal + external = 416.99s
+    # internal = 56.19s -> 呼叫Mie越多次越慢
