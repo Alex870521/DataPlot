@@ -1,6 +1,6 @@
 import numpy as np
-from DataPlot.data_processing.Mie_theory import Mie_Q, Mie_MEE
-from Mie_plot import Q_plot, Q_size_para_plot, MEE_plot, All_species_Q, All_species_MEE, RRI_2D, IJ_couple
+from DataPlot.data_processing.method.mie_theory import Mie_Q, Mie_MEE
+from Mie_plot import Q_plot, Q_size_para_plot, MEE_plot
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
 textprops = {'fontname': 'Times New Roman', 'weight': 'bold', 'fontsize': 16}

@@ -168,7 +168,7 @@ class SizeDist(DataProcessor):
 
     @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
-        result_df = pd.concat([self.extinction_internal(), ], axis=1).reindex(self.index)
+        result_df = pd.concat([self.extinction_internal(), self.extinction_external()], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 

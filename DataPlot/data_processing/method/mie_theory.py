@@ -1,7 +1,6 @@
 from PyMieScatt import AutoMieQ, Mie_SD
 import numpy as np
 import math
-import pandas as pd
 
 
 def Mie_Q(m, wavelength, dp):
@@ -139,35 +138,3 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
     Abs = Q_abs * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
 
     return Ext, Sca, Abs
-
-
-def mie_theory(df_psd, df_m, wave_length=550):
-    _ori_idx = df_psd.index.copy()
-    _cal_idx = df_psd.loc[df_m.dropna().index].dropna(how='all').index
-
-    _psd, _RI = df_psd.loc[_cal_idx], df_m.loc[_cal_idx]
-
-    ## parameter
-    _bins = _psd.keys().tolist()
-
-    ## calculate
-    _dt_lst = []
-    for _dt, _m in zip(_psd.values, _RI.values):
-        _out_dic = Mie_SD(_m, wave_length, _bins, _dt, asDict=True)
-        _dt_lst.append(_out_dic)
-
-    _out = pd.DataFrame(_dt_lst, index=_cal_idx).reindex(_ori_idx)
-
-    if len(_out.dropna()) == 0:
-        return _out
-
-    _out = _out.rename(columns={'Bext': 'ext',
-                                'Bsca': 'sca',
-                                'Babs': 'abs',
-                                'Bback': 'back',
-                                'Bratio': 'ratio',
-                                'Bpr'	: 'pr' ,})
-
-    return _out[['abs', 'sca', 'ext', 'back', 'ratio', 'pr', 'G']]
-
-

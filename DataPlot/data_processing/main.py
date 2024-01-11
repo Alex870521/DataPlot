@@ -25,8 +25,6 @@ def main(reset=False, filename=None):
     # 6. Extinction distribution
     PESD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv').ext_process()
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
-    breakpoint()
-    # df = dataproc.other_process(df.copy())
 
     return concat([minion, impact, chemical, improve, PESD, PSD], axis=1)
 
