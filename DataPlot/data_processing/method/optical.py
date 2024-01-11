@@ -1,5 +1,5 @@
 import numpy as np
-from DataPlot.data_processing.method.mie_theory import Mie_PESD
+from mie_theory import Mie_PESD
 
 
 def internal(ser, dp, dlogdp, wavelength=550):

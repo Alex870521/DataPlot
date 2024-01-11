@@ -1,3 +1,4 @@
 from .prop import *
-from .opt import *
+from .optical import *
 from .mie_theory import *
+from .others import *

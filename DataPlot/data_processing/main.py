@@ -19,14 +19,18 @@ def main(reset=False, filename=None):
     # 4. IMPROVE
     improve = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
 
-    # 5. Number & Surface & volume distribution
-    PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv').psd_process()
+    # 5. Number & Surface & volume & Extinction distribution
+    PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
 
-    # 6. Extinction distribution
-    PESD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv').ext_process()
+    psd = PSD.psd_process()
+    ext = PSD.ext_process()
+
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
 
-    return concat([minion, impact, chemical, improve, PESD, PSD], axis=1)
+    # 7. others
+    _df = concat([minion, impact, chemical, improve, psd, ext], axis=1)
+    df = other_process(_df.copy)
+    return df
 
 
 if __name__ == '__main__':
