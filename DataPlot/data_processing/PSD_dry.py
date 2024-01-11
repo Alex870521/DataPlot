@@ -3,8 +3,9 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 from decorator import save_to_csv
-from core import DataReader, DataProcessor
-from PSD import SizeDist
+from core import DataReader
+from DataPlot.data_processing.PSD import SizeDist
+
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data-example' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'
 

@@ -1,14 +1,15 @@
+
 # process class
 from IMPACT import ImpactProcessor
-from Chemical import ChemicalProcessor
 from IMPROVE import ImproveProcessor
 from PSD import SizeDist
-
-# decorator object
-from decorator import *
+from Chemical import ChemicalProcessor
 
 # core object
 from core import *
+
+# decorator object
+from decorator import *
 
 # method object
 from method import *

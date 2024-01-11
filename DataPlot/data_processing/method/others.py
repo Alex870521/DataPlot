@@ -23,10 +23,10 @@ def other_process(df):
     df['Vis_cal'] = 1096 / df['Extinction']
     # df['size'] = df['gRH'] * df['GMDs']
     # df['fRH_Mix'] = df['Bext'] / df['Extinction']
-    df['fRH_PNSD'] = df['Bext'] / df['Bext_dry']
+    # df['fRH_PNSD'] = df['Bext_internal'] / df['Bext_dry']
     df['fRH_IMPR'] = df['total_ext'] / df['total_ext_dry']
     df['OCEC_ratio'] = df['O_OC'] / df['O_EC']
     df['PM1/PM25'] = np.where(df['PM1'] / df['PM25'] < 1, df['PM1'] / df['PM25'], np.nan)
-    df['MEE_PNSD'] = df['Bext'] / df['PM25']
-    df['MEE_dry_PNSD'] = df['Bext_dry'] / df['PM25']
+    df['MEE_PNSD'] = df['Bext_internal'] / df['PM25']
+    # df['MEE_dry_PNSD'] = df['Bext_dry'] / df['PM25']
     return df

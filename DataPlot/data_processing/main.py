@@ -2,7 +2,7 @@ from pathlib import Path
 from pandas import read_csv, concat
 from DataPlot.data_processing import *
 
-PATH_MAIN = Path(__file__).parents[2] / 'Data-example'
+PATH_MAIN = Path(__file__).parents[1] / 'Data-example'
 
 
 @save_to_csv(PATH_MAIN / 'All_data.csv')
@@ -11,16 +11,16 @@ def main(reset=False, filename=None):
     minion = DataReader('EPB.csv')
 
     # 2. IMPACT
-    impact = ImpactProcessor(reset=True, filename='IMPACT.csv').process_data()
+    impact = ImpactProcessor(reset=False, filename='IMPACT.csv').process_data()
 
     # 3. Mass_volume
-    chemical = ChemicalProcessor(reset=True, filename='chemical.csv').process_data()
+    chemical = ChemicalProcessor(reset=False, filename='chemical.csv').process_data()
 
     # 4. IMPROVE
-    improve = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
+    improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
 
     # 5. Number & Surface & volume & Extinction distribution
-    PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+    PSD = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv')
 
     psd = PSD.psd_process()
     ext = PSD.ext_process()
@@ -29,7 +29,7 @@ def main(reset=False, filename=None):
 
     # 7. others
     _df = concat([minion, impact, chemical, improve, psd, ext], axis=1)
-    df = other_process(_df.copy)
+    df = other_process(_df.copy())
     return df
 
 

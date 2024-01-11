@@ -1,4 +1,4 @@
-from pandas import DataFrame, concat
+from pandas import DataFrame, concat, read_csv
 from pathlib import Path
 from core import DataReader, DataProcessor
 from decorator import timer
@@ -160,14 +160,27 @@ class SizeDist(DataProcessor):
 
         return pd.concat([ext_prop, sca_prop['Bsca_external'], abs_prop['Babs_external']], axis=1)
 
+    def process_data(self):
+        pass
+
     @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
+        file = self.file_path.parent / filename
+        if file.exists() and not self.reset:
+            with open(file, 'r', encoding='utf-8', errors='ignore') as f:
+                return read_csv(f, parse_dates=['Time']).set_index('Time')
+
         result_df = pd.concat([self.number(), self.surface(), self.volume()], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
     @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
+        file = self.file_path.parent / filename
+        if file.exists() and not self.reset:
+            with open(file, 'r', encoding='utf-8', errors='ignore') as f:
+                return read_csv(f, parse_dates=['Time']).set_index('Time')
+
         result_df = pd.concat([self.extinction_internal(), self.extinction_external()], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
