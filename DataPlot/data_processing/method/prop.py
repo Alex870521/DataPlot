@@ -13,23 +13,24 @@ def geometric(dp, _dist, _total):
     return np.exp(_gmd), np.exp(_gsd)
 
 
-def mode(dp, _dist):
+def mode(dist, find_peaks_kwargs={}):
     """ Find three peak mode in distribution.
 
     Parameters
     ----------
-    dp
-    _dist
+
+    dist
+    find_peaks_kwargs
 
     Returns
     -------
 
     """
-    min_value = np.array([min(_dist)])
-    extend_ser = np.concatenate([min_value, _dist, min_value])
-    _mode, _ = find_peaks(extend_ser, distance=20)
+    min_value = np.array([min(dist)])
+    extend_ser = np.concatenate([min_value, dist, min_value])
+    _mode, _ = find_peaks(extend_ser, **dict(distance=len(dist)-1, **find_peaks_kwargs))
 
-    return dp[_mode - 1][:3]
+    return _mode - 1
 
 
 def contribution(dp, _dist, _total):

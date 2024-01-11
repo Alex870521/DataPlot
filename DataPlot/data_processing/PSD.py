@@ -190,7 +190,7 @@ class SizeDist(DataProcessor):
         total = np.sum(dist)
 
         gmd, gsd = geometric(self.dp, dist, total)
-        _mode = mode(self.dp, dist)
+        _mode = self.dp[mode(dist)]
         ultra, accum, coarse = contribution(self.dp, dist, total)
 
         weight_mapping = {
@@ -221,7 +221,7 @@ class SizeDist(DataProcessor):
         w = pleonasm_mapping[weighting]
 
         return {weight_mapping[weighting]: total, f'GMD{w}': gmd, f'GSD{w}': gsd,
-                f'mode_{w}': _mode, f'ultra_{w}': ultra, f'accum_{w}': accum, f'coarse_{w}': coarse}
+                f'mode_{w}': _mode[0], f'ultra_{w}': ultra, f'accum_{w}': accum, f'coarse_{w}': coarse}
 
 
 if __name__ == '__main__':

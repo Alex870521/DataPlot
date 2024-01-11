@@ -20,17 +20,17 @@ def main(reset=False, filename=None):
     improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
 
     # 5. Number & Surface & volume & Extinction distribution
-    PSD = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv')
+    PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
 
     psd = PSD.psd_process()
     ext = PSD.ext_process()
 
     # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
+    _df = concat([minion, impact, chemical, improve, psd, ext], axis=1)
 
     # 7. others
-    _df = concat([minion, impact, chemical, improve, psd, ext], axis=1)
-    df = other_process(_df.copy())
-    return df
+    _df = other_process(_df.copy())
+    return _df
 
 
 if __name__ == '__main__':
