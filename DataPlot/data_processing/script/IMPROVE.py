@@ -1,5 +1,5 @@
 from pandas import read_csv, concat
-from core import DataProcessor, DataReader
+from ..core import DataProcessor, DataReader
 
 
 class ImproveProcessor(DataProcessor):

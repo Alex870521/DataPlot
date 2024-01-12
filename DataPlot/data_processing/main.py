@@ -1,5 +1,5 @@
 from pathlib import Path
-from pandas import read_csv, concat
+from pandas import concat
 from DataPlot.data_processing import *
 
 PATH_MAIN = Path(__file__).parents[1] / 'Data-example'

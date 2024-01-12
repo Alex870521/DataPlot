@@ -1,9 +1,6 @@
 
 # process class
-from IMPACT import ImpactProcessor
-from IMPROVE import ImproveProcessor
-from PSD import SizeDist
-from Chemical import ChemicalProcessor
+from script import *
 
 # core object
 from core import *

@@ -1,8 +1,8 @@
-from pandas import DataFrame, concat, read_csv
+from pandas import DataFrame, read_csv
 from pathlib import Path
-from core import DataReader, DataProcessor
-from decorator import timer
-from method import *
+from ..core import DataReader, DataProcessor
+from ..decorator import timer
+from ..method import *
 from functools import partial
 import math
 import pandas as pd
@@ -222,10 +222,3 @@ class SizeDist(DataProcessor):
 
         return {weight_mapping[weighting]: total, f'GMD{w}': gmd, f'GSD{w}': gsd,
                 f'mode_{w}': _mode[0], f'ultra_{w}': ultra, f'accum_{w}': accum, f'coarse_{w}': coarse}
-
-
-if __name__ == '__main__':
-    psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
-    psd.ext_process()
-    # internal + external = 416.99s
-    # internal = 56.19s -> 呼叫Mie越多次越慢
