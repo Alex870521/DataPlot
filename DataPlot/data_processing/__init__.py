@@ -1,12 +1,12 @@
 
 # process class
-from script import *
+from .script import *
 
 # core object
-from core import *
+from .core import *
 
 # decorator object
-from decorator import *
+from .decorator import *
 
 # method object
-from method import *
+from .method import *

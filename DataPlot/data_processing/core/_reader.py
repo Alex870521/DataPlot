@@ -56,7 +56,7 @@ class DataReader:
     @staticmethod
     def read_csv(file_path):
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-            return read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F']).set_index('Time')
+            return read_csv(f, parse_dates=['Time'], na_values=['-', 'E', 'F'], low_memory=False).set_index('Time')
 
     @staticmethod
     def read_json(file_path):

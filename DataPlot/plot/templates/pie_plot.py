@@ -1,7 +1,7 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.templates import set_figure, unit, getColor, linecolor
+from DataPlot.plot import set_figure, unit, getColor, linecolor
 
 prop_text = {'fontsize': 14, }
 prop_legend = {'fontsize': 14, }

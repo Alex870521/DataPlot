@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.templates import set_figure, unit
+from DataPlot.plot import set_figure, unit
 
 __all__ = ['barplot_extend',
            'barplot_concen',

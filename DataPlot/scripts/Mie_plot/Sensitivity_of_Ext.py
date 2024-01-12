@@ -1,28 +1,16 @@
-import numpy as np
-import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
+from DataPlot.plot import scatter
+from DataPlot.data_processing import *
 import pickle
-from DataPlot.templates import scatter
-
-from DataPlot.data_processing import Mie_PESD
-from DataPlot.data_processing import main
-import matplotlib.pyplot as plt
+import pandas as pd
 
 
-PATH_MAIN = Path(__file__).parents[3] / "Data-example" / "Level2"
-PATH_DIST = PATH_MAIN / "distribution"
+PATH_MAIN = Path(__file__).parents[0]
 
-with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
+PNSD, RI = DataReader('PNSD_dNdlogdp.csv'), DataReader('chemical.csv')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb']]
 
-with open(PATH_MAIN / 'chemical.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    refractive_index = read_csv(f, parse_dates=['Time']).set_index('Time')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb']]
-
-with open(PATH_MAIN.parent / 'All_data.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    All = read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')
-
-df = concat([PNSD, refractive_index], axis=1)
+df = concat([PNSD, RI], axis=1)
 
 dp = np.array(PNSD.columns, dtype='float')
 _length = np.size(dp)
@@ -54,10 +42,13 @@ def Fixed_ext_process():
 if __name__ == '__main__':
     # result = Fixed_ext_process()
 
-    with open(PATH_MAIN.parent / 'fixed_PNSD_RI.pkl', 'rb') as f:
+    with open(PATH_MAIN / 'fixed_PNSD_RI.pkl', 'rb') as f:
         result = pickle.load(f)
 
+    All = DataReader('All_data.csv')
+
     df = concat([result, All], axis=1)
+
     scatter(df, x='Extinction', y='Bext_internal', xlim=[0, 600], ylim=[0, 600], title='Mie theory', regression=True, diagonal=True)
     scatter(df, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD', regression=True, diagonal=True)
     scatter(df, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI', regression=True, diagonal=True)

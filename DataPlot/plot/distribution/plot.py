@@ -5,7 +5,7 @@ import matplotlib.colors as colors
 from scipy.stats import norm, lognorm
 from numpy import nan_to_num
 from matplotlib.ticker import ScalarFormatter
-from DataPlot.templates import set_figure
+from DataPlot.plot import set_figure
 
 __all__ = ["heatmap",
            "overlay_dist",

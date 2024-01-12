@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from DataPlot.templates import set_figure, unit, getColor, linecolor
+from DataPlot.plot import set_figure, unit, getColor, linecolor
 
 
 @set_figure(figsize=(6, 6))
