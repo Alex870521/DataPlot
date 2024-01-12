@@ -1,9 +1,8 @@
 from pathlib import Path
-from pandas import read_csv, concat
+from pandas import concat, DataFrame
 from DataPlot.plot import scatter
 from DataPlot.data_processing import *
 import pickle
-import pandas as pd
 
 
 PATH_MAIN = Path(__file__).parents[0]
@@ -35,7 +34,7 @@ def Fixed_ext_process():
         out['Bext_Fixed_PNSD'].append(FixPNSD['Bext'])
         out['Bext_Fixed_RI'].append(FixRI['Bext'])
 
-    Bext_df = pd.DataFrame(out).set_index(df_input.index.copy()).reindex(_index)
+    Bext_df = DataFrame(out).set_index(df_input.index.copy()).reindex(_index)
     return Bext_df
 
 

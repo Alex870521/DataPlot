@@ -3,15 +3,14 @@
 ## Structure
 ```plaintext
 DataPlot/
-├── data_processing (ContainerHandle)/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── Chemical.py
-│   ├── IMPACT.py
-│   ├── IMPROVE.py
+├── Data-example/
+│   └── ...
+├── data_processing/
 │   ├── core/
 │   ├── decorator/
+│   ├── method/
 │   ├── script/
+│   ├── main.py
 │   └── ...
 ├── plot/
 │   ├── core/
@@ -21,6 +20,9 @@ DataPlot/
 │   │   ├── unit.json
 │   │   └── ...
 │   ├── distribution/
+│   │   ├── plot.py
+│   │   ├── fit.py
+│   │   └── ...
 │   ├── templates/
 │   │   ├── scatter_plot.py
 │   │   ├── bar_plot.py
@@ -29,10 +31,9 @@ DataPlot/
 │   │   └── ...
 │   └── ...
 ├── scripts/
-│   ├── Module1.py
-│   ├── Module2.py
-│   └── ...
-
+│   ├── IMPROVE/
+│   ├── meteorology/
+│   ├── optical/
 │   │   └── ...
 │   └── ...
 └── ...

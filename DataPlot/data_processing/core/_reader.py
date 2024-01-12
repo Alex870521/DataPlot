@@ -3,6 +3,10 @@ from pathlib import Path
 from pandas import read_csv, read_json, read_excel, DataFrame
 
 
+class FileNotFound(Exception):
+    pass
+
+
 class DataReader:
     """
     A class for reading data files with different extensions (.csv, .json, .xls, .xlsx).
@@ -29,10 +33,10 @@ class DataReader:
     DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
     def __new__(cls, filename: str) -> Union[DataFrame, None]:
-        file_path = list(cls.DEFAULT_PATH.glob('**/' + filename))[0]
-        if not file_path:
-            print(f"File '{filename}' not found.")
-            return None
+        try:
+            file_path = list(cls.DEFAULT_PATH.glob('**/' + filename))[0]
+        except IndexError:
+            raise FileNotFound(f"File '{filename}' not found.")
         else:
             return cls.read_data(file_path)
 
