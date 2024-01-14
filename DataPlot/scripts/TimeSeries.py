@@ -20,11 +20,6 @@ PESD = DataReader('PESD_dextdlogdp_internal.csv')
 df = DataReader('All_data.csv')
 dic_grp_sta = state_classify(df)
 
-# for i in ['Extinction', 'Scattering', 'Absorption', 'MEE', 'MSE', 'MAE']:
-#     print(i)
-# print(dic_grp_sta['Clean'][i].quantile([0.001, 0.999]))
-# print('Mean=', dic_grp_sta['Clean'][i].mean().round(2), 'Std=', dic_grp_sta['Clean'][i].std().round(2))
-
 
 @set_figure(fs=12)
 def time_series(_df):
@@ -196,7 +191,7 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
     _df = _df.rolling(3).mean(numeric_only=True)
     # df_.Extinction = df_.Extinction.fillna(0)  # 使用0填充NaN值
     # df_.Extinction = df_.Extinction.replace([np.inf, -np.inf], 0)
-    # time_series(_df)
+    time_series(_df)
     extinction_timeseries(_df)
     extinction_month(_df)
 

@@ -4,8 +4,8 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from plot_templates import scatter, scatter_mutiReg
-from Data_processing import integrate, function_handler, save_to_csv
+from DataPlot.data_processing import *
+from DataPlot.plot import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -13,16 +13,9 @@ import seaborn as sns
 PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
 PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'
 
-with open(PATH_DIST / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
+PNSD, All = DataReader('PNSD_dNdlogdp.csv'), DataReader('All_data.csv')
 
-with open(PATH_MAIN / 'level2' / 'mass_volume_VAM.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    refractive_index = read_csv(f, parse_dates=['Time']).set_index('Time')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb']]
-
-with open(PATH_MAIN / 'All_data.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    All = read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')
-
-df = concat([All, PNSD, refractive_index], axis=1)
+df = concat([All, PNSD], axis=1)
 
 dp = np.array(PNSD.columns, dtype='float')
 _length = np.size(dp)
@@ -64,7 +57,7 @@ if __name__ == '__main__':
     #
     # df = pd.merge(df_merged, df_merged_, on=['Time', 'Extinction', 'Bext', 'method'], how='outer')
     # df.reset_index(drop=True, inplace=True)
-    # sns.jointplot(data=df, x="Extinction", y="Bext", hue="method")
+    sns.jointplot(data=df, x="Extinction", y="Bext_internal")
 
     # verify_scat_plot()
 
@@ -74,5 +67,5 @@ if __name__ == '__main__':
     # scatter(df, x='PM25', y='Scattering', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM25', y='Absorption', c='PM1/PM25', c_range=[0, 1], regression=True, )
     # scatter(df, x='PM1', y='Extinction', c='PM1/PM25', c_range=[0, 1], regression=True, )
-    scatter(df, x='Extinction', y='O3', c='PM1', y_range=[0, 15], c_range=[0, 1])
+    # scatter(df, x='Extinction', y='O3', c='PM1', y_range=[0, 15], c_range=[0, 1])
 

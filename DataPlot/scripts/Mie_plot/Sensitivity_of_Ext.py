@@ -29,8 +29,8 @@ def Fixed_ext_process():
     Fixed_k = np.array(df_input['k_amb'].mean())
 
     for _tm, _ser in df_input.iterrows():
-        FixPNSD, _ = Mie_PESD(_ser['n_amb'] + 1j * _ser['k_amb'], 550, dp, dlogdp, ndp=Fixed_PNSD, output_dist=True)
-        FixRI, __ = Mie_PESD(Fixed_n + 1j * Fixed_k, 550, dp, dlogdp, ndp=_ser[:_length], output_dist=True)
+        FixPNSD = Mie_PESD(_ser['n_amb'] + 1j * _ser['k_amb'], 550, dp, dlogdp, ndp=Fixed_PNSD)
+        FixRI = Mie_PESD(Fixed_n + 1j * Fixed_k, 550, dp, dlogdp, ndp=_ser[:_length])
         out['Bext_Fixed_PNSD'].append(FixPNSD['Bext'])
         out['Bext_Fixed_RI'].append(FixRI['Bext'])
 
@@ -39,10 +39,10 @@ def Fixed_ext_process():
 
 
 if __name__ == '__main__':
-    # result = Fixed_ext_process()
+    result = Fixed_ext_process()
 
-    with open(PATH_MAIN / 'fixed_PNSD_RI.pkl', 'rb') as f:
-        result = pickle.load(f)
+    # with open(PATH_MAIN / 'fixed_PNSD_RI.pkl', 'rb') as f:
+    #     result = pickle.load(f)
 
     All = DataReader('All_data.csv')
 
