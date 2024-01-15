@@ -163,9 +163,10 @@ def extinction_timeseries(_df):
     st_tm, fn_tm = _df.index[0], _df.index[-1]
     tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
 
-    fig, (ax2, ax1) = plt.subplots(2, 1, figsize=(12, 5), dpi=150)
+    fig, (ax2, ax1) = plt.subplots(2, 1, figsize=(12, 5))
 
     ax1 = sub(_df, trg='Scattering', ax=ax1)
+
     sc1 = ax1.scatter(_df.index, _df.Scattering,
                       marker='o', s=15, facecolor="g", edgecolor=None, linewidths=0.3, alpha=0.9)
     sc2 = ax1.scatter(_df.index, _df.Absorption,
