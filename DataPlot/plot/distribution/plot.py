@@ -65,8 +65,6 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
 
     """
     # Copy to avoid modifying original data
-    if fig_kws is None:
-        fig_kws = {}
     z = z.copy().to_numpy()
     z = nan_to_num(z)
 
@@ -88,6 +86,7 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
 
+    # main plot
     pco1 = ax.pcolormesh(x, y, z.T, shading='auto', **plot_kws)
 
     # Set the ylabel and ylim

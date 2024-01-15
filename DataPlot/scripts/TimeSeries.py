@@ -9,8 +9,6 @@ from pandas import read_csv, concat, date_range
 from DataPlot.data_processing import *
 from DataPlot.scripts.Data_classify import state_classify, season_classify, Seasons
 
-PATH_MAIN = Path(__file__).parents[3] / 'Data-example' / 'Level2' / 'distribution'
-
 PNSD = DataReader('PNSD_dNdlogdp.csv')
 PSSD = DataReader('PSSD_dSdlogdp.csv')
 PVSD = DataReader('PVSD_dVdlogdp.csv')
@@ -21,22 +19,74 @@ df = DataReader('All_data.csv')
 dic_grp_sta = state_classify(df)
 
 
+def inset_colorbar(ax):
+
+    return ax
+
+
+def sub(df, trg: str, ax=None, cbar=False, set_visible=False,
+        cmap='jet', fig_kws={}, cbar_kws={}, plot_kws={},
+        **kwargs):
+    cbar_label = cbar_kws.pop('cbar_label', unit(trg))
+    cbar_min = cbar_kws.pop('cbar_min', df[trg].min() if df[trg].min() > 0.0 else 1.)
+    cbar_max = cbar_kws.pop('cbar_max', df[trg].max())
+
+    # Set the plot_kws
+    plot_kws = dict(**plot_kws)
+
+    # Set the figure keywords
+    fig_kws = dict(figsize=(10, 4), **fig_kws)
+
+    if ax is None:
+        fig, ax = plt.subplots(**fig_kws)
+
+    # main plot
+    ax.plot(df.index, df[trg], **plot_kws)
+
+    # Set title
+    st_tm, fn_tm = df.index[0], df.index[-1]
+    ax.set_title(kwargs.get('title', f'{st_tm.strftime("%Y/%m/%d")} - {fn_tm.strftime("%Y/%m/%d")}'))
+
+    if set_visible:
+        ax.axes.xaxis.set_visible(False)
+
+    # Set the figure keywords
+    if cbar:
+        cbar_kws = dict(label=r'$dN/dlogD_p\ (\# / cm^{-3})$', **cbar_kws)
+        clb = plt.colorbar(ax, pad=0.01, **cbar_kws)
+
+    return ax
+
+
 @set_figure(fs=12)
 def time_series(_df):
+    st_tm, fn_tm = _df.index[0], _df.index[-1]
     fig, (ax1, ax2, ax3, ax6) = plt.subplots(4, 1, figsize=(12, 6))
-    fig.subplots_adjust(right=1 - 0.1)
-    sc_1, = ax1.plot(time_, _df.Extinction, lw=1.5, color="b", alpha=1)
-    sc_2, = ax1.plot(time_, _df.Scattering, lw=1.5, color="g", alpha=1)
-    sc_3, = ax1.plot(time_, _df.Absorption, lw=1.5, color="r", alpha=1)
+
+    ax1 = sub(_df,
+              trg='Extinction',
+              ax=ax1,
+              plot_kws=dict(lw=1.5, color="b", alpha=1, label=r'$\bf Extinction$'),
+              set_visible=True,
+              )
+    ax1 = sub(_df,
+              trg='Scattering',
+              ax=ax1,
+              plot_kws=dict(lw=1.5, color="g", alpha=1, label=r'$\bf Scattering$'),
+              )
+    ax1 = sub(_df,
+              trg='Absorption',
+              ax=ax1,
+              plot_kws=dict(lw=1.5, color="r", alpha=1, label=r'$\bf Absorption$'),
+              )
+
     ax1.set_ylabel(r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$')
     ax1.set(ylim=(0., _df.Extinction.max() * 1.1), xlim=(st_tm, fn_tm))
-    ax1.axes.xaxis.set_visible(False)
-    ax1.legend([sc_1, sc_2, sc_3], [r'$\bf Extinction$', r'$\bf Scattering$', r'$\bf Absorption$'],
-               loc='upper right', bbox_to_anchor=(1, 1), ncol=3, frameon=False, labelspacing=0.5, handlelength=1)
+    ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, frameon=False, labelspacing=0.5, handlelength=1)
 
     # Temp, RH
     AT, = ax2.plot(time_, _df.AT, color="r", alpha=1)
-    ax2.set_ylabel(r'$\bf Temp\ (^{\circ}C)$')
+    ax2.set_ylabel(unit('AT'))
     ax2.set(ylim=(_df.AT.min() - 2, _df.AT.max() + 2), xlim=(st_tm, fn_tm))
     ax2.axes.xaxis.set_visible(False)
     ax2.tick_params(axis='y', colors=AT.get_color())
@@ -45,9 +95,10 @@ def time_series(_df):
 
     ax2_2 = ax2.twinx()
     RH, = ax2_2.plot(time_, _df.RH, color="b", alpha=1)
-    ax2_2.set_ylabel(r'$\bf RH\ (\%)$')
+    ax2_2.set_ylabel(unit('RH'))
     ax2_2.set(ylim=(20, 100), xlim=(st_tm, fn_tm))
     ax2_2.axes.xaxis.set_visible(False)
+
     ax2_2.tick_params(axis='y', colors=RH.get_color())
     ax2_2.yaxis.label.set_color(RH.get_color())
     ax2_2.spines['right'].set_color(RH.get_color())
@@ -94,40 +145,25 @@ def time_series(_df):
 
 @set_figure(fs=12)
 def extinction_timeseries(_df):
-    # 消光 PM1 PM2.5 整年度時序
     st_tm, fn_tm = _df.index[0], _df.index[-1]
     tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
-    fig2, (axes1, axes2) = plt.subplots(2, 1, figsize=(12, 5), dpi=150, constrained_layout=True)
-    sc = axes1.scatter(_df.index, _df.Extinction, c=_df.PM25, norm=plt.Normalize(vmin=0, vmax=50), cmap='jet',
-                       marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
+    fig, ax1 = plt.subplots(1, 1, figsize=(12, 5))
 
-    axes1.set_title('Extinction & $\mathregular{PM_{2.5}}$ Sequence Diagram')
-    axes1.set_xlabel('')
-    axes1.set_ylabel('Ext (1/Mm)')
-    axes1.set_ylim(0., 600)
-    axes1.set_xlim(st_tm, fn_tm)
+    sc = ax1.scatter(_df.index, _df.Extinction, c=_df.PM25, norm=plt.Normalize(vmin=0, vmax=50), cmap='jet',
+                     marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
 
-    axins = inset_axes(axes1, width="40%", height="5%", loc=1)
+    ax1.set_title(r'$Extinction\ &\ PM_{2.5}\ Sequence\ Diagram$')
+    ax1.set_ylabel('Extinction (1/Mm)')
+    ax1.set_ylim(0., )
+    ax1.set_xlim(st_tm, fn_tm)
+
+    axins = inset_axes(ax1, width="40%", height="5%", loc=1)
     color_bar = plt.colorbar(sc, cax=axins, orientation='horizontal')
-    color_bar.set_label(label='$\mathregular{PM_{2.5}}$' + ' ($\mathregular{\mu}$g/$\mathregular{m^3}$)',
-                        family='Times New Roman', weight='bold', size=14)
+    color_bar.set_label(label=r'$PM_{2.5}$' + r' $({\mu}g/{m^3})$', weight='bold', size=14)
+    color_ticks = color_bar.ax.get_xticks().astype(int)
+    color_bar.ax.set_xticks(color_ticks)
+    color_bar.ax.set_xticklabels(color_ticks, size=14)
 
-    color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int), size=14)
-    ###
-    sc2 = axes2.scatter(_df.index, _df.Extinction, c=_df.PM1, norm=plt.Normalize(vmin=0, vmax=30), cmap='jet',
-                        marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
-
-    axes2.set_title('Extinction & $\mathregular{PM_{1.0}}$ Sequence Diagram')
-    axes2.set_xlabel('')
-    axes2.set_ylabel('Ext (1/Mm)')
-    axes2.set_ylim(0., 600)
-    axes2.set_xlim(st_tm, fn_tm)
-
-    axins2 = inset_axes(axes2, width="40%", height="5%", loc=1)
-    color_bar2 = plt.colorbar(sc2, cax=axins2, orientation='horizontal')
-    color_bar2.set_label(label='$\mathregular{PM_{1.0}}$' + ' ($\mathregular{\mu}$g/$\mathregular{m^3}$)',
-                         family='Times New Roman', weight='bold', size=14)
-    color_bar2.ax.set_xticklabels(color_bar2.ax.get_xticks().astype(int), size=14)
     plt.show()
 
 
@@ -138,6 +174,7 @@ def extinction_month(_df):
 
     fig, (ax2, ax1) = plt.subplots(2, 1, figsize=(12, 5), dpi=150)
 
+    ax1 = sub(_df, trg='Scattering', ax=ax1)
     sc1 = ax1.scatter(_df.index, _df.Scattering,
                       marker='o', s=15, facecolor="g", edgecolor='k', linewidths=0.3, alpha=0.9)
     sc2 = ax1.scatter(_df.index, _df.Absorption,
@@ -152,11 +189,9 @@ def extinction_month(_df):
 
     sc3 = ax2.scatter(_df.index, _df.Extinction,
                       marker='o', s=15, facecolor="b", edgecolor='k', linewidths=0.3, alpha=0.9)
-    therosold = ax2.plot(_df.index, np.full(len(_df.index), _df.Extinction.quantile([0.90])), color='r',
-                         ls='--', lw=2)
+    ax2.plot(_df.index, np.full(len(_df.index), _df.Extinction.quantile([0.90])), color='r',
+                         ls='--', lw=2, label='therosold')
     ax2.set_ylabel('Extinction (1/Mm)', loc='bottom')
-    # ax2.set_xticks(tick_time)
-    # ax2.set_xticklabels(tick_time.strftime(''))
     ax2.set_ylim(0, _df.Scattering.max() + 10)
     ax2.set_xlim(st_tm, fn_tm)
 
@@ -165,13 +200,12 @@ def extinction_month(_df):
     ax2.yaxis.set_label_position("left")
     ax2.yaxis.tick_left()
 
-    # [ax2.spines[axis].set_visible(False) for axis in ['bottom']]
+    [ax2.spines[axis].set_visible(False) for axis in ['bottom']]
     ax2.get_xaxis().set_visible(False)
 
     ax2.legend(handles=[sc1, sc2, sc3], labels=['Scattering', 'Absorption', 'Extinction'],
                bbox_to_anchor=(0, 1.), loc='upper left')
-    plt.subplots_adjust(hspace=0.0)
-    # fig.savefig(pth(f"Optical{_df.Season[0]}"))
+
     plt.show()
 
 
@@ -189,8 +223,7 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
 
     # 數據平滑
     _df = _df.rolling(3).mean(numeric_only=True)
-    # df_.Extinction = df_.Extinction.fillna(0)  # 使用0填充NaN值
-    # df_.Extinction = df_.Extinction.replace([np.inf, -np.inf], 0)
+
     time_series(_df)
     extinction_timeseries(_df)
     extinction_month(_df)
