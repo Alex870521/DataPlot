@@ -19,9 +19,23 @@ df = DataReader('All_data.csv')
 dic_grp_sta = state_classify(df)
 
 
-def inset_colorbar(ax):
+def inset_colorbar(ax, axes_image, label=None, loc=None):
+    axis = inset_axes(ax,
+                      width="35%",
+                      height="8%",
+                      loc=loc or 'lower left',
+                      bbox_to_anchor=(0.015, 0.85, 1, 1),
+                      bbox_transform=ax.transAxes,
+                      borderpad=0,
+                      )
+    color_bar = plt.colorbar(axes_image, cax=axis, orientation='horizontal')
+    color_bar.set_label(label=label or '', weight='bold', size=12)
 
-    return ax
+    # set color_ticks
+    # color_ticks = color_bar.ax.get_xticks()
+    # color_bar.ax.set_xticks(color_ticks)
+    # color_bar.ax.set_xticklabels(color_ticks, size=12)
+    return axis
 
 
 def sub(df, trg: str, ax=None, cbar=False, set_visible=False,
@@ -61,6 +75,8 @@ def sub(df, trg: str, ax=None, cbar=False, set_visible=False,
 @set_figure(fs=12)
 def time_series(_df):
     st_tm, fn_tm = _df.index[0], _df.index[-1]
+    tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
+
     fig, (ax1, ax2, ax3, ax6) = plt.subplots(4, 1, figsize=(12, 6))
 
     ax1 = sub(_df,
@@ -129,16 +145,15 @@ def time_series(_df):
     ax3_2.set_ylim((-2, _df.WS.max() * 1.1))
     ax3_2.set_yticks([0, 2, 4])
 
-    ax3_3 = inset_axes(ax3, width="30%", height="5%", loc='upper left')
-    color_bar2 = plt.colorbar(sc_6, cax=ax3_3, orientation='horizontal')
-    color_bar2.set_label(label=r'$\bf WD $')
+    ax3_3 = inset_colorbar(ax3, sc_6, label=r'$\bf WD $')
+
 
     sc_6 = ax6.scatter(time_, _df.PM25, c=_df.PM1 / _df.PM25, vmin=0.2, vmax=1, cmap='jet', marker='o', s=5, alpha=1.0)
     ax6.set_ylabel(r'$\bf PM_{2.5}\ (\mu g/m^3)$')
     ax6.set(ylim=(0, _df.PM25.max() * 1.2), xlim=(st_tm, fn_tm))
-    ax4_2 = inset_axes(ax6, width="30%", height="5%", loc='upper left')
-    color_bar2 = plt.colorbar(sc_6, cax=ax4_2, orientation='horizontal')
-    color_bar2.set_label(label=r'$\bf PM_{1}/PM_{2.5} $')
+
+    ax4_2 = inset_colorbar(ax6, sc_6, label=r'$\bf PM_{1}/PM_{2.5} $')
+
     # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
     plt.show()
 
@@ -147,38 +162,14 @@ def time_series(_df):
 def extinction_timeseries(_df):
     st_tm, fn_tm = _df.index[0], _df.index[-1]
     tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
-    fig, ax1 = plt.subplots(1, 1, figsize=(12, 5))
-
-    sc = ax1.scatter(_df.index, _df.Extinction, c=_df.PM25, norm=plt.Normalize(vmin=0, vmax=50), cmap='jet',
-                     marker='o', s=10, facecolor="b", edgecolor=None, alpha=1)
-
-    ax1.set_title(r'$Extinction\ &\ PM_{2.5}\ Sequence\ Diagram$')
-    ax1.set_ylabel('Extinction (1/Mm)')
-    ax1.set_ylim(0., )
-    ax1.set_xlim(st_tm, fn_tm)
-
-    axins = inset_axes(ax1, width="40%", height="5%", loc=1)
-    color_bar = plt.colorbar(sc, cax=axins, orientation='horizontal')
-    color_bar.set_label(label=r'$PM_{2.5}$' + r' $({\mu}g/{m^3})$', weight='bold', size=14)
-    color_ticks = color_bar.ax.get_xticks().astype(int)
-    color_bar.ax.set_xticks(color_ticks)
-    color_bar.ax.set_xticklabels(color_ticks, size=14)
-
-    plt.show()
-
-
-@set_figure(fs=12)
-def extinction_month(_df):
-    st_tm, fn_tm = _df.index[0], _df.index[-1]
-    tick_time = date_range(st_tm, fn_tm, freq='10d')  ## set tick
 
     fig, (ax2, ax1) = plt.subplots(2, 1, figsize=(12, 5), dpi=150)
 
     ax1 = sub(_df, trg='Scattering', ax=ax1)
     sc1 = ax1.scatter(_df.index, _df.Scattering,
-                      marker='o', s=15, facecolor="g", edgecolor='k', linewidths=0.3, alpha=0.9)
+                      marker='o', s=15, facecolor="g", edgecolor=None, linewidths=0.3, alpha=0.9)
     sc2 = ax1.scatter(_df.index, _df.Absorption,
-                      marker='o', s=15, facecolor="r", edgecolor='k', linewidths=0.3, alpha=0.9)
+                      marker='o', s=15, facecolor="r", edgecolor=None, linewidths=0.3, alpha=0.9)
 
     ax1.set_ylabel('Scattering & \n Absorption (1/Mm)')
     # ax1.set_xticks(tick_time)
@@ -226,6 +217,5 @@ for season, (st_tm_, fn_tm_) in Seasons.items():
 
     time_series(_df)
     extinction_timeseries(_df)
-    extinction_month(_df)
 
     break
