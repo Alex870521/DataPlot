@@ -32,9 +32,9 @@ class DataReader:
 
     DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
-    def __init__(self, filename: str):
-        self.file_path: Union[Path, None] = list(self.DEFAULT_PATH.glob('**/' + filename))[0]
-        self.data:      Union[DataFrame, None] = self.read_data(self.file_path)
+    # def __init__(self, filename: str):
+    #     self.file_path: Union[Path, None] = list(self.DEFAULT_PATH.glob('**/' + filename))[0]
+    #     self.data:      Union[DataFrame, None] = self.read_data(self.file_path)
 
     def __new__(cls, filename: str) -> 'DataFrame':
         file_path: Union[Path, None] = cls.find_file(filename)
