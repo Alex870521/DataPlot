@@ -8,35 +8,36 @@ from DataPlot.data_processing import *
 from DataPlot.plot import *
 
 
-def inset_colorbar(ax, axes_image, label=None, loc=None, inset_axes_kws={}, clb_kws={}, **kwargs):
+def inset_colorbar(ax, axes_image, orientation, inset_kws={}, clb_kws={}):
     # Set inset_axes_kws
-    inset_axes_kws = dict(width="35%",
-                          height="7%",
-                          loc=loc or 'lower left',
-                          bbox_to_anchor=(0.015, 0.85, 1, 1),
-                          bbox_transform=ax.transAxes,
-                          borderpad=0,
-                          **inset_axes_kws)
+    if orientation == 'horizontal':
+        inset_kws.update(width="35%",
+                         height="7%",
+                         loc='lower left',
+                         bbox_to_anchor=(0.015, 0.85, 1, 1),
+                         bbox_transform=ax.transAxes,
+                         borderpad=0,
+                         )
 
-    # clb_kws = dict(width="35%",
-    #                height="7%",
-    #                loc=loc or 'lower left',
-    #                bbox_to_anchor=(0.015, 0.85, 1, 1),
-    #                bbox_transform=ax.transAxes,
-    #                borderpad=0,
-    #                **inset_axes_kws)
+    if orientation == 'vertical':
+        inset_kws.update(width="1%",
+                         height="100%",
+                         loc='lower left',
+                         bbox_to_anchor=(1.1, 0., 1, 1),
+                         bbox_transform=ax.transAxes,
+                         borderpad=0,
+                         )
 
-    axis = inset_axes(ax, **inset_axes_kws)
-    color_bar = plt.colorbar(axes_image, cax=axis, orientation='horizontal', label=label)
+    # Set clb_kws
+    clb_kws = dict(**clb_kws)
 
-    # set color_ticks
-    # color_ticks = kwargs.pop('ticks', color_bar.ax.get_xticks()).astype(int)
-    # color_bar.ax.set_xticks(color_ticks)
-    # color_bar.ax.set_xticklabels(color_ticks, size=12)
+    axis = inset_axes(ax, **inset_kws)
+    color_bar = plt.colorbar(axes_image, cax=axis, orientation=orientation, **clb_kws)
+
     return axis
 
 
-def sub_timeseries(df, target_col: str, c: str = None, *, ax=None, cbar=False, set_visible=True,
+def sub_timeseries(df, target_col, c=None, ax=None, cbar=False, set_visible=True,
                    fig_kws={}, cbar_kws={}, plot_kws={}, **kwargs):
     time = df.index.copy()
 
@@ -152,17 +153,18 @@ def time_series(df):
     ax3.set(ylim=(0, df.VC.max() * 1.1), xlim=(st_tm, fn_tm))
     ax3.axes.xaxis.set_visible(False)
 
-    ax3_1 = inset_axes(ax3,
-                       width="1%",
-                       height="100%",
-                       loc='lower left',
-                       bbox_to_anchor=(1.1, 0., 1, 1),
-                       bbox_transform=ax3.transAxes,
-                       borderpad=0,
-                       )
-
-    cbar = plt.colorbar(scalar_map, cax=ax3_1, orientation='vertical', ticks=[0, 200, 400, 600, 800],
-                        label=r'$\bf PBLH (m)$')
+    # ax3_1 = inset_axes(ax3,
+    #                    width="1%",
+    #                    height="100%",
+    #                    loc='lower left',
+    #                    bbox_to_anchor=(1.1, 0., 1, 1),
+    #                    bbox_transform=ax3.transAxes,
+    #                    borderpad=0,
+    #                    )
+    #
+    # cbar = plt.colorbar(scalar_map, cax=ax3_1, orientation='vertical',)
+    ax3_1 = inset_colorbar(ax3, scalar_map, orientation='vertical', inset_kws=dict(),
+                           clb_kws=dict(ticks=[0, 200, 400, 600, 800], label=r'$\bf PBLH (m)$'))
 
     ax3_2 = ax3.twinx()
     sc_6 = ax3_2.scatter(time, df.WS, c=df.WD, cmap='hsv', marker='o', s=5, alpha=1.0)
@@ -171,7 +173,8 @@ def time_series(df):
     ax3_2.set_yticks([0, 2, 4])
 
     # add colorbar
-    ax3_3 = inset_colorbar(ax3, sc_6, label=r'$\bf WD $', )
+    ax3_3 = inset_colorbar(ax3, sc_6, orientation='horizontal', inset_kws=dict(),
+                           clb_kws=dict(label=r'$\bf WD $'))
 
     # sc_6 = sub_timeseries(df,
     #                       target_col='PM25',
@@ -189,7 +192,8 @@ def time_series(df):
     ax4.set_xticks(tick_time)
     ax4.set_xticklabels(tick_time, size=12)
     # add colorbar
-    ax4_2 = inset_colorbar(ax4, sc_6, label=r'$\bf PM_{1}/PM_{2.5} $')
+    ax4_2 = inset_colorbar(ax4, sc_6, orientation='horizontal', inset_kws=dict(),
+                           clb_kws=dict(label=r'$\bf PM_{1}/PM_{2.5} $'))
 
     # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
     plt.show()
