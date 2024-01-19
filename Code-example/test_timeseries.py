@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from numpy.random import multivariate_normal
+
+import matplotlib.colors as mcolors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.plot import set_figure, unit, getColor, color_maker
 from pandas import DataFrame, concat, date_range, Timestamp
@@ -16,6 +19,19 @@ if __name__ == '__main__':
     PESD = DataReader('PESD_dextdlogdp_internal.csv')
     df   = DataReader('All_data.csv')
 
+
+    plt.style.use('_mpl-gallery-nogrid')
+    PNSD=PVSD.dropna(axis=0)
+    # plot:
+    fig, ax = plt.subplots()
+    original_array = np.array(PNSD.columns)
+    x = np.repeat(original_array, len(PNSD.index)).astype(float)
+    y = PNSD.values.flatten().astype(float)
+    ax.hist2d(x, y, bins=167, norm=mcolors.PowerNorm(0.3))
+
+    plt.show()
+
+
     # Season timeseries
     for season, (st_tm_, fn_tm_) in Seasons.items():
         st_tm, fn_tm = pd.Timestamp(st_tm_), pd.Timestamp(fn_tm_)
@@ -28,6 +44,6 @@ if __name__ == '__main__':
         # 數據平滑
         df = df.rolling(3).mean(numeric_only=True)
 
-        time_series(df)
+        # time_series(df)
 
         break

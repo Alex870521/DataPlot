@@ -37,8 +37,22 @@ def inset_colorbar(ax, axes_image, orientation, inset_kws={}, clb_kws={}):
     return axis
 
 
-def sub_timeseries(df, target_col, c=None, ax=None, cbar=False, set_visible=True,
-                   fig_kws={}, cbar_kws={}, plot_kws={}, **kwargs):
+def sub_timeseries(df, target_col,
+                   c=None,
+                   ax=None,
+                   cbar=False,
+                   set_visible=True,
+                   fig_kws=None,
+                   cbar_kws=None,
+                   plot_kws=None,
+                   **kwargs):
+
+    if fig_kws is None:
+        fig_kws = {}
+    if cbar_kws is None:
+        cbar_kws = {}
+    if plot_kws is None:
+        plot_kws = {}
     time = df.index.copy()
 
     # Set cbar_kws
@@ -75,17 +89,23 @@ def sub_timeseries(df, target_col, c=None, ax=None, cbar=False, set_visible=True
     else:
         line, = ax.plot(time, df[target_col], **plot_kws)
 
-    # set title
+    # prepare parameter
     st_tm, fn_tm = time[0], time[-1]
-    ax.set_title(kwargs.get('title', ''))
-    # ax.set_title(kwargs.get('title', f'{st_tm.strftime("%Y/%m/%d")} - {fn_tm.strftime("%Y/%m/%d")}'))
-
-    # set ticks
     freq = kwargs.get('freq', '10d')
     tick_time = date_range(st_tm, fn_tm, freq=freq)
-
-    ax.set_xticks(tick_time)
-    ax.set_xticklabels(tick_time, size=12)
+    breakpoint()
+    # set
+    if kwargs is not None:
+        ax.set(title=kwargs.get('title', ''),
+               xlabel=kwargs.get('xlabel', ''),
+               ylabel=kwargs.get('ylabel', ''),
+               xticks=kwargs.get('xticks', tick_time),
+               xticklabels=(kwargs.get('xticklabels', tick_time)),
+               yticks=kwargs.get('yticks', None),
+               yticklabels=kwargs.get('yticklabels', None),
+               xlim=kwargs.get('xlim', None),
+               ylim=kwargs.get('ylim', None),
+               )
 
     if ~set_visible:
         ax.axes.xaxis.set_visible(False)
@@ -111,37 +131,56 @@ def time_series(df):
                          ax=ax1,
                          set_visible=False,
                          plot_kws=dict(color="b", label='Extinction'),
+                         title='',
+                         ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                         xlim=tick_time,
+                         ylim=[0., df.Extinction.max() * 1.1]
                          )
+
     ax1 = sub_timeseries(df,
                          target_col='Scattering',
                          ax=ax1,
                          set_visible=False,
                          plot_kws=dict(color="g", label='Scattering'),
+                         ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                         xlim=tick_time,
+                         ylim=[0., df.Extinction.max() * 1.1]
                          )
+
     ax1 = sub_timeseries(df,
                          target_col='Absorption',
                          ax=ax1,
                          set_visible=False,
                          plot_kws=dict(color="r", label='Absorption'),
+                         ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                         xlim=tick_time,
+                         ylim=[0., df.Extinction.max() * 1.1]
                          )
 
-    ax1.set_ylabel(r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$')
-    ax1.set(ylim=(0., df.Extinction.max() * 1.1), xlim=(st_tm, fn_tm))
     ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, frameon=False, labelspacing=0.5, handlelength=1)
 
     # Temp, RH
-    ax2 = sub_timeseries(df, 'AT', ax=ax2, set_visible=False, plot_kws=dict(color='r', label=unit('AT')))
-    ax2.set(ylim=(df.AT.min() - 2, df.AT.max() + 2), xlim=(st_tm, fn_tm))
+    ax2 = sub_timeseries(df,
+                         target_col='AT',
+                         ax=ax2,
+                         set_visible=False,
+                         plot_kws=dict(color='r', label=unit('AT')),
+                         ylabel=unit('AT'),
+                         ylim=(df.AT.min() - 2, df.AT.max() + 2))
 
     # ax2.tick_params(axis='y', colors=ax2.get_facecolor())
     # ax2.yaxis.label.set_color(ax2.get_facecolor())
     # ax2.spines['left'].set_color(ax2.get_facecolor())
 
     ax2_2 = ax2.twinx()
-    ax2_2 = sub_timeseries(df, 'RH', ax=ax2_2, set_visible=False, plot_kws=dict(color='b', label=unit('RH')))
-    ax2_2.set(ylim=(20, 100), xlim=(st_tm, fn_tm))
+    ax2_2 = sub_timeseries(df, 'RH',
+                           ax=ax2_2,
+                           set_visible=False,
+                           plot_kws=dict(color='b', label=unit('RH')),
+                           ylabel=unit('RH'),
+                           ylim=(20, 100))
 
-    ax2_2.tick_params(axis='y', colors=ax2_2.get_facecolor())
+    # ax2_2.tick_params(axis='y', colors=ax2_2.get_facecolor())
     # ax2_2.yaxis.label.set_color(ax2_2.get_facecolor())
     # ax2_2.spines['right'].set_color(ax2_2.get_facecolor())
     # ax2_2.spines['left'].set_color(ax2.get_facecolor())
@@ -173,7 +212,7 @@ def time_series(df):
     ax3_2.set_yticks([0, 2, 4])
 
     # add colorbar
-    ax3_3 = inset_colorbar(ax3, sc_6, orientation='horizontal', inset_kws=dict(),
+    ax3_3 = inset_colorbar(ax3, sc_6, orientation='vertical', inset_kws=dict(),
                            clb_kws=dict(label=r'$\bf WD $'))
 
     # sc_6 = sub_timeseries(df,
@@ -192,7 +231,7 @@ def time_series(df):
     ax4.set_xticks(tick_time)
     ax4.set_xticklabels(tick_time, size=12)
     # add colorbar
-    ax4_2 = inset_colorbar(ax4, sc_6, orientation='horizontal', inset_kws=dict(),
+    ax4_2 = inset_colorbar(ax4, sc_6, orientation='vertical', inset_kws=dict(),
                            clb_kws=dict(label=r'$\bf PM_{1}/PM_{2.5} $'))
 
     # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
