@@ -93,10 +93,10 @@ def sub_timeseries(df, target_col,
     st_tm, fn_tm = time[0], time[-1]
     freq = kwargs.get('freq', '10d')
     tick_time = date_range(st_tm, fn_tm, freq=freq)
-    breakpoint()
+
     # set
     if kwargs is not None:
-        ax.set(title=kwargs.get('title', ''),
+        ax.set(
                xlabel=kwargs.get('xlabel', ''),
                ylabel=kwargs.get('ylabel', ''),
                xticks=kwargs.get('xticks', tick_time),

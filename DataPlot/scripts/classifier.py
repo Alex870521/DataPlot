@@ -21,6 +21,9 @@ class Classifier:
 class SeasonClassifier(Classifier):
     Seasons = Seasons
 
+    def __new__(cls, df):
+        return cls.classify(df)
+
     @classmethod
     def classify(cls, df):
         df['Month'] = df.index.strftime('%Y-%m')
