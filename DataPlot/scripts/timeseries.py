@@ -46,7 +46,6 @@ def sub_timeseries(df, target_col,
                    cbar_kws=None,
                    plot_kws=None,
                    **kwargs):
-
     if fig_kws is None:
         fig_kws = {}
     if cbar_kws is None:
@@ -72,7 +71,7 @@ def sub_timeseries(df, target_col,
                         vmin=df[c].min(),
                         vmax=df[c].max(),
                         c=df[c]
-                        **plot_kws)
+                          ** plot_kws)
     else:
         plot_kws = dict(**plot_kws)
 
@@ -94,17 +93,27 @@ def sub_timeseries(df, target_col,
     freq = kwargs.get('freq', '10d')
     tick_time = date_range(st_tm, fn_tm, freq=freq)
 
+    title = kwargs.get('title', '')
+    xlabel = kwargs.get('xlabel', '')
+    ylabel = kwargs.get('ylabel', '')
+    xticks = kwargs.get('xticks', tick_time)
+    xticklabels = (kwargs.get('xticklabels', tick_time))
+    yticks = kwargs.get('yticks', None),
+    yticklabels = kwargs.get('yticklabels', None)
+    xlim = kwargs.get('xlim', None)
+    ylim = kwargs.get('ylim', None)
+
     # set
     if kwargs is not None:
         ax.set(
-               xlabel=kwargs.get('xlabel', ''),
-               ylabel=kwargs.get('ylabel', ''),
-               xticks=kwargs.get('xticks', tick_time),
-               xticklabels=(kwargs.get('xticklabels', tick_time)),
-               yticks=kwargs.get('yticks', None),
-               yticklabels=kwargs.get('yticklabels', None),
-               xlim=kwargs.get('xlim', None),
-               ylim=kwargs.get('ylim', None),
+               xlabel=xlabel,
+               ylabel=ylabel,
+               xticks=xticks,
+               xticklabels=xticklabels,
+               yticks=yticks,
+               yticklabels=yticklabels,
+               xlim=xlim,
+               ylim=ylim,
                )
 
     if ~set_visible:
@@ -134,7 +143,7 @@ def time_series(df):
                          title='',
                          ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
                          xlim=tick_time,
-                         ylim=[0., df.Extinction.max() * 1.1]
+                         ylim=(0., df.Extinction.max() * 1.1)
                          )
 
     ax1 = sub_timeseries(df,
