@@ -27,6 +27,7 @@
     "Bsca_dry": "Mie Dry Scattering (1/Mm)",
     "Scattering": "Scattering (1/Mm)",
     "Diurnal": "Hour",
+    "PBLH": "PBLH (m)",
     "VC": "VC (m²/s)$",
     "MAC": "MAC (m²/g)",
     "MAE": "MAE (m²/g)",
@@ -62,5 +63,6 @@
     "CPC_2": "CPC_2 ({\\#}/cm^{3})",
     "BC6": "BC6 (ng/cm^{3}) (880 nm)",
     "IR BCc": "IR BCc (ng/cm^{3}) (880 nm)",
-    "AT": "Temp (^{\\circ}C)"
+    "AT": "Temp (^{\\circ}C)",
+    "WS": "WS (m/s)"
 }
