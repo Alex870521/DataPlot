@@ -22,4 +22,5 @@ if __name__ == '__main__':
         df = df.rolling(3).mean(numeric_only=True)
 
         time_series(df)
+
         break
