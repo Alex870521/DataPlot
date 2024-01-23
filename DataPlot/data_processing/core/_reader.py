@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 from pathlib import Path
 from pandas import read_csv, read_json, read_excel, DataFrame
 
@@ -32,26 +32,22 @@ class DataReader:
 
     DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
 
-    # def __init__(self, filename: str):
-    #     self.file_path: Union[Path, None] = list(self.DEFAULT_PATH.glob('**/' + filename))[0]
-    #     self.data:      Union[DataFrame, None] = self.read_data(self.file_path)
-
-    def __new__(cls, filename: str) -> 'DataFrame':
-        file_path: Union[Path, None] = cls.find_file(filename)
-        data:      Union[DataFrame, None] = cls.read_data(file_path)
+    def __new__(cls, filename: str) -> DataFrame:
+        file_path: Optional[Path] = cls.find_file(filename)
+        data:      Optional[DataFrame] = cls.read_data(file_path)
         return data
 
     @classmethod
     def find_file(cls, filename: str) -> Path:
         try:
             file_path = list(cls.DEFAULT_PATH.glob('**/' + filename))[0]
-        except IndexError:
-            raise FileNotFound(f"File '{filename}' not found.")
-        else:
             return file_path
 
+        except IndexError:
+            raise FileNotFound(f"File '{filename}' not found.")
+
     @classmethod
-    def read_data(cls, file_path) -> Union[DataFrame, None]:
+    def read_data(cls, file_path) -> Optional[DataFrame]:
         file_extension = file_path.suffix.lower()
 
         if file_extension == '.csv':
@@ -64,13 +60,17 @@ class DataReader:
             raise ValueError(f"Unsupported file format: {file_extension}")
 
     @staticmethod
-    def read_csv(file_path) -> DataFrame:
-        return read_csv(file_path, parse_dates=['Time'], na_values=['-', 'E', 'F'], low_memory=False).set_index('Time')
+    def read_csv(file_path: Path) -> DataFrame:
+        return read_csv(file_path, na_values=('-', 'E', 'F'), parse_dates=['Time'], low_memory=False).set_index('Time')
 
     @staticmethod
-    def read_json(file_path) -> DataFrame:
+    def read_json(file_path: Path) -> DataFrame:
         return read_json(file_path)
 
     @staticmethod
-    def read_excel(file_path) -> DataFrame:
+    def read_excel(file_path: Path) -> DataFrame:
         return read_excel(file_path, parse_dates=['Time'])
+
+
+if __name__ == '__main__':
+    df = DataReader('EPB.csv')

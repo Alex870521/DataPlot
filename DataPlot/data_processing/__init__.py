@@ -10,3 +10,6 @@ from .decorator import *
 
 # method object
 from .method import *
+
+# main
+from .main import main

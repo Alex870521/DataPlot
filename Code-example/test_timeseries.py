@@ -19,7 +19,8 @@ if __name__ == '__main__':
         PSSD_data = PSSD.loc[st_tm:fn_tm]
 
         # 數據平滑
-        # df = df.rolling(3).mean(numeric_only=True)
+        df = df.rolling(3).mean(numeric_only=True)
 
         time_series(df)
+
 

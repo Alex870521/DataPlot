@@ -39,9 +39,10 @@ def timer(func=None):
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):
-            st = time.perf_counter()
+            start = time.perf_counter()
             result = _func(*args, **kwargs)
-            print('time cost: {:.2f} seconds'.format(time.perf_counter() - st))
+            end = time.perf_counter() - start
+            print(f'Time cost for {func.__name__}: {end:.2f} seconds')
             return result
 
         return wrapper
