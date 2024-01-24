@@ -8,7 +8,7 @@ from DataPlot.data_processing import *
 from DataPlot.plot import *
 
 
-@set_figure(fs=12)
+@set_figure(fs=10)
 def time_series(df):
     time = df.index.copy()
     st_tm, fn_tm = time[0], time[-1]
@@ -31,7 +31,7 @@ def time_series(df):
                y='Absorption',
                ax=ax1,
                plot_kws=dict(color="r", label='Absorption'),
-               ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+               ylabel=r'$\bf Optical\ (1/Mm)$',
                ylim=[0., df.Extinction.max() * 1.1]
                )
 
@@ -57,7 +57,7 @@ def time_series(df):
     ax3.set_ylabel(r'$\bf VC\ (m^2/s)$')
     ax3.set(ylim=(0, df.VC.max() * 1.1), xlim=(st_tm, fn_tm))
     ax3.axes.xaxis.set_visible(False)
-    breakpoint()
+
     inset_colorbar(scalar_map, ax3,  inset_kws=dict(),
                    cbar_kws=dict(orientation='vertical', ticks=[0, 200, 400, 600, 800], label=unit('PBLH')))
 
@@ -72,7 +72,6 @@ def time_series(df):
                cbar_kws=dict(orientation='vertical', ticks=[0, 180, 360], label=unit('WS'))
                )
 
-    df['PM1/PM25'] = df.PM1 / df.PM25
     timeseries(df,
                y='PM25',
                c='PM1/PM25',
@@ -81,7 +80,7 @@ def time_series(df):
                plot_kws=dict(vmin=0.2, vmax=1, cmap='jet', label=unit('PM25')),
                ylabel=unit('PM25'),
                cbar=True,
-               cbar_kws=dict(orientation='vertical', ticks=[0, 180, 360], label=unit('PM1/PM25'))
+               cbar_kws=dict(orientation='vertical', label=unit('PM1/PM25'))
                )
 
     # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
