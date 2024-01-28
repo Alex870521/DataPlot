@@ -4,8 +4,17 @@ from pandas import date_range
 from DataPlot.plot.core import *
 
 
-def inset_cax(ax, orientation, inset_kws=None):
+def _inset_axes(ax, orientation='vertical', inset_kws={}):
     default_inset_kws = {}
+    if orientation == 'vertical':
+        default_inset_kws = dict(
+            width="1%",
+            height="100%",
+            loc='lower left',
+            bbox_to_anchor=(1.02, 0., 1, 1),
+            bbox_transform=ax.transAxes,
+            borderpad=0
+        )
 
     if orientation == 'horizontal':
         default_inset_kws = dict(
@@ -17,38 +26,23 @@ def inset_cax(ax, orientation, inset_kws=None):
             borderpad=0
         )
 
-    elif orientation == 'vertical':
-        default_inset_kws = dict(
-            width="1%",
-            height="100%",
-            loc='lower left',
-            bbox_to_anchor=(1.02, 0., 1, 1),
-            bbox_transform=ax.transAxes,
-            borderpad=0
-        )
-
     default_inset_kws.update(inset_kws)
 
     return inset_axes(ax, **default_inset_kws)
 
 
-def inset_colorbar(axes_image, ax, orientation='vertical', inset_kws=None, cbar_kws=None):
-    # Set inset_axes_kws
-    if cbar_kws is None:
-        cbar_kws = {}
-    if inset_kws is None:
-        inset_kws = {}
+def inset_colorbar(axes_image, ax, orientation='vertical', inset_kws={}, cbar_kws={}):
+    # create cax for colorbar
+    cax = _inset_axes(ax, orientation=orientation, inset_kws=inset_kws)
 
-    default_cbar_kws = {}
-    # # Set cbar_kws
-    # cbar_label = cbar_kws.pop('cbar_label', unit(y))
-    # cbar_min = cbar_kws.pop('cbar_min', df[y].min() if df[y].min() > 0.0 else 1.)
-    # cbar_max = cbar_kws.pop('cbar_max', df[y].max())
-    # cmap = cbar_kws.pop('cmap', 'jet')
+    default_cbar_kws = dict(
+        label='cbar_label',
+        cmap='jet',
+    )
+
     default_cbar_kws.update(cbar_kws)
 
     # Set clb_kws
-    cax = inset_cax(ax, orientation=orientation, inset_kws=inset_kws)
     plt.colorbar(mappable=axes_image, cax=cax, **default_cbar_kws)
 
 
@@ -57,23 +51,19 @@ def timeseries(df,
                c=None,
                ax=None,
                set_visible=False,
-               fig_kws=None,
-               plot_kws=None,
+               fig_kws={},
+               plot_kws={},
                cbar=False,
-               cbar_kws=None,
+               cbar_kws={},
                **kwargs):
-    if cbar_kws is None:
-        cbar_kws = {}
-    if plot_kws is None:
-        plot_kws = {}
-    if fig_kws is None:
-        fig_kws = {}
+    time = df.index.copy()
 
-    x = df.index.copy()
+    if ax is None:
+        fig, ax = plt.subplots(**fig_kws)
 
     # Set the plot_kws
-
-    if c is not None:
+    default_plot_kws = {}
+    if c is not None:  # scatterplot
         default_plot_kws = dict(
             marker='o',
             s=10,
@@ -86,36 +76,25 @@ def timeseries(df,
             c=df[c],
         )
 
-        default_plot_kws.update(**plot_kws)
+        default_plot_kws.update(plot_kws)
+
+        ax.scatter(time, df[y], **default_plot_kws)
 
     else:
-        default_plot_kws = dict(**plot_kws)
-
-    # Set the figure keywords
-    fig_kws = dict(**fig_kws)
-
-    if ax is None:
-        fig, ax = plt.subplots(**fig_kws)
-
-    # main plot
-    if c is not None:
-        ax.scatter(x, df[y], **default_plot_kws)
-
-    else:
-        ax.plot(x, df[y], **default_plot_kws)
-
-    # prepare parameter
-    st_tm, fn_tm = x[0], x[-1]
-    freq = kwargs.get('freq', '10d')
-    tick_time = date_range(st_tm, fn_tm, freq=freq)
+        default_plot_kws.update(plot_kws)
+        ax.plot(time, df[y], **default_plot_kws)
 
     if not set_visible:
         ax.axes.xaxis.set_visible(False)
 
     if cbar:
-        inset_colorbar(ax.get_children()[0], ax, inset_kws=None, cbar_kws=cbar_kws)
+        inset_colorbar(ax.get_children()[0], ax, cbar_kws=cbar_kws)
 
     if kwargs is not None:
+        st_tm, fn_tm = time[0], time[-1]
+        freq = kwargs.get('freq', '10d')
+        tick_time = date_range(st_tm, fn_tm, freq=freq)
+
         ax.set(
             xlabel=kwargs.get('xlabel', ''),
             ylabel=kwargs.get('ylabel', unit(f'{y}')),
@@ -132,3 +111,55 @@ def tms_scatter(): pass
 
 
 def tms_plot(): pass
+
+
+def tms_bar(df,
+            y,
+            color=None,
+            ax=None,
+            set_visible=False,
+            fig_kws={},
+            plot_kws={},
+            cbar=False,
+            cbar_kws={},
+            **kwargs):
+
+    time = df.index.copy()
+
+    if ax is None:
+        fig, ax = plt.subplots(**fig_kws)
+
+    # Set the plot_kws
+    default_plot_kws = dict(
+        width=0.0417,
+        edgecolor=None,
+        linewidth=0,
+        cmap='jet',
+    )
+
+    default_plot_kws.update(plot_kws)
+
+    scalar_map, colors = color_maker(df[f'{color}'].values, cmap=default_plot_kws.pop('cmap'))
+    ax.bar(time, df[f'{y}'], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
+
+    if not set_visible:
+        ax.axes.xaxis.set_visible(False)
+
+    if cbar:
+        inset_colorbar(scalar_map, ax, cbar_kws=cbar_kws)
+
+    if kwargs is not None:
+        st_tm, fn_tm = time[0], time[-1]
+        freq = kwargs.get('freq', '10d')
+        tick_time = date_range(st_tm, fn_tm, freq=freq)
+
+        ax.set(
+            xlabel=kwargs.get('xlabel', ''),
+            ylabel=kwargs.get('ylabel', unit(f'{y}')),
+            xticks=kwargs.get('xticks', tick_time),
+            xticklabels=kwargs.get('xticklabels', [_tm.strftime('%Y-%m-%d') for _tm in tick_time]),
+            # yticks=kwargs.get('yticks', ''),
+            # yticklabels=kwargs.get('yticklabels', ''),
+            xlim=kwargs.get('xlim', [st_tm, fn_tm]),
+            ylim=kwargs.get('ylim', [None, None]),
+        )

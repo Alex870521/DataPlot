@@ -28,7 +28,7 @@
     "Scattering": "Scattering (1/Mm)",
     "Diurnal": "Hour",
     "PBLH": "PBLH (m)",
-    "VC": "VC (m²/s)$",
+    "VC": "VC (m²/s)",
     "MAC": "MAC (m²/g)",
     "MAE": "MAE (m²/g)",
     "MEE": "MEE (m²/g)",
@@ -64,5 +64,6 @@
     "BC6": "BC6 (ng/cm^{3}) (880 nm)",
     "IR BCc": "IR BCc (ng/cm^{3}) (880 nm)",
     "AT": "Temp (^{\\circ}C)",
-    "WS": "WS (m/s)"
+    "WS": "WS (m/s)",
+    "WD": "WD ({\\circ})"
 }

@@ -23,4 +23,4 @@ if __name__ == '__main__':
 
         time_series(df)
 
-        break
+
