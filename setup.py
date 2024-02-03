@@ -12,7 +12,8 @@ setup(
 
     # Specify your project's dependencies
     install_requires=[
-        "pandas", "numpy", "matplotlib", "scipy"  # Add any other dependencies here
+        "pandas", "numpy", "matplotlib", "scipy", "seaborn",
+        "PyMieScatt", "tabulate", "scikit-learn"  # Add any other dependencies here
     ],
     # 你要安装的包，通过 setuptools.find_packages 找到当前目录下有哪些包
     packages=find_packages()
