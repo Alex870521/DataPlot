@@ -64,11 +64,11 @@ class DataReader:
         return read_csv(file_path, na_values=('-', 'E', 'F'), parse_dates=['Time'], low_memory=False).set_index('Time')
 
     @staticmethod
-    def read_json(file_path) -> DataFrame:
+    def read_json(file_path: Path) -> DataFrame:
         return read_json(file_path)
 
     @staticmethod
-    def read_excel(file_path) -> DataFrame:
+    def read_excel(file_path: Path) -> DataFrame:
         return read_excel(file_path, parse_dates=['Time'])
 
 
