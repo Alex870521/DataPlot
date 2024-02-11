@@ -15,6 +15,6 @@ setup(
         "pandas", "numpy", "matplotlib", "scipy", "seaborn",
         "PyMieScatt", "tabulate", "scikit-learn"  # Add any other dependencies here
     ],
-    # 你要安装的包，通过 setuptools.find_packages 找到当前目录下有哪些包
+    # 你要安装的包，通过 setuptools.find_packages
     packages=find_packages()
 )

@@ -1,4 +1,5 @@
 from datetime import datetime
+from pandas import DataFrame
 
 
 Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
@@ -18,6 +19,22 @@ class Classifier:
         pass
 
 
+class HourClassifier(Classifier):
+    def __new__(cls, df):
+        return cls.classify(df)
+
+    @classmethod
+    def classify(cls, df) -> DataFrame:
+        df['Month'] = df.index.strftime('%Y-%m')
+        df['Hour'] = df.index.hour
+
+        df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
+        df.loc[(df['Hour'] <= 23) & (df['Hour'] >= 19), 'Diurnal'] = 'Night'
+        df.loc[(df['Hour'] <= 6) & (df['Hour'] >= 0), 'Diurnal'] = 'Night'
+
+        return df
+
+
 class SeasonClassifier(Classifier):
     Seasons = Seasons
 
@@ -25,7 +42,7 @@ class SeasonClassifier(Classifier):
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df):
+    def classify(cls, df) -> dict:
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
@@ -60,7 +77,7 @@ class SeasonClassifier(Classifier):
 
 class StateClassifier(Classifier):
     @classmethod
-    def classify(cls, df):
+    def classify(cls, df) -> dict:
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
