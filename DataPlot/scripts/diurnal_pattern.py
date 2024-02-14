@@ -17,23 +17,23 @@ df['Hour'] = df.index.strftime('%H')
 Hour = range(0, 24)
 
 # Define Event & Clean
-dic_sta: dict = StateClassifier(df)
+dic_sta = StateClassifier(df)
 
 # Calculate Mean & Standard deviation
 df_mean_all = dic_sta['Total'].groupby('Hour').mean(numeric_only=True)
-# df_mean_all = dic_sta['Event'].groupby('Hour').mean()
-# df_mean1_all = dic_sta['Clean'].groupby('Hour').mean()
+# df_mean_all = dic_sta['Event'].groupby('Hour').mean(numeric_only=True)
+# df_mean1_all = dic_sta['Clean'].groupby('Hour').mean(numeric_only=True)
 df_std_all = dic_sta['Total'].groupby('Hour').std(numeric_only=True)
 # df_std_all = dic_sta['Event'].groupby('Hour').std()
 # df_std1_all = dic_sta['Clean'].groupby('Hour').std()
 
 
 @set_figure(fs=16)
-def din(df, y1, y2, ax=None, std_area=0.5):
-    df_mean = df_mean_all['POC_mass'] * df_mean_all['VC']/1000
+def diurnal(data, y, ax=None, std_area=0.5):
+    df_mean = data['POC_mass'] * data['VC'] / 1000
     df_std = std_area * df_std_all['POC_mass']
 
-    df_mean1 = df_mean_all['SOC_mass'] * df_mean_all['VC']/1000
+    df_mean1 = data['SOC_mass'] * data['VC'] / 1000
     df_std1 = std_area * df_std_all['SOC_mass']
 
     # Plot Diurnal pattern
@@ -67,4 +67,4 @@ def din(df, y1, y2, ax=None, std_area=0.5):
     plt.show()
 
 
-din(df_mean_all, y1='POC_mass', y2='SOC_mass')
+diurnal(df_mean_all, y='POC_mass')

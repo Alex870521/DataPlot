@@ -20,7 +20,7 @@ class Classifier:
 
 
 class HourClassifier(Classifier):
-    def __new__(cls, df):
+    def __new__(cls, df) -> DataFrame:
         return cls.classify(df)
 
     @classmethod
@@ -38,7 +38,7 @@ class HourClassifier(Classifier):
 class SeasonClassifier(Classifier):
     Seasons = Seasons
 
-    def __new__(cls, df):
+    def __new__(cls, df) -> dict:
         return cls.classify(df)
 
     @classmethod

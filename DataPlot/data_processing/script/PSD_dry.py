@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
-from ..decorator import save_to_csv
 from ..core import DataReader
 from DataPlot.data_processing.script.PSD import SizeDist
 
@@ -16,7 +15,7 @@ chemical = DataReader('chemical.csv')
 psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
 
 
-@save_to_csv(PATH_DIST / 'PNSDist_dry.csv')
+
 def dry_PNSD_process(**kwargs):
     index = df.index.copy()
     df_input = df.dropna()
