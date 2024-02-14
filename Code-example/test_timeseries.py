@@ -1,4 +1,4 @@
-from DataPlot.scripts import *
+from DataPlot.plot import *
 from DataPlot.data_processing import *
 
 

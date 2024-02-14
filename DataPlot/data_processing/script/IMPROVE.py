@@ -1,5 +1,17 @@
 from pandas import read_csv, concat
-from ..core import DataProcessor, DataReader
+from ..core import *
+
+
+def frh(_RH, version=None):
+    _frh = DataReader('fRH.json')
+    if _RH is not None:
+        if _RH > 95:
+            _RH = 95
+        _RH = round(_RH)
+        return _frh.loc[_RH].values.T
+
+    return 1, 1, 1, 1
+    pass
 
 
 class ImproveProcessor(DataProcessor):
@@ -65,7 +77,7 @@ class ImproveProcessor(DataProcessor):
 
             return L_mode, S_mode
 
-        _frh, _frhss, _frhs, _frhl = ImproveProcessor.frh(_df['RH'], 'revised')
+        _frh, _frhss, _frhs, _frhl = frh(_df['RH'], 'revised')
 
         L_AS, S_AS = mode(_df['AS'])
         L_AN, S_AN = mode(_df['AN'])
@@ -98,7 +110,7 @@ class ImproveProcessor(DataProcessor):
 
     @staticmethod
     def modified(_df):
-        _frh, _frhss, _frhs, _frhl = ImproveProcessor.frh(_df['RH'], 'modified')
+        _frh, _frhss, _frhs, _frhl = frh(_df['RH'], 'modified')
 
         _df['AS_ext_dry'] = 3 * 1 * _df['AS']
         _df['AN_ext_dry'] = 3 * 1 * _df['AN']
@@ -131,18 +143,6 @@ class ImproveProcessor(DataProcessor):
         _df['AbsorptionByGas'] = (0.33 * _df['NO2'])
         _df['ExtinctionByGas'] = _df['ScatteringByGas'] + _df['AbsorptionByGas']
         return _df['ScatteringByGas':]
-
-    @staticmethod
-    def frh(_RH, version=None):
-        frh = DataReader('fRH.json')
-        if _RH is not None:
-            if _RH > 95:
-                _RH = 95
-            _RH = round(_RH)
-            return frh.loc[_RH].values.T
-
-        return 1, 1, 1, 1
-        pass
 
     def process_data(self):
         if self.file_path.exists() and not self.reset:

@@ -11,7 +11,3 @@ class DataProcessor:
     def process_data(self):
         # Implement data processing logic here
         pass
-
-    def save_result(self, data):
-        # Implement logic to save the result to a CSV file
-        pass

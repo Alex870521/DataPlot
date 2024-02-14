@@ -1,8 +1,6 @@
 import numpy as np
-import pandas as pd
-from pandas import read_csv, concat
-from ..core import DataProcessor, DataReader
-
+from pandas import read_csv, concat, notna
+from ..core import *
 
 # Note: df['ALWC'] 不要加到 df_volume裡面
 
@@ -133,7 +131,7 @@ class ChemicalProcessor(DataProcessor):
                         0.54 * _df["EC_volume_ratio"])
 
         # 檢查_df['ALWC']是否缺失 -> 有值才計算ambient的折射率
-        if pd.notna(_df['ALWC']):
+        if notna(_df['ALWC']):
             v_dry = _df['total_volume']
             v_wet = _df['total_volume'] + _df['ALWC']
 
