@@ -26,7 +26,7 @@ def main(reset=False, filename='All_data.csv'):
         improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
 
         # 5. Number & Surface & volume & Extinction distribution
-        PSD = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+        PSD = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv')
 
         psd = PSD.psd_process()
         ext = PSD.ext_process()
