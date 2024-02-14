@@ -1,6 +1,8 @@
 # my
 _figure/
 Test/
+# MacOX product
+.DS_store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
