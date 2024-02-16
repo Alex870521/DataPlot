@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.colors as mcolors
 import numpy as np
 from windrose import WindroseAxes
-from DataPlot.process import data
+from DataPlot.process import *
 from DataPlot.plot import StateClassifier, set_figure
 
 
@@ -70,6 +70,6 @@ def wind_rose(ws: pd.Series, wd: pd.Series):
 
 
 if __name__ == "__main__":
-    df = data.copy()[:20]
+    df = DataBase.copy()[:20]
     wind_heatmap(df['WS'], df['WD'], df.index.strftime('%F'))
     wind_rose(df['WS'], df['WD'])

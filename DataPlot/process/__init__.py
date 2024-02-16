@@ -6,6 +6,9 @@ from .script import *
 from pathlib import Path
 from pandas import read_csv, concat
 
+__all__ = ['DataBase',
+           'DataReader', ]
+
 
 class MainProcessor(DataProcessor):
     def __init__(self, reset=False, filename='All_data.csv'):
@@ -48,4 +51,4 @@ class MainProcessor(DataProcessor):
             return _df
 
 
-data = MainProcessor(reset=False).process_data()
+DataBase = MainProcessor(reset=False).process_data()

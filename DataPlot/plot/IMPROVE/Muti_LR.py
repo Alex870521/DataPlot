@@ -1,11 +1,12 @@
-import DataPlot
-from DataPlot import data, DataReader
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
+
+from DataPlot.process import *
 from DataPlot.plot.templates import scatter, scatter_mutiReg
 from DataPlot.plot.core import set_figure, unit, getColor, StateClassifier
 
@@ -23,7 +24,7 @@ def residual_ext(_df):
 
 
 if __name__ == '__main__':
-    df = data
+    df = DataBase
     dic_grp_sta = StateClassifier(df)
 
     species = ['Extinction', 'Scattering', 'Absorption', 'total_ext_dry', 'AS_ext_dry', 'AN_ext_dry',
