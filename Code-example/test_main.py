@@ -1,4 +1,4 @@
-import DataPlot.plot as plot
-import DataPlot.data_processing as pro
+from DataPlot.plot import *
+from DataPlot.process import *
 
-df = pro.data
+df = data

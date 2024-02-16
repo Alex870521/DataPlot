@@ -7,12 +7,12 @@ from ..core import *
 
 class ChemicalProcessor(DataProcessor):
     """
-    A class for processing chemical data.
+    A class for process chemical data.
 
     Parameters:
     -----------
     reset : bool, optional
-        If True, resets the processing. Default is False.
+        If True, resets the process. Default is False.
     filename : str, optional
         The name of the file to process. Default is None.
 

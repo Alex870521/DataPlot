@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 import pickle
-from DataPlot.data_processing import *
+from DataPlot.process import *
 from DataPlot.plot import *
 import matplotlib.pyplot as plt
 import seaborn as sns

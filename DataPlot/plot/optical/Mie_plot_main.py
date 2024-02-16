@@ -1,5 +1,5 @@
 import numpy as np
-from DataPlot.data_processing.method.mie_theory import Mie_Q, Mie_MEE
+from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
 from Mie_plot import Q_plot, Q_size_para_plot, MEE_plot
 
 prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}

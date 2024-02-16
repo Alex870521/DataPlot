@@ -1,7 +1,7 @@
 from pathlib import Path
 from pandas import concat, DataFrame
 from DataPlot.plot import scatter
-from DataPlot.data_processing import *
+from DataPlot.process import *
 import pickle
 
 

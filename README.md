@@ -1,44 +1,5 @@
 ## DataPlot
 
-## Structure
-```plaintext
-DataPlot/
-├── Data-example/
-│   └── ...
-├── data_processing/
-│   ├── core/
-│   ├── decorator/
-│   ├── method/
-│   ├── script/
-│   ├── main.py
-│   └── ...
-├── plot/
-│   ├── core/
-│   │   ├── color_handler.py
-│   │   ├── rcParams_decorator.py
-│   │   ├── unit_handler.py
-│   │   ├── unit.json
-│   │   └── ...
-│   ├── distribution/
-│   │   ├── plot.py
-│   │   ├── fit.py
-│   │   └── ...
-│   ├── templates/
-│   │   ├── scatter_plot.py
-│   │   ├── bar_plot.py
-│   │   ├── pie_plot.py
-│   │   ├── violin_plot.py
-│   │   └── ...
-│   └── ...
-├── scripts/
-│   ├── IMPROVE/
-│   ├── meteorology/
-│   ├── optical/
-│   │   └── ...
-│   └── ...
-└── ...
-```
-
 ### Provide tools for visualizing research data for newcomers to the *aerosol field*.
 
 > The provided code comprises a versatile toolkit for data 
@@ -54,13 +15,11 @@ To install the package, run
 
     $ git clone https://github.com/Alex870521/DataPlot.git
 
-
-
 ## Dependencies
 * matplotlib
 * pandas
 
-## Some Advance Dependencies
+## Some related Dependencies
 * PyMieScatt
   - <https://github.com/bsumlin/PyMieScatt.git>
 * py-smps

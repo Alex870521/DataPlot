@@ -1,6 +1,6 @@
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from DataPlot.templates import set_figure, unit, getColor
-from DataPlot.data_processing import main
+from DataPlot.process import main
 
 import pandas as pd
 import matplotlib.pyplot as plt

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import DataFrame, concat, date_range
-from DataPlot.data_processing import *
+from DataPlot.process import *
 from DataPlot.plot import *
 
 

@@ -1,7 +1,7 @@
 from matplotlib.ticker import (AutoMinorLocator)
 import matplotlib.pyplot as plt
 from DataPlot.plot import set_figure, unit
-from DataPlot.data_processing import data
+from DataPlot.process import data
 from DataPlot.plot.scripts import StateClassifier
 
 # Read file
@@ -25,7 +25,7 @@ df_std_all = dic_sta['Total'].groupby('Hour').std(numeric_only=True)
 
 @set_figure(fs=16)
 def diurnal(data, y, ax=None, std_area=0.5):
-    # processing data
+    # process data
     df_mean = data[f'{y}'] * data['VC'] / 1000
     df_std = df_std_all['POC'] * std_area
 

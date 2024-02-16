@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.colors as mcolors
 import numpy as np
 from windrose import WindroseAxes
-from DataPlot.data_processing import data
+from DataPlot.process import data
 from DataPlot.plot import StateClassifier, set_figure
 
 

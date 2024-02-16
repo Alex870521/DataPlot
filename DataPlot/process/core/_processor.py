@@ -9,5 +9,5 @@ class DataProcessor:
         self.reset = reset
 
     def process_data(self):
-        # Implement data processing logic here
+        # Implement data process logic here
         pass

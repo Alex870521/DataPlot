@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 from ..core import DataReader
-from DataPlot.data_processing.script.PSD import SizeDist
+from DataPlot.process.script.PSD import SizeDist
 
 PATH_MAIN = Path(__file__).parent.parent.parent / 'Data-example' / 'Level2'
 PATH_DIST = PATH_MAIN / 'distribution'

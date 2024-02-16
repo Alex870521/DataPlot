@@ -5,8 +5,8 @@ from pandas import read_csv
 from matplotlib.collections import PolyCollection
 from matplotlib.ticker import FuncFormatter
 from DataPlot.templates import set_figure
-from DataPlot.data_processing import main
-from DataPlot.data_processing.method.mie_theory import Mie_PESD
+from DataPlot.process import main
+from DataPlot.process.method.mie_theory import Mie_PESD
 
 
 PATH_MAIN = Path(__file__).parents[1] / "Data-example"

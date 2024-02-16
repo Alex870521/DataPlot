@@ -10,7 +10,7 @@ import numpy as np
 
 class SizeDist(DataProcessor):
     """
-    A class for processing particle size distribution (PSD) data.
+    A class for process particle size distribution (PSD) data.
 
     Parameters
     ----------

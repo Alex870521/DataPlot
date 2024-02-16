@@ -16,16 +16,16 @@ def frh(_RH, version=None):
 
 class ImproveProcessor(DataProcessor):
     """
-    A class for processing improved chemical data.
+    A class for process improved chemical data.
 
     Parameters:
     -----------
     reset : bool, optional
-        If True, resets the processing. Default is False.
+        If True, resets the process. Default is False.
     filename : str, optional
         The name of the file to process. Default is None.
     version : str, optional
-        The version of the data processing. Should be one of 'revised' or 'modified'.
+        The version of the data process. Should be one of 'revised' or 'modified'.
         Default is None.
 
     Methods:
