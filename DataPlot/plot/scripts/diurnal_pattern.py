@@ -1,11 +1,11 @@
 from matplotlib.ticker import (AutoMinorLocator)
 import matplotlib.pyplot as plt
 from DataPlot.plot import set_figure, unit
-from DataPlot.data_processing import main
+from DataPlot.data_processing import data
 from DataPlot.plot.scripts import StateClassifier
 
 # Read file
-df = main()
+df = data
 df['Hour'] = df.index.strftime('%H')
 Hour = range(0, 24)
 

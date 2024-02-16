@@ -1,11 +1,6 @@
 
-# core object
 from .core import *
-
-# method object
 from .method import *
-
-# process class
 from .script import *
 
 from pathlib import Path
@@ -53,4 +48,4 @@ class MainProcessor(DataProcessor):
             return _df
 
 
-data = MainProcessor(reset=True).process_data()
+data = MainProcessor(reset=False).process_data()

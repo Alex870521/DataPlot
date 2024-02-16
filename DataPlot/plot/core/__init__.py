@@ -1,4 +1,4 @@
-from .rcParams_decorator import set_figure
+from ._decorator import set_figure
 from ._unit import unit
 from ._color import *
 from ._classifier import *

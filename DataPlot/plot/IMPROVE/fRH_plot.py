@@ -1,16 +1,15 @@
 from pathlib import Path
 from pandas import read_csv, read_json
 import matplotlib.pyplot as plt
-from DataPlot.templates import set_figure, unit, getColor
+from ..core import set_figure, unit, getColor
 
-PATH_MAIN = Path(__file__).parents[3] / 'Data-example'
 
-with open(PATH_MAIN / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
+with open(Path(__file__).parents[2] / 'Data-example' / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
     frh = read_json(f)
 
 
 @set_figure
-def fRH_plot():  # ref f(RH)
+def fRH_plot() -> plt.Axes:  # ref f(RH)
     print(f'Plot: fRH_plot')
     fig, ax = plt.subplots(1, 1, figsize=(6, 6))
     plt.plot(frh.index, frh['fRH'], 'k-o', lw=2)
@@ -29,7 +28,7 @@ def fRH_plot():  # ref f(RH)
                 fr'$\bf f(RH)_{{sea\ salt}}$'],
                loc='upper left', prop=dict(size=16), handlelength=1, frameon=False)
     # fig.savefig('fRH_plot')
-    return fig, ax
+    return ax
 
 
 if __name__ == '__main__':

@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
-from DataPlot.templates import set_figure, unit, getColor
+from pandas import DataFrame
+from ..core import set_figure, unit, getColor
 
 
 @set_figure
-def ammonium_rich(_df, title=''):
-    print(f'Plot: ammonium_rich, Title: {title}')
+def ammonium_rich(_df: DataFrame, title='') -> plt.Axes:
+    print(f'Plot: ammonium_rich')
     df = _df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
     df['required_ammonium'] = df['NO3-'] + 2 * df['SO42-']
 
@@ -24,8 +25,8 @@ def ammonium_rich(_df, title=''):
     ax.legend(lines, labels, loc='best')
 
     color_bar = plt.colorbar(scatter, extend='both')
-    color_bar.set_label(label=unit.PM25, size=14)
+    color_bar.set_label(label=unit('PM25'), size=14)
 
     # fig.savefig(f'Ammonium_rich_{title}')
-    return fig, ax
+    return ax
 

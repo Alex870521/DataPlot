@@ -141,7 +141,6 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
     # figure info
     category_names = kwargs.get('ticks') or list(data_set.keys())
     title = kwargs.get('title') or ''
-    title = title.replace(' ', '\ ')
     title_format = fr'$\bf {title}$'
     colors = kwargs.get('colors') or plt.colormaps['Blues'](np.linspace(0.2, 0.8, species))
 

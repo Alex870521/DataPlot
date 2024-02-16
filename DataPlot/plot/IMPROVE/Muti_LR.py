@@ -1,49 +1,34 @@
-from Data_processing import integrate
-from Data_classify import state_classify
+import DataPlot
+from DataPlot import data, DataReader
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from pandas import read_csv, concat
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
-from config.scatterPlot import scatter, scatter_mutiReg
-from config.custom import setFigure, unit, getColor
-
-
-__all__ = [
-    'residual_ext',
-    'residual_PM'
-]
+from DataPlot.plot.templates import scatter, scatter_mutiReg
+from DataPlot.plot.core import set_figure, unit, getColor, StateClassifier
 
 
 def residual_PM(_df):
-    _df['residual_PM'] = _df['PM25'] \
-                         - _df['AS_mass'] \
-                         - _df['AN_mass'] \
-                         - _df['OM_mass'] \
-                         - _df['SS_mass'] \
-                         - _df['EC_mass']
+    _df['residual_PM'] = _df['PM25'] - _df['AS'] - _df['AN'] - _df['OM'] - _df['SS'] - _df['EC']
 
     return _df[['residual_PM', 'Ti', 'Fe', 'Si']]
 
 
 def residual_ext(_df):
-    _df['residual_ext'] = _df['total_ext_dry'] \
-                          - _df['AS_ext_dry'] \
-                          - _df['AN_ext_dry'] \
-                          - _df['Soil_ext_dry'] \
-                          - _df['SS_ext_dry']
+    _df['residual_ext'] = _df['total_ext_dry'] - _df['AS_ext_dry'] - _df['AN_ext_dry'] - _df['Soil_ext_dry'] - _df['SS_ext_dry']
 
-    return _df[['residual_ext', 'POC_mass', 'SOC_mass']]
+    return _df[['residual_ext', 'POC', 'SOC']]
 
 
 if __name__ == '__main__':
-    df = integrate()
-    dic_grp_sta = state_classify(df)
+    df = data
+    dic_grp_sta = StateClassifier(df)
 
     species = ['Extinction', 'Scattering', 'Absorption', 'total_ext_dry', 'AS_ext_dry', 'AN_ext_dry',
                'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry',
-               'AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'Soil_mass', 'SS_mass', 'EC_mass', 'OM_mass']
+               'AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'OM']
 
     for key, values in dic_grp_sta.items():
         if key == 'Total':
@@ -51,7 +36,7 @@ if __name__ == '__main__':
             df_cal = dic_grp_sta[key][species].dropna().copy()
             df_cal['Const'] = 1
             df_cal['Const2'] = 1
-            x = df_cal[['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'Soil_mass', 'SS_mass', 'Const']].to_numpy()
+            x = df_cal[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'Const']].to_numpy()
             y = df_cal[['Scattering']].to_numpy()
 
             model = LinearRegression(positive=True).fit(x, y)
@@ -61,12 +46,12 @@ if __name__ == '__main__':
             print(f"coefficients: {model.coef_}")
             y_pred = model.predict(x)
             df_ = pd.DataFrame(np.concatenate([y, y_pred], axis=1), columns=['y', 'y_pred'])
-            regPlot.linear_reg(df_, 'y', 'y_pred', title=f'{key}')
+            scatter(df_, 'y', 'y_pred', regression=True, title=f'{key}')
 
-            result = df_cal[['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'Soil_mass', 'SS_mass', 'Const']].mul(model.coef_[0]).mean()
+            result = df_cal[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'Const']].mul(model.coef_[0]).mean()
 
             # --------
-            x2 = df_cal[['POC_mass', 'SOC_mass', 'EC_mass', 'Const2']].to_numpy()
+            x2 = df_cal[['POC', 'SOC', 'EC', 'Const2']].to_numpy()
             y2 = df_cal[['Absorption']].to_numpy()
 
             model2 = LinearRegression(positive=True).fit(x2, y2)
@@ -76,32 +61,27 @@ if __name__ == '__main__':
             print(f"coefficients: {model2.coef_}")
             y_pred2 = model2.predict(x2)
             df_ = pd.DataFrame(np.concatenate([y2, y_pred2], axis=1), columns=['y', 'y_pred'])
-            regPlot.linear_reg(df_, 'y', 'y_pred', title=f'{key}')
+            scatter(df_, 'y', 'y_pred', regression=True, title=f'{key}')
 
-            result2 = df_cal[['POC_mass', 'SOC_mass', 'EC_mass', 'Const2']].mul(model2.coef_[0]).mean()
+            result2 = df_cal[['POC', 'SOC', 'EC', 'Const2']].mul(model2.coef_[0]).mean()
 
 
-            n_df = df_cal[['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'EC_mass']].mul([2.74, 4.41, 11.5, 7.34, 12.27])
+            n_df = df_cal[['AS', 'AN', 'POC', 'SOC', 'EC']].mul([2.74, 4.41, 11.5, 7.34, 12.27])
             new_df = concat([df_cal['Extinction'], n_df], axis=1)
-            new_dic = state_classify(new_df)
+            new_dic = StateClassifier(new_df)
 
             ext_dry_dict = {state: [new_dic[state][specie].mean() for specie in
-                                    ['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'EC_mass']] for state in
+                                    ['AS', 'AN', 'POC', 'SOC', 'EC']] for state in
                             ['Total', 'Clean', 'Transition', 'Event']}
 
-            df_cal['Localized'] = df_cal[['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'EC_mass']].mul([2.74, 4.41, 11.5, 7.34, 12.27]).sum(axis=1)
+            df_cal['Localized'] = df_cal[['AS', 'AN', 'POC', 'SOC', 'EC']].mul([2.74, 4.41, 11.5, 7.34, 12.27]).sum(axis=1)
 
-
-    # core
-    PATH_MAIN = Path("/Data-Code-example")
-    with open(PATH_MAIN / 'level2' / 'modify_IMPROVE.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        modify_IMPROVE = read_csv(f, parse_dates=['Time']).set_index('Time')['total_ext_dry'].rename('Modified')
-    with open(PATH_MAIN / 'level2' / 'revised_IMPROVE.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        revised_IMPROVE = read_csv(f, parse_dates=['Time']).set_index('Time')['total_ext_dry'].rename('Revised')
+    modify_IMPROVE = DataReader('modify_IMPROVE.csv')['total_ext_dry'].rename('Modified')
+    revised_IMPROVE = DataReader('revised_IMPROVE.csv')['total_ext_dry'].rename('Revised')
 
     df = concat([df_cal, revised_IMPROVE, modify_IMPROVE], axis=1)
 
-    @setFigure(figsize=(10, 6))
+    @set_figure(figsize=(10, 6))
     def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
 
         prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
@@ -154,10 +134,10 @@ if __name__ == '__main__':
                   title='Outer : Event' + '\n' + 'Middle : Transition' + '\n' + 'Inner : Clean',
                   bbox_to_anchor=(0.66, 0, 0.5, 1), frameon=False)
         plt.show()
-        fig.savefig(f"IMPROVE_ext_donuts_{title}", transparent=True)
+        # fig.savefig(f"IMPROVE_ext_donuts_{title}", transparent=True)
 
 
-    @setFigure(figsize=(6, 6))
+    @set_figure(figsize=(6, 6))
     def scatter_mutiReg2(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
         # create fig
         fig, ax = plt.subplots()
@@ -185,7 +165,7 @@ if __name__ == '__main__':
         ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
         title = kwargs.get('title') or ''
-        title = title.replace(' ', '\ ')
+
         title_format = fr'$\bf {title}$'
         ax.set_title(title_format, fontdict={'fontweight': 'bold', 'fontsize': 20})
 
@@ -230,7 +210,7 @@ if __name__ == '__main__':
         return fig, ax
 
 
-    @setFigure(figsize=(6, 6))
+    @set_figure(figsize=(6, 6))
     def scatter_mutiReg(df, x, y1, y2, y3, regression=None, diagonal=False, **kwargs):
         # create fig
         fig, ax = plt.subplots()
@@ -261,7 +241,7 @@ if __name__ == '__main__':
         ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
         title = kwargs.get('title') or ''
-        title = title.replace(' ', '\ ')
+
         title_format = fr'$\bf {title}$'
         ax.set_title(title_format, fontdict={'fontweight': 'bold', 'fontsize': 20})
 
