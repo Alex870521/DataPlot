@@ -1,7 +1,10 @@
-
+from DataPlot.plot import *
 from DataPlot.process import *
 
 print(dir())
-# plot.fRH_plot()
-# plot.ammonium_rich(df)
+
+df = DataBase
+# fRH_plot()
+# ammonium_rich(df)
+wind_rose(df['WS'], df['WD'])
 

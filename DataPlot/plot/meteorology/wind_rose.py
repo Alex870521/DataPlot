@@ -5,7 +5,7 @@ import matplotlib.colors as mcolors
 import numpy as np
 from windrose import WindroseAxes
 from DataPlot.process import *
-from DataPlot.plot import StateClassifier, set_figure
+from DataPlot.plot import set_figure
 
 
 @set_figure(fs=6)

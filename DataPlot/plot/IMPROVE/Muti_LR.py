@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 
 from DataPlot.process import *
 from DataPlot.plot.templates import scatter, scatter_mutiReg
-from DataPlot.plot.core import set_figure, unit, getColor, StateClassifier
+from DataPlot.plot.core import set_figure, unit, getColor
 
 
 def residual_PM(_df):
@@ -25,7 +25,7 @@ def residual_ext(_df):
 
 if __name__ == '__main__':
     df = DataBase
-    dic_grp_sta = StateClassifier(df)
+    dic_grp_sta = Classifier(df, 'state')
 
     species = ['Extinction', 'Scattering', 'Absorption', 'total_ext_dry', 'AS_ext_dry', 'AN_ext_dry',
                'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry',
