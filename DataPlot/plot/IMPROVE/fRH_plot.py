@@ -10,7 +10,7 @@ with open(Path(__file__).parents[2] / 'Data-example' / 'level1' / 'fRH.json', 'r
 
 @set_figure
 def fRH_plot() -> plt.Axes:  # ref f(RH)
-    print(f'Plot: fRH_plot')
+    print('Plot: fRH_plot')
     fig, ax = plt.subplots(1, 1, figsize=(6, 6))
     plt.plot(frh.index, frh['fRH'], 'k-o', lw=2)
     plt.plot(frh.index, frh['fRHs'], 'g-o', lw=2)

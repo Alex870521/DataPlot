@@ -63,7 +63,7 @@ class SizeDist(DataProcessor):
     >>> psd_data.psd_process()
     """
 
-    def __init__(self, reset=False, filename=None):
+    def __init__(self, reset=False, filename='PNSD_dNdlogdp.csv'):
         super().__init__(reset)
         self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
 
@@ -72,6 +72,9 @@ class SizeDist(DataProcessor):
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
+
+    __slots__ = ("data", "index", "dp", "dlogdp")
+
 
     def number(self, filename='PNSD_dSdlogdp.csv'):
         """

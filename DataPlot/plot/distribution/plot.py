@@ -14,19 +14,15 @@ color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
 
 
 @set_figure(fs=12)
-def heatmap(x: np.ndarray, y: np.ndarray, z: pd.DataFrame, ax: Optional[plt.Axes] = None,
+def heatmap(df: pd.DataFrame, ax: Optional[plt.Axes] = None,
             logy=True, cbar=True, hide_low=True, cmap: str = 'jet',
             fig_kws={}, cbar_kws={}, plot_kws={}, **kwargs):
     """ Plot the size distribution over time.
 
     Parameters
     ----------
-    x : array-like
-        An array of times or datetime objects to plot on the x-axis.
-    y : array-like
-        An array of particle diameters to plot on the y-axis.
-    z : 2D array-like
-        A 2D-array of particle concentrations to plot on the Z axis.
+    df : DataFrame
+        A DataFrame of particle concentrations to plot the heatmap.
     ax : matplotlib.axis.Axis
         An axis object to plot on. If none is provided, one will be created.
     logy : bool, default=True
@@ -50,24 +46,25 @@ def heatmap(x: np.ndarray, y: np.ndarray, z: pd.DataFrame, ax: Optional[plt.Axes
 
     Examples
     --------
-
     Plot a SPMS + APS data:
-
-    >>> ax = heatmap(x, y, z, cmap='jet')
-
+    >>> ax = heatmap(x, y, data, cmap='jet')
     """
+    print('Plot: heatmap')
+
     # Copy to avoid modifying original data
-    z = z.copy().to_numpy()
-    z = nan_to_num(z)
+    time = df.index
+    dp = np.array(df.columns, dtype=float)
+    data = df.copy().to_numpy()
+    data = nan_to_num(data)
 
     # Set the colorbar min and max based on the min and max of the values
-    cbar_min = cbar_kws.pop('cbar_min', z.min() if z.min() > 0.0 else 1.)
-    cbar_max = cbar_kws.pop('cbar_max', z.max())
+    cbar_min = cbar_kws.pop('cbar_min', data.min() if data.min() > 0.0 else 1.)
+    cbar_max = cbar_kws.pop('cbar_max', data.max())
 
     # Increase values below cbar_min to cbar_min
     if hide_low:
-        below_min = z < cbar_min
-        z[below_min] = cbar_min
+        below_min = data < cbar_min
+        data[below_min] = cbar_min
 
     # Set the plot_kws
     plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **plot_kws)
@@ -79,13 +76,13 @@ def heatmap(x: np.ndarray, y: np.ndarray, z: pd.DataFrame, ax: Optional[plt.Axes
         fig, ax = plt.subplots(**fig_kws)
 
     # main plot
-    pco1 = ax.pcolormesh(x, y, z.T, shading='auto', **plot_kws)
+    pco1 = ax.pcolormesh(time, dp, data.T, shading='auto', **plot_kws)
 
     # Set the ylabel and ylim
-    ax.set(ylabel=r'$\bf D_p\ (nm)$', ylim=(y.min(), y.max()))
+    ax.set(ylabel=r'$\bf D_p\ (nm)$', ylim=(dp.min(), dp.max()))
 
     # Set title
-    st_tm, fn_tm = x[0], x[-1]
+    st_tm, fn_tm = time[0], time[-1]
     ax.set_title(kwargs.get('title', f'{st_tm.strftime("%Y/%m/%d")} - {fn_tm.strftime("%Y/%m/%d")}'))
 
     # Set the axis to be log in the y-axis
@@ -139,6 +136,7 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
     Example 2: Plot a list of distributions with custom labels
     >>> overlay_dist(dp_values, [curve1_data, curve2_data, curve3_data], labels=['Curve 1', 'Curve 2', 'Curve 3'], enhancement=True)
     """
+    print('Plot: overlay_dist')
 
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
@@ -239,6 +237,8 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
     Example 2: Plot with custom labels and titles
     >>> separatedist(dp_values, {'Clean': clean_data, 'Transition': transition_data}, {'Clean': clean_data2, 'Transition': transition_data2}, {'Clean': clean_data3, 'Transition': transition_data3}, labels=['Number', 'Surface', 'Volume'], title='Particle Size Distributions')
     """
+    print('Plot: separatedist')
+
     plot_kws = dict(ls='solid', lw=2, alpha=0.8, **plot_kws)
 
     if ax is None:
@@ -318,6 +318,7 @@ def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std
     ax : AxesSubplot
         Matplotlib AxesSubplot.
     """
+    print('Plot: dist_with_std')
 
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
@@ -383,6 +384,8 @@ def compare(dp, dist, std1, dist2, std2, ax=None, std_scale=0.2, fig_kws={}, **k
     ax : AxesSubplot
         Matplotlib AxesSubplot.
     """
+    print('Plot: compare')
+
     PESD, PESD_std = dist, std1
     PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(len(dist), ) * std_scale
     PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
@@ -462,6 +465,8 @@ def ls_mode(ax=None, **kwargs):
     >>> ls_mode(ax=my_axes, xlim=(0.01, 30), ylim=(0, 0.5), xlabel='Particle Diameter (μm)',
     ...         ylabel='Probability (dM/dlogdp)', title='Custom Log-normal Mass Size Distribution')
     """
+    print('Plot: ls_mode')
+
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -517,6 +522,7 @@ def psd_example(ax=None, **kwargs):
     Example 1: Plot default particle size distributions
     >>> psd_example()
     """
+    print('Plot: pse_example')
 
     if ax is None:
         fig, axes = plt.subplots(3, 2, figsize=(12, 12))

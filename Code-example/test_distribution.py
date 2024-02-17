@@ -1,10 +1,6 @@
 import numpy as np
 from pandas import concat
-from pathlib import Path
 from DataPlot import *
-
-PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
-PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'
 
 
 PNSD = DataReader('PNSD_dNdlogdp.csv')
@@ -13,9 +9,10 @@ PVSD = DataReader('PVSD_dVdlogdp.csv')
 PESD_inter = DataReader('PESD_dextdlogdp_internal.csv')
 PESD_dry_inter = DataReader('PESD_dextdlogdp_dry_internal.csv')
 PESD_exter = DataReader('PESD_dextdlogdp_external.csv')
-df   = DataReader('All_data.csv')
+df = DataReader('All_data.csv')
 
-StateClassifier(df)
+
+Classifier(df, 'state')
 
 Ext_amb_df_internal = concat([df[['Extinction', 'State']], PESD_inter], axis=1)
 Ext_dry_df = concat([df[['Extinction', 'State']], PESD_dry_inter], axis=1)
@@ -44,10 +41,13 @@ PVSD_amb_dis, PVSD_amb_dis_std = get_statistic(PVSD_amb_df.dropna().groupby('Sta
 
 
 if __name__ == '__main__':
-    dp = np.array(PNSD.columns, dtype=float)
-    plot.overlay_dist(dp, Ext_amb_dis_internal, enhancement=True)
+    dp = SizeDist().dp
+    # plot.overlay_dist(dp, Ext_amb_dis_internal, enhancement=True)
     # plot.separate_dist(dp, PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis)
-    plot.heatmap(PNSD.index, dp, PNSD)
+    # plot.heatmap(PNSD)
+    # plot.heatmap(PSSD)
+    # plot.heatmap(PVSD)
+    plot.heatmap(PESD_inter)
     # plot.dist_with_std(dp, Ext_amb_dis_internal, Ext_amb_dis_std_internal, Ext_dry_dis_internal, Ext_dry_dis_std_internal)
     #
     # dist1, diat_std1 = Ext_amb_df_internal.dropna().iloc[:, 2:].mean(),  Ext_amb_df_internal.dropna().iloc[:, 2:].std()

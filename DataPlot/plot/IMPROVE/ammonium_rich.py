@@ -5,7 +5,7 @@ from ..core import set_figure, unit, getColor
 
 @set_figure
 def ammonium_rich(_df: DataFrame, title='') -> plt.Axes:
-    print(f'Plot: ammonium_rich')
+    print('Plot: ammonium_rich')
     df = _df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
     df['required_ammonium'] = df['NO3-'] + 2 * df['SO42-']
 

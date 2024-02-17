@@ -1,5 +1,5 @@
-from DataPlot.plot import *
-from DataPlot.process import *
+from DataPlot import *
+import pandas as pd
 
 
 if __name__ == '__main__':
@@ -7,7 +7,7 @@ if __name__ == '__main__':
     PSSD = DataReader('PSSD_dSdlogdp.csv')
     PVSD = DataReader('PVSD_dVdlogdp.csv')
     PESD = DataReader('PESD_dextdlogdp_internal.csv')
-    Data = DataReader('All_data.csv')
+    Data = DataBase
 
     # Season timeseries
     for season, (st_tm_, fn_tm_) in Seasons.items():

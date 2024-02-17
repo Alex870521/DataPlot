@@ -10,6 +10,8 @@ from DataPlot.plot import set_figure
 
 @set_figure(fs=6)
 def wind_heatmap(ws: pd.Series, wd: pd.Series, xticklabels):
+    print('Plot: wind_heatmap')
+
     def drawArrow(A, B, ax: plt.Axes):  # 畫箭頭
         _ax = ax.twinx()
         if A[0] == B[0] and A[1] == B[1]:  # 靜風畫點
@@ -54,6 +56,7 @@ def wind_heatmap(ws: pd.Series, wd: pd.Series, xticklabels):
 
 @set_figure(fs=15)
 def wind_rose(ws: pd.Series, wd: pd.Series):
+    print('Plot: wind_rose')
     color_lst = ['#8ecae6', '#f1dca7', '#f4a261', '#bc3908']
 
     fig, ax = plt.subplots(figsize=(4, 4))

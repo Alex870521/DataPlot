@@ -11,6 +11,7 @@ from pandas import DataFrame
 
 __all__ = ['DataBase',
            'DataReader',
+           'SizeDist',
            'Seasons',
            'Classifier'
            ]
