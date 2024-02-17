@@ -2,19 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from typing import Optional
 from scipy.stats import norm, lognorm
 from numpy import nan_to_num
 from matplotlib.ticker import ScalarFormatter
 from DataPlot.plot import set_figure
-
-__all__ = ["heatmap",
-           "overlay_dist",
-           "separate_dist",
-           "dist_with_std",
-           "compare",
-           "ls_mode",
-           "psd_example"
-           ]
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
                 'Transition': ['#4a9f1d', '#a7e984'],
@@ -22,9 +14,9 @@ color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
 
 
 @set_figure(fs=12)
-def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
-            cmap='jet', fig_kws={}, cbar_kws={}, plot_kws={},
-            **kwargs):
+def heatmap(x: np.ndarray, y: np.ndarray, z: pd.DataFrame, ax: Optional[plt.Axes] = None,
+            logy=True, cbar=True, hide_low=True, cmap: str = 'jet',
+            fig_kws={}, cbar_kws={}, plot_kws={}, **kwargs):
     """ Plot the size distribution over time.
 
     Parameters
@@ -112,7 +104,7 @@ def heatmap(x, y, z, ax=None, logy=True, cbar=True, hide_low=True,
 
 
 @set_figure
-def overlay_dist(dp, dist, ax=None, enhancement=False, fig_kws={}, plot_kws={}, **kwargs):
+def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None, enhancement=False, fig_kws={}, plot_kws={}, **kwargs):
     """
     Plot particle size distribution curves and optionally show enhancements.
 
@@ -211,7 +203,7 @@ def overlay_dist(dp, dist, ax=None, enhancement=False, fig_kws={}, plot_kws={}, 
 
 
 @set_figure(figsize=(10, 4))
-def separate_dist(dp, dist, dist2, dist3, ax=None, fig_kws={}, plot_kws={}, **kwargs):
+def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np.ndarray, ax: Optional[plt.Axes] = None, fig_kws={}, plot_kws={}, **kwargs):
     """
     Plot particle size distribution curves on three separate subplots.
 
@@ -331,20 +323,21 @@ def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std
         fig, ax = plt.subplots(**fig_kws)
 
     for state in Ext_amb_dis.keys():
-        PESD, PESD_std= Ext_amb_dis[state], Ext_amb_dis_std[state]
-        PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167,)
+        PESD, PESD_std = Ext_amb_dis[state], Ext_amb_dis_std[state]
+        PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167, )
         PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
 
-        PESD_dry, PESD_std_dry= Ext_dry_dis[state], Ext_dry_dis_std[state]
-        PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(167,)
+        PESD_dry, PESD_std_dry = Ext_dry_dis[state], Ext_dry_dis_std[state]
+        PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(167, )
         PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
 
         ax.plot(dp, PESD, ls='solid', color=color_choose[state][0], lw=2, label=f'Amb {state}')
         ax.plot(dp, PESD_dry, ls='dashed', color=color_choose[state][1], lw=2, label=f'Dry {state}')
-        ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.4, color=color_choose[state][1], edgecolor=None, label='__nolegend__')
-        ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.5, color='#ece8e7', edgecolor=color_choose[state][1], label='__nolegend__')
+        ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.4, color=color_choose[state][1], edgecolor=None,
+                        label='__nolegend__')
+        ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.5, color='#ece8e7',
+                        edgecolor=color_choose[state][1], label='__nolegend__')
         plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-
 
     # figure_set
     xlim = kwargs.get('xlim') or (11.8, 2500)
@@ -411,8 +404,10 @@ def compare(dp, dist, std1, dist2, std2, ax=None, std_scale=0.2, fig_kws={}, **k
 
     ax.plot(dp, PESD, ls='solid', color=color_choose['Clean'][0], lw=2, label='Internal')
     ax.plot(dp, PESD_dry, ls='solid', color=color_choose['Transition'][0], lw=2, label='External')
-    ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.3, color=color_choose['Clean'][0], edgecolor=None, label='__nolegend__')
-    ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.3, color=color_choose['Transition'][0], edgecolor=None, label='__nolegend__')
+    ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.3, color=color_choose['Clean'][0], edgecolor=None,
+                    label='__nolegend__')
+    ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.3, color=color_choose['Transition'][0],
+                    edgecolor=None, label='__nolegend__')
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
     # figure_set
@@ -480,7 +475,7 @@ def ls_mode(ax=None, **kwargs):
     for _geoMean, _geoStdv, _color, _label in zip(geoMean, geoStdv, color, label):
         x = np.geomspace(0.001, 20, 10000)
         # 用logdp畫 才會讓最大值落在geoMean上
-        pdf = (np.exp(-(np.log(x) - np.log(_geoMean))**2 / (2 * np.log(_geoStdv)**2))
+        pdf = (np.exp(-(np.log(x) - np.log(_geoMean)) ** 2 / (2 * np.log(_geoStdv) ** 2))
                / (np.log(_geoStdv) * np.sqrt(2 * np.pi)))
 
         ax.semilogx(x, pdf, linewidth=2, color=_color, label=_label)
@@ -537,9 +532,11 @@ def psd_example(ax=None, **kwargs):
     mu = np.log(gmean)
     sigma = np.log(gstd)
 
-    normpdf = lambda x, mu, sigma: (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(x - mu)**2 / (2 * sigma**2))
-    lognormpdf = lambda x, gmean, gstd: (1 / (np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(-(np.log(x) - np.log(gmean))**2 / (2 * np.log(gstd)**2))
-    lognormpdf2 = lambda x, gmean, gstd: (1 / (x * np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(-(np.log(x) - np.log(gmean))**2 / (2 * np.log(gstd)**2))
+    normpdf = lambda x, mu, sigma: (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
+    lognormpdf = lambda x, gmean, gstd: (1 / (np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(
+        -(np.log(x) - np.log(gmean)) ** 2 / (2 * np.log(gstd) ** 2))
+    lognormpdf2 = lambda x, gmean, gstd: (1 / (x * np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(
+        -(np.log(x) - np.log(gmean)) ** 2 / (2 * np.log(gstd) ** 2))
 
     # 生成常態分布
     x = np.linspace(-10, 10, 1000)
@@ -552,14 +549,15 @@ def psd_example(ax=None, **kwargs):
     # pdf2_2 = lognormpdf2(x2, gmean=np.exp(0.8), gstd=np.exp(1.5))
     # 這兩個相等
     ln2_1 = lognorm(s=1.5, scale=np.exp(0.8))
-    ttt = lambda x, mu, std: (1 / (x * std * np.sqrt(2 * np.pi))) * np.exp(-(np.log(x) - np.log(mu))**2 / (2 * std**2))
+    ttt = lambda x, mu, std: (1 / (x * std * np.sqrt(2 * np.pi))) * np.exp(
+        -(np.log(x) - np.log(mu)) ** 2 / (2 * std ** 2))
 
     # 若對數常態分布x有mu=3, sigma=1，ln(x)則為一常態分佈，試問其分布的平均值與標準差
     pdf3 = lognormpdf(x2, gmean=3, gstd=1.5)
     ln1 = lognorm(s=1, scale=np.exp(3))
     data3 = ln1.rvs(size=1000)
 
-    Y = np.log(data3) #Y.mean()=3, Y.std()=1
+    Y = np.log(data3)  # Y.mean()=3, Y.std()=1
     nor2 = norm(loc=3, scale=1)
     data4 = nor2.rvs(size=1000)
 

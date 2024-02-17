@@ -34,7 +34,6 @@ def violin(means, data_set, **kwargs):  # Distribution pattern of light extincti
     ylabel = kwargs.get('ylabel') or unit('Extinction')
     ticks = kwargs.get('ticks') or np.arange(grps)
     title = kwargs.get('title') or ''
-    title = title.replace(' ', '\ ')
     title_format = fr'$\bf {title}$'
 
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)

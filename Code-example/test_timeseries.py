@@ -1,5 +1,5 @@
-from DataPlot.scripts import *
-from DataPlot.data_processing import *
+from DataPlot.plot import *
+from DataPlot.process import *
 
 
 if __name__ == '__main__':

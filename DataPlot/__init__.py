@@ -1,3 +1,2 @@
-from .data_processing import *
+from .process import *
 from .plot import *
-from .scripts import *

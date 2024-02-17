@@ -50,7 +50,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
         matplotlib.figure, matplotlib.axes
 
     """
-    # data processing
+    # data process
     data = np.array(list(data_set.values()))
 
     if data_std == 'None':
@@ -125,7 +125,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
         matplotlib.figure, matplotlib.axes
 
     """
-    # data processing
+    # data process
 
     abs_data = np.array(list(data_set.values()))
 
@@ -141,7 +141,6 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
     # figure info
     category_names = kwargs.get('ticks') or list(data_set.keys())
     title = kwargs.get('title') or ''
-    title = title.replace(' ', '\ ')
     title_format = fr'$\bf {title}$'
     colors = kwargs.get('colors') or plt.colormaps['Blues'](np.linspace(0.2, 0.8, species))
 
@@ -203,7 +202,7 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
 
     """
 
-    # data processing
+    # data process
     data = np.array(list(data_set.values()))
     data2 = np.array(list(data_ALWC.values()))
     if data_std == 'None':
