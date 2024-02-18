@@ -3,17 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
 from pathlib import Path
-from DataPlot.process import main
-from DataPlot.process.Data_classify import state_classify, season_classify, Seasons
-from DataPlot.templates import set_figure, unit, getColor
-from DataPlot.templates import violin
-from DataPlot.templates import barplot_concen, barplot_combine
-from DataPlot.templates import scatter, scatter_mutiReg
-
-import DataPlot.templates as pt
-import DataPlot.templates.basic.pie_plot as piePlot
-import DataPlot.templates.basic.bar_plot as barPlot
-import DataPlot.templates.basic.violin_plot as violinPlot
+from DataPlot import *
 
 
 colors1 = getColor(kinds='1')
@@ -24,9 +14,9 @@ colors3c = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#
 colors4 = getColor(kinds='4')
 colors5 = getColor(kinds='5')
 
-df = main()['2020-09-04':'2021-05-06']
-dic_grp_sea = season_classify(df)
-dic_grp_sta = state_classify(df)
+df = DataBase['2020-09-04':'2021-05-06']
+dic_grp_sea = Classifier(df, 'season')
+dic_grp_sta = Classifier(df, 'state')
 
 Species1 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
 Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'ALWC_SS_ext', 'EC_ext_dry']

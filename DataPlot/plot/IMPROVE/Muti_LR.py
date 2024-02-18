@@ -46,8 +46,8 @@ if __name__ == '__main__':
             # print(f"intercept: {model.intercept_}")
             print(f"coefficients: {model.coef_}")
             y_pred = model.predict(x)
-            df_ = pd.DataFrame(np.concatenate([y, y_pred], axis=1), columns=['y', 'y_pred'])
-            scatter(df_, 'y', 'y_pred', regression=True, title=f'{key}')
+            df_ = pd.DataFrame(np.concatenate([y, y_pred], axis=1), columns=['y_calculated', 'y_predict'])
+            scatter(df_, 'y_calculated', 'y_predict', regression=True, title=f'{key}')
 
             result = df_cal[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'Const']].mul(model.coef_[0]).mean()
 
@@ -61,15 +61,15 @@ if __name__ == '__main__':
             # print(f"intercept: {model2.intercept_}")
             print(f"coefficients: {model2.coef_}")
             y_pred2 = model2.predict(x2)
-            df_ = pd.DataFrame(np.concatenate([y2, y_pred2], axis=1), columns=['y', 'y_pred'])
-            scatter(df_, 'y', 'y_pred', regression=True, title=f'{key}')
+            df_ = pd.DataFrame(np.concatenate([y2, y_pred2], axis=1), columns=['y_calculated', 'y_predict'])
+            scatter(df_, 'y_calculated', 'y_predict', regression=True, title=f'{key}')
 
             result2 = df_cal[['POC', 'SOC', 'EC', 'Const2']].mul(model2.coef_[0]).mean()
 
 
             n_df = df_cal[['AS', 'AN', 'POC', 'SOC', 'EC']].mul([2.74, 4.41, 11.5, 7.34, 12.27])
             new_df = concat([df_cal['Extinction'], n_df], axis=1)
-            new_dic = StateClassifier(new_df)
+            new_dic = Classifier(new_df, 'state')
 
             ext_dry_dict = {state: [new_dic[state][specie].mean() for specie in
                                     ['AS', 'AN', 'POC', 'SOC', 'EC']] for state in
@@ -136,79 +136,6 @@ if __name__ == '__main__':
                   bbox_to_anchor=(0.66, 0, 0.5, 1), frameon=False)
         plt.show()
         # fig.savefig(f"IMPROVE_ext_donuts_{title}", transparent=True)
-
-
-    @set_figure(figsize=(6, 6))
-    def scatter_mutiReg2(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
-        # create fig
-        fig, ax = plt.subplots()
-
-        df = df.dropna(subset=[x, y1, y2])
-
-        x_data = np.array(df[x])
-
-        y_data1 = np.array(df[y1])
-        y_data2 = np.array(df[y2])
-
-        color1 = {'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'}
-        color2 = {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'}
-        color3 = {'line': '#c81e1e', 'edge': '#f05252', 'face': '#f98080'}
-
-        scatter1 = ax.scatter(x_data, y_data1, s=25, color=color1['face'], alpha=0.8, edgecolors=color1['edge'],
-                              label='Revised')
-        scatter2 = ax.scatter(x_data, y_data2, s=25, color=color2['face'], alpha=0.8, edgecolors=color2['edge'],
-                              label='Modified')
-
-        xlim = kwargs.get('xlim')
-        ylim = kwargs.get('ylim')
-        xlabel = kwargs.get('xlabel') or unit(x) or ''
-        ylabel = kwargs.get('ylabel') or unit(y1) or ''
-        ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-
-        title = kwargs.get('title') or ''
-
-        title_format = fr'$\bf {title}$'
-        ax.set_title(title_format, fontdict={'fontweight': 'bold', 'fontsize': 20})
-
-        if regression:
-            x_2d = x_data.reshape(-1, 1)
-            y_2d = y_data1.reshape(-1, 1)
-
-            model = LinearRegression().fit(x_2d, y_2d)
-            slope = model.coef_[0][0].__round__(3)
-            intercept = model.intercept_[0].__round__(3)
-            r_square = model.score(x_2d, y_2d).__round__(3)
-
-            plt.plot(x_2d, model.predict(x_2d), linewidth=3, color=color1['line'], alpha=1, zorder=3)
-
-            text = np.poly1d([slope, intercept])
-            func1 = '\n' + 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
-
-
-            x_2d = x_data.reshape(-1, 1)
-            y_2d2 = y_data2.reshape(-1, 1)
-            model2 = LinearRegression().fit(x_2d, y_2d2)
-            slope = model2.coef_[0][0].__round__(3)
-            intercept = model2.intercept_[0].__round__(3)
-            r_square = model2.score(x_2d, y_2d2).__round__(3)
-
-            plt.plot(x_2d, model2.predict(x_2d), linewidth=3, color=color2['line'], alpha=1, zorder=3)
-
-            text = np.poly1d([slope, intercept])
-            func2 = '\n' + 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
-
-        if diagonal:
-            ax.axline((0, 0), slope=1., color='k', lw=2, ls='--', alpha=0.5, label='1:1')
-            plt.text(0.97, 0.95, r'$\bf 1:1\ Line$', color='k', ha='right', va='top', transform=ax.transAxes)
-
-        leg = plt.legend(handles=[scatter1, scatter2],
-                         labels=[f'Revised: {func1}', f'Modified: {func2}', ],
-                         loc='upper left', prop={'weight': 'bold', 'size': 12})
-
-        for text, color in zip(leg.get_texts(), [color1['line'], color2['line']]):
-            text.set_color(color)
-
-        return fig, ax
 
 
     @set_figure(figsize=(6, 6))
@@ -300,11 +227,7 @@ if __name__ == '__main__':
 
         return fig, ax
 
-
-    fix, ax = scatter_mutiReg2(df, x='Extinction', y1='Revised', y2='Modified', xlim=[0, 400], ylim=[0, 400],
-                               title='', regression=True, diagonal=True)
-
-    fix, ax = scatter_mutiReg(df, x='Extinction', y1='Revised', y2='Modified', y3='Localized', xlim=[0, 400], ylim=[0, 400],
+    fig, ax = scatter_mutiReg(df, x='Extinction', y1='Revised', y2='Modified', y3='Localized', xlim=[0, 400], ylim=[0, 400],
                               title='', regression=True, diagonal=True)
 
     donuts_ext(ext_dry_dict, labels=['AS', 'AN', 'POC', 'SOC', 'EC'])

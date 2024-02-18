@@ -65,5 +65,7 @@
     "IR BCc": "IR BCc (ng/cm^{3}) (880 nm)",
     "AT": "Temp (^{\\circ}C)",
     "WS": "WS (m/s)",
-    "WD": "WD ({\\circ})"
+    "WD": "WD ({\\circ})",
+    "y_calculated":  "y_{calculated}",
+    "y_predict":  "y_{predict}"
 }
