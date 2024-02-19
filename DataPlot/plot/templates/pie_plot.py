@@ -4,7 +4,7 @@ import numpy as np
 from DataPlot.plot import set_figure, unit, getColor, linecolor
 
 prop_text = {'fontsize': 14, }
-prop_legend = {'fontsize': 14, }
+prop_legend = {'size': 14, }
 
 __all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext']
 

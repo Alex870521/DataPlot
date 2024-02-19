@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import time
 from functools import wraps
+from typing import Optional
+
 
 # For more details please seehttps://matplotlib.org/stable/users/explain/customizing.html
 
@@ -17,7 +19,14 @@ from functools import wraps
 # }
 
 
-def set_figure(func=None, *, figsize=None, fs=None, fw=None, titlesize=None):
+def set_figure(func=None,
+               *,
+               figsize: Optional[tuple] = None,
+               titlesize: Optional[str] = None,
+               fs: Optional[str] = None,
+               fw: Optional[str] = None,
+               ):
+
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):
@@ -31,7 +40,7 @@ def set_figure(func=None, *, figsize=None, fs=None, fw=None, titlesize=None):
             # The text, annotate, label, title, ticks, are used to create text
             plt.rcParams['font.family'] = 'Times New Roman'
             plt.rcParams['font.weight'] = fw or 'normal'
-            plt.rcParams['font.size'] = fs or 16
+            plt.rcParams['font.size'] = fs or 14
 
             plt.rcParams['axes.titlelocation'] = 'center'
             plt.rcParams['axes.titleweight'] = 'bold'
@@ -59,6 +68,7 @@ def set_figure(func=None, *, figsize=None, fs=None, fw=None, titlesize=None):
             result = _func(*args, **kwargs)
 
             return result
+
         return wrapper
 
     if func is None:
@@ -102,6 +112,7 @@ def timer(func=None):
     The elapsed time is printed to the console after the function execution.
 
     """
+
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):

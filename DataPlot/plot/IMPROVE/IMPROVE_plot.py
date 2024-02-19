@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as plc
 from pathlib import Path
 from DataPlot import *
-
+from DataPlot.plot.core import *
+from DataPlot.plot.templates import *
 
 colors1 = getColor(kinds='1')
 colors2 = getColor(kinds='2')
@@ -19,20 +20,20 @@ dic_grp_sea = Classifier(df, 'season')
 dic_grp_sta = Classifier(df, 'state')
 
 Species1 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
-Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'ALWC_SS_ext', 'EC_ext_dry']
+Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry',
+            'ALWC_SS_ext', 'EC_ext_dry']
 Species3 = ['AS_ext', 'AN_ext', 'OM_ext', 'Soil_ext', 'SS_ext', 'EC_ext']
 
 dry_particle = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
 water = ['ALWC_ext']
 water2 = ['ALWC_AS_ext', 'ALWC_AN_ext', 'ALWC_SS_ext']
 
-mass_1 = ['AS_mass', 'AN_mass', 'OM_mass', 'Soil_mass', 'SS_mass', 'EC_mass']
-mass_2 = ['AS_mass', 'AN_mass', 'OM_mass', 'Soil_mass', 'SS_mass', 'EC_mass', 'others_mass']
-mass_3 = ['AS_mass', 'AN_mass', 'OM_mass', 'Soil_mass', 'SS_mass', 'EC_mass', 'ALWC']
-mass_4 = ['AS_mass', 'AN_mass', 'POC_mass', 'SOC_mass', 'Soil_mass', 'SS_mass', 'EC_mass', 'ALWC']
+mass_1 = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']
+mass_2 = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'unknown_mass']
+mass_3 = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'ALWC']
+mass_4 = ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC']
 
 States1 = ['Total', 'Clean', 'Transition', 'Event']
-
 
 if __name__ == '__main__':
     mass_comp1_dict = {state: [dic_grp_sta[state][specie].mean() for specie in mass_1] for state in States1}
@@ -66,7 +67,8 @@ if __name__ == '__main__':
             dic_grp_Ext = {}
             dic_grp_Ext['Total'] = df[['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']].mean().values
             for key, _df in dic_grp_sea.items():
-                dic_grp_Ext[key] = _df['Total'][['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']].mean().values
+                dic_grp_Ext[key] = _df['Total'][
+                    ['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']].mean().values
 
             barplot_concen(data_set=dic_grp_Ext,
                            labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
@@ -74,6 +76,7 @@ if __name__ == '__main__':
 
         # total_light_ext_violin()
         # total_light_ext_barplot()
+
 
     # 以EXT
     def Ext_based():
@@ -132,6 +135,7 @@ if __name__ == '__main__':
 
         # aaaa()
 
+
     # 以RH分類畫圖
     def RH_based():
         bins = np.array([0, 40, 60, 80, 100])
@@ -140,13 +144,13 @@ if __name__ == '__main__':
         df_RH_group = df.groupby('RH_cut')
         dic = {}
         for _grp, _df in df_RH_group:
-            dic_grp_sta = state_classify(_df)
+            dic_grp_sta = Classifier(_df, 'state')
             dic[_grp] = {state: [dic_grp_sta[state][specie].mean() for specie in Species3] for state in States1}
 
         for label in labels:
-            piePlot.pie_ext(data_set=dic[label],
-                            labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], style='donut',
-                            title=label)
+            pie_ext(data_set=dic[label],
+                    labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], style='donut',
+                    title=label)
 
 
     @set_figure(figsize=(10, 6))
@@ -199,20 +203,20 @@ if __name__ == '__main__':
                              label='Transition / Clean')
         ax3.set_ylabel(r'$\bf Enhancement\ ratio$')
         ax3.set_ylim(0, 4)
-        plt.legend(handles=[point1, point2], loc='upper left', prop=dict(weight='bold',))
+        plt.legend(handles=[point1, point2], loc='upper left', prop=dict(weight='bold', ))
         plt.show()
 
 
     def ext_mass_barplot():
-        barPlot.barplot_combine(data_set=ext_dry_dict,
-                                data_std=ext_dry_std,
-                                data_ALWC=ext_ALWC_dict,
-                                data_ALWC_std=ext_ALWC_std,
-                                labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'ALWC'],
-                                colors=colors3b,
-                                title='',
-                                orientation='va',
-                                figsize=(12, 12))
+        barplot_combine(data_set=ext_dry_dict,
+                        data_std=ext_dry_std,
+                        data_ALWC=ext_ALWC_dict,
+                        data_ALWC_std=ext_ALWC_std,
+                        labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'ALWC'],
+                        colors=colors3b,
+                        title='',
+                        orientation='va',
+                        figsize=(12, 12))
 
         # barPlot.barplot_extend(data_set=mass_comp1_dict,
         #                        labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'other'],
@@ -230,15 +234,16 @@ if __name__ == '__main__':
         # piePlot.pie_ext(data_set=ext_amb_dict, labels=['AS', 'AS_ALWC', 'AN', 'AN_ALWC', 'OM', 'Soil', 'SS', 'SS_ALWC', 'BC'], style='donut', title='Mix')
         # piePlot.donuts_ext(data_set=ext_dry_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], title='Dry')
         # piePlot.donuts_ext(data_set=ext_mix_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], title='Ambient')
-        piePlot.donuts_ext(data_set=ext_amb_dict, labels=['AS', 'AS_ALWC', 'AN', 'AN_ALWC', 'OM', 'Soil', 'SS', 'SS_ALWC', 'EC'], title='Ambient')
+        donuts_ext(data_set=ext_amb_dict,
+                   labels=['AS', 'AS_ALWC', 'AN', 'AN_ALWC', 'OM', 'Soil', 'SS', 'SS_ALWC', 'EC'], title='Ambient')
 
 
-    # pie_plot()
-    # ext_mass_barplot()
-    # chemical_enhancement()
-    # extinction_by_particle_gas()
-    # RH_based()
-    # Ext_based()
+    pie_plot()
+    ext_mass_barplot()
+    chemical_enhancement()
+    extinction_by_particle_gas()
+    RH_based()
+    Ext_based()
 
     # for items in ['Extinction', 'Scattering', 'Absorption', 'SSA',
     #               'MEE', 'MSE', 'MAE', 'PM1', 'PM25', 'WS', 'PBLH',
@@ -253,7 +258,6 @@ if __name__ == '__main__':
     #
     #         print(f'{items}: ' + str(dic_grp_sta[state][items].mean().__round__(2)) + ' + ' + str(
     #             dic_grp_sta[state][items].std().__round__(2)))
-
 
     # for season in Seasons:
     #     # unclass.ammonium_rich(dic_grp_sea[season]['Total'], title=season)
@@ -287,9 +291,9 @@ if __name__ == '__main__':
     #     print(dic_grp_sta[state]['MEE_dry_PNSD'].mean(), dic_grp_sta[state]['MEE_dry_PNSD'].std())
     #     print(dic_grp_sta[state]['MEE_PNSD'].mean(), dic_grp_sta[state]['MEE_PNSD'].std())
     # for state in ['Clean', 'Event']:
-        # aaa = dic_grp_sta[state]
-        # scatter(aaa, x='Extinction', y='MSE', c='OM_mass_ratio', y_range=[0, 10], c_range=[0, 0.5], title=state)
-        # scatter(aaa, x='GMDs', y='MSE', c='AS_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
-        # scatter(aaa, x='GMDs', y='MSE', c='AN_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
-        # scatter(aaa, x='Ox', y='SOC_mass', y_range=[0, 10], title=state)
-    scatter(df, x='Extinction', y='SSA', c='EC_mass_ratio', s='PM25', y_range=[0, 1], c_range=[0, 0.07], box=True, title="")
+    # aaa = dic_grp_sta[state]
+    # scatter(aaa, x='Extinction', y='MSE', c='OM_mass_ratio', y_range=[0, 10], c_range=[0, 0.5], title=state)
+    # scatter(aaa, x='GMDs', y='MSE', c='AS_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
+    # scatter(aaa, x='GMDs', y='MSE', c='AN_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
+    # scatter(aaa, x='Ox', y='SOC_mass', y_range=[0, 10], title=state)
+    # scatter(df, x='Extinction', y='SSA', c='EC_ratio', s='PM25', y_range=[0, 1], c_range=[0, 0.07], box=True, title="")
