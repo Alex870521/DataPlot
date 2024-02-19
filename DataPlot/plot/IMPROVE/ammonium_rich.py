@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from pandas import DataFrame
-from ..core import set_figure, unit, getColor
+from DataPlot.plot.core import *
 
 
 @set_figure

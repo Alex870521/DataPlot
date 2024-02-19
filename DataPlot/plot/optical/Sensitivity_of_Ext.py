@@ -1,8 +1,8 @@
+import numpy as np
 from pathlib import Path
 from pandas import concat, DataFrame
 from DataPlot.plot import scatter
-from DataPlot.process import *
-import pickle
+from DataPlot.process import DataReader, SizeDist, Mie_PESD
 
 
 PATH_MAIN = Path(__file__).parents[0]
@@ -11,9 +11,9 @@ PNSD, RI = DataReader('PNSD_dNdlogdp.csv'), DataReader('chemical.csv')[['gRH', '
 
 df = concat([PNSD, RI], axis=1)
 
-dp = np.array(PNSD.columns, dtype='float')
+dp = SizeDist().dp
 _length = np.size(dp)
-dlogdp = np.array([0.014] * _length)
+dlogdp = SizeDist().dlogdp
 
 
 def Fixed_ext_process():

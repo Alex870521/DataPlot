@@ -1,6 +1,6 @@
 from typing import Optional
-from pathlib import Path
 from pandas import read_csv, read_json, read_excel, DataFrame
+from DataPlot.process.core._DEFAULT_PATH import *
 
 
 class FileNotFound(Exception):
@@ -30,7 +30,7 @@ class DataReader:
     >>> chemical = DataReader('chemical.csv')
     """
 
-    DEFAULT_PATH = Path(__file__).parents[2] / 'Data-example'
+    DEFAULT_PATH = DEFAULT_PATH
 
     def __new__(cls, filename: str) -> DataFrame:
         file_path: Optional[Path] = cls.find_file(filename)

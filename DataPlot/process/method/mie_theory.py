@@ -1,9 +1,9 @@
-from PyMieScatt import AutoMieQ, Mie_SD
+from PyMieScatt import AutoMieQ
 import numpy as np
 import math
 
 
-def Mie_Q(m, wavelength, dp):
+def Mie_Q(m: complex, wavelength: float, dp: np.ndarray) -> tuple[np.ndarray]:
     """
     Calculate Mie scattering efficiency (Q) for a distribution of spherical particles.
 

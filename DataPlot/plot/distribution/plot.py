@@ -6,7 +6,7 @@ from typing import Optional
 from scipy.stats import norm, lognorm
 from numpy import nan_to_num
 from matplotlib.ticker import ScalarFormatter
-from DataPlot.plot import set_figure
+from DataPlot.plot.core import set_figure
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
                 'Transition': ['#4a9f1d', '#a7e984'],
@@ -14,9 +14,16 @@ color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
 
 
 @set_figure(fs=12)
-def heatmap(df: pd.DataFrame, ax: Optional[plt.Axes] = None,
-            logy=True, cbar=True, hide_low=True, cmap: str = 'jet',
-            fig_kws={}, cbar_kws={}, plot_kws={}, **kwargs):
+def heatmap(df: pd.DataFrame,
+            ax: Optional[plt.Axes] = None,
+            logy: bool = True,
+            cbar: bool = True,
+            hide_low: bool = True,
+            cmap: str = 'jet',
+            fig_kws: Optional[dict] = {},
+            cbar_kws: Optional[dict] = {},
+            plot_kws: Optional[dict] = {},
+            **kwargs):
     """ Plot the size distribution over time.
 
     Parameters

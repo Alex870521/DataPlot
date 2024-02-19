@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from DataPlot.plot import set_figure, unit, getColor, linecolor
+from DataPlot.plot.core import *
+
+__all__ = ['violin']
 
 
 @set_figure(figsize=(6, 6))
@@ -41,4 +43,4 @@ def violin(means, data_set, **kwargs):  # Distribution pattern of light extincti
     ax.set_title(title_format)
 
     plt.show()
-    fig.savefig(f'Violin')
+    # fig.savefig(f'Violin')

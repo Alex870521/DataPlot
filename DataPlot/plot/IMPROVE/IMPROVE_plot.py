@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
-from pathlib import Path
-from DataPlot import *
+
+from DataPlot.process import *
 from DataPlot.plot.core import *
 from DataPlot.plot.templates import *
+
 
 colors1 = getColor(kinds='1')
 colors2 = getColor(kinds='2')

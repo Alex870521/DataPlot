@@ -5,11 +5,9 @@ from tabulate import tabulate
 from pandas import concat
 from sklearn.linear_model import LinearRegression
 
-from DataPlot.process import *
+from DataPlot.process import DataBase, DataReader, Classifier
 from DataPlot.plot.templates import scatter
-from DataPlot.plot.core import set_figure, unit, getColor
-
-print('this will print two times')
+from DataPlot.plot.core import set_figure, getColor, unit
 
 
 def residual_PM(_df):
@@ -25,13 +23,13 @@ def residual_ext(_df):
     return _df[['residual_ext', 'POC', 'SOC']]
 
 
-def _multiple_linear_Reg(df, x: list, y: list, add_constant=True, plot=False, plot_title: str = None) -> list:
+def _multiple_linear_reg(_df, x: list, y: list, add_constant=True, plot=False, plot_title: str = None) -> list:
 
     if add_constant:
-        df = df.assign(Const=1)
+        _df = _df.assign(Const=1)
 
-    x_params: np.ndarray = df[[*x, 'Const']].to_numpy()
-    y_actual: np.ndarray = df[y].to_numpy()
+    x_params: np.ndarray = _df[[*x, 'Const']].to_numpy()
+    y_actual: np.ndarray = _df[y].to_numpy()
 
     model = LinearRegression(positive=True).fit(x_params, y_actual)
 
@@ -194,7 +192,7 @@ def scatter_mutiReg__(df, x, y1, y2, y3, ax=None, regression=None, diagonal=Fals
     return ax
 
 
-if __name__ == '__main__':
+def MLR_IMPROVE():
     df = DataBase
     dic_grp_sta = Classifier(df, 'state')
 
@@ -203,8 +201,9 @@ if __name__ == '__main__':
                'AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'OM']
 
     df_cal = df[species].dropna().copy()
-    scat_coef = _multiple_linear_Reg(df_cal, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y=['Scattering'], add_constant=True)
-    abs_coef = _multiple_linear_Reg(df_cal, x=['POC', 'SOC', 'EC'], y=['Absorption'], add_constant=True)
+    scat_coef = _multiple_linear_reg(df_cal, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y=['Scattering'],
+                                     add_constant=True)
+    abs_coef = _multiple_linear_reg(df_cal, x=['POC', 'SOC', 'EC'], y=['Absorption'], add_constant=True)
 
     df_cal['Localized'] = df_cal[['AS', 'AN', 'POC', 'SOC', 'EC']].mul([2.74, 4.41, 11.5, 7.34, 12.27]).sum(axis=1)
     modify_IMPROVE = DataReader('modify_IMPROVE.csv')['total_ext_dry'].rename('Modified')
@@ -220,5 +219,9 @@ if __name__ == '__main__':
                     for state in ['Total', 'Clean', 'Transition', 'Event']}
 
     scatter_mutiReg__(df, x='Extinction', y1='Revised', y2='Modified', y3='Localized', xlim=[0, 400], ylim=[0, 400],
-                    title='', regression=True, diagonal=True)
+                      title='', regression=True, diagonal=True)
     donuts_ext(ext_dry_dict, labels=['AS', 'AN', 'POC', 'SOC', 'EC'])
+
+
+if __name__ == '__main__':
+    MLR_IMPROVE()

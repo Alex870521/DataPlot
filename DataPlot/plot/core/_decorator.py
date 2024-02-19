@@ -6,24 +6,12 @@ from typing import Optional
 
 # For more details please seehttps://matplotlib.org/stable/users/explain/customizing.html
 
-# font_scalings = {
-#     'xx-small': 0.579,
-#     'x-small': 0.694,
-#     'small': 0.833,
-#     'medium': 1.0,
-#     'large': 1.200,
-#     'x-large': 1.440,
-#     'xx-large': 1.728,
-#     'larger': 1.2,
-#     'smaller': 0.833
-# }
-
 
 def set_figure(func=None,
                *,
                figsize: Optional[tuple] = None,
-               titlesize: Optional[str] = None,
-               fs: Optional[str] = None,
+               titlesize: Optional[int] = None,
+               fs: Optional[int] = None,
                fw: Optional[str] = None,
                ):
 
@@ -44,7 +32,7 @@ def set_figure(func=None,
 
             plt.rcParams['axes.titlelocation'] = 'center'
             plt.rcParams['axes.titleweight'] = 'bold'
-            plt.rcParams['axes.titlesize'] = 'large'
+            plt.rcParams['axes.titlesize'] = titlesize or 'large'
             plt.rcParams['axes.labelweight'] = 'bold'
 
             plt.rcParams['xtick.labelsize'] = 'medium'

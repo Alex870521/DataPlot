@@ -30,7 +30,7 @@ def Q_plot(species, subdic):
     plt.ylabel(r'$\bf Optical\ efficiency\ (Q)$')
     plt.title(subdic['title'])
     plt.show()
-    fig.savefig(PATH_MAIN/f'Q_{species}')
+    # fig.savefig(PATH_MAIN/f'Q_{species}')
 
 
 @set_figure(figsize=(6, 6))
@@ -47,7 +47,7 @@ def MEE_plot(species, subdic):
     plt.ylabel(r'$\bf Mass\ Optical\ Efficiency\ (m^2/g)$')
     plt.title(subdic['title'])
     plt.show()
-    fig.savefig(PATH_MAIN/f'MEE_{species}')
+    # fig.savefig(PATH_MAIN/f'MEE_{species}')
 
 
 @set_figure(figsize=(6, 6))
@@ -70,7 +70,7 @@ def Q_size_para_plot(species, subdic):
     plt.ylim(0, 5)
     plt.title(subdic['title'])
     plt.show()
-    fig.savefig(PATH_MAIN/f'Q_sp_{species}')
+    # fig.savefig(PATH_MAIN/f'Q_sp_{species}')
 
 
 @set_figure(figsize=(8, 6), fs=16)
@@ -119,7 +119,7 @@ def All_species_Q(dic, x='dp', y='Q', mode='ext', **kwargs):
 
         plt.title('')
         plt.show()
-        fig.savefig(PATH_MAIN/f'Q_ALL_{mode}', transparent=True)
+        # fig.savefig(PATH_MAIN/f'Q_ALL_{mode}', transparent=True)
 
 
 @set_figure(figsize=(8, 6), fs=16)
@@ -164,7 +164,7 @@ def All_species_MEE(dic, x='dp', y='MEE', mode='ext', **kwargs):
         ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
         plt.title('')
         plt.show()
-        fig.savefig(PATH_MAIN/f'MEE_ALL_{mode}', transparent=True)
+        # fig.savefig(PATH_MAIN/f'MEE_ALL_{mode}', transparent=True)
 
 
 @set_figure(figsize=(12, 6))
@@ -205,7 +205,7 @@ def IJ_couple():
 
     plt.title(r'$\bf n\ =\ 1.50 $')
     plt.show()
-    fig.savefig(PATH_MAIN/f'IJ_couple')
+    # fig.savefig(PATH_MAIN/f'IJ_couple')
 
 
 @set_figure(figsize=(6, 5))
@@ -242,4 +242,4 @@ def RRI_2D(mode='ext', **kwargs):
         color_bar = plt.colorbar(im, extend='both')
         color_bar.set_label(label=fr'$\bf Scattering\ efficiency\ (Q_{{{mode}}})$')
         plt.show()
-        fig.savefig(PATH_MAIN/f'RRI_{mode}_{dp}')
+        # fig.savefig(PATH_MAIN/f'RRI_{mode}_{dp}')

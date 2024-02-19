@@ -6,32 +6,28 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import math
 from PyMieScatt import ScatteringFunction
-
+from DataPlot.plot import set_figure
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
 textprops = {'fontsize': 12, 'fontfamily': 'Times New Roman', 'fontweight': 'bold'}
 
-# df = Data_pro.get_data()
-# dic_grp_sea = Data_pro.season_classify(df)
-# dic_grp_sta = Data_pro.state_classify(df)
 
-
+@set_figure(figsize=(10, 6))
 def polor_plot(inner, outer):
-
     employee = ['AS', 'AN', 'OM', 'Soil', 'SS', 'BC']
     actual = np.append(inner, inner[0])
     expected = np.append(outer, outer[0])
 
-    plt.figure(figsize=(10, 6), dpi=150, constrained_layout=True)
+    plt.figure()
     plt.subplot(polar=True)
 
     theta = np.linspace(0, 2 * np.pi, len(actual))
 
-    lines, labels = plt.thetagrids(range(0, 360, int(360 / len(employee))), (employee))
+    lines, labels = plt.thetagrids(range(0, 360, int(360 / len(employee))), employee)
 
-    line1, = plt.plot(theta, actual, 'o-', linewidth=0.5, color='#115162')
+    line1, = plt.plot(theta, actual, 'o-', linewidth=0.1, color='#115162')
     plt.fill(theta, actual, '#afe0f5', alpha=0.5)
-    line2, = plt.plot(theta, expected, 'o-', linewidth=0.5, color='#7FAE80')
+    line2, = plt.plot(theta, expected, 'o-', linewidth=0.1, color='#7FAE80')
     plt.fill(theta, expected, '#b5e6c5', alpha=0.5)
 
     plt.legend(handles=[line1, line2], labels=['Dry', 'Amb'], prop=prop_legend, loc='best', bbox_to_anchor=(1, 0, 0.2, 1), frameon=False)

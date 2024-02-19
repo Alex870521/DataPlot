@@ -3,6 +3,11 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
 from DataPlot.plot.core import *
 
+__all__ = ['timeseries',
+           'tms_scatter',
+           'tms_plot',
+           'tms_bar']
+
 
 def _inset_axes(ax, orientation='vertical', inset_kws={}):
     default_inset_kws = {}

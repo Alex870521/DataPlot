@@ -2,7 +2,7 @@ import numpy as np
 from .mie_theory import Mie_PESD
 
 
-def internal(ser, dp, dlogdp, wavelength=550):
+def internal(ser, dp, dlogdp, wavelength=550) -> dict:
     m = ser['n_amb'] + 1j * ser['k_amb']
     ndp = np.array(ser[:np.size(dp)])
     ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
@@ -10,7 +10,7 @@ def internal(ser, dp, dlogdp, wavelength=550):
     return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
 
 
-def external(ser, dp, dlogdp, wavelength=550):
+def external(ser, dp, dlogdp, wavelength=550) -> dict:
     refractive_dic = {'AS_volume_ratio':   1.53 + 0j,
                       'AN_volume_ratio':   1.55 + 0j,
                       'OM_volume_ratio':   1.54 + 0j,

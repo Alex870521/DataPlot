@@ -1,16 +1,12 @@
-from pathlib import Path
-from pandas import read_csv, read_json
 import matplotlib.pyplot as plt
-from ..core import set_figure, unit, getColor
-
-
-with open(Path(__file__).parents[2] / 'Data-example' / 'level1' / 'fRH.json', 'r', encoding='utf-8', errors='ignore') as f:
-    frh = read_json(f)
+from DataPlot.process import DataReader
+from DataPlot.plot import set_figure
 
 
 @set_figure
-def fRH_plot() -> plt.Axes:  # ref f(RH)
+def fRH_plot() -> plt.Axes:
     print('Plot: fRH_plot')
+    frh = DataReader('fRH.json')
     fig, ax = plt.subplots(1, 1, figsize=(6, 6))
     plt.plot(frh.index, frh['fRH'], 'k-o', lw=2)
     plt.plot(frh.index, frh['fRHs'], 'g-o', lw=2)

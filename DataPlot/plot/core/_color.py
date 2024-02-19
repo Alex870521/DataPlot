@@ -67,6 +67,14 @@ def linecolor():
     return color_lst
 
 
+class Color:
+    def __init__(self):
+        pass
+
+    def palplot(self):
+        pass
+
+
 if __name__ == '__main__':
     # sns.palplot(getColor(num=15))
     # sns.palplot(sns.color_palette("Set3", 15))
