@@ -1,5 +1,5 @@
 from .plot import heatmap, overlay_dist, separate_dist, dist_with_std, compare, ls_mode, psd_example
-from .fit import curvefit
+from .fit import curve_fitting
 
 __all__ = ["heatmap",
            "overlay_dist",
@@ -8,5 +8,5 @@ __all__ = ["heatmap",
            "compare",
            "ls_mode",
            "psd_example",
-           "curvefit"
+           "curve_fitting"
            ]

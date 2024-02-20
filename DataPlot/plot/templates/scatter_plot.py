@@ -2,13 +2,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from typing import Union, List
 from DataPlot.plot import set_figure, unit, getColor, linecolor
 from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html
 
 __all__ = ['scatter',
-           'scatter_mutiReg']
+           'scatter_multiple_reg',
+           ]
 
 
 def _range(series, **kwargs):
@@ -81,20 +83,9 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         color_bar.set_label(label=unit(c) or 'clabel', size=14)
 
     if regression:
-        x_fit = x_data.reshape(-1, 1)
-        y_fit = y_data.reshape(-1, 1)
+        text = _regression(x_data, y_data, color=sns.xkcd_rgb["denim blue"])
 
-        model = LinearRegression(fit_intercept=True).fit(x_fit, y_fit)
-
-        slope = round(model.coef_[0][0], 3)
-        intercept = round(model.intercept_[0], 3)
-        r_square = round(model.score(x_fit, y_fit), 3)
-
-        plt.plot(x_fit, model.predict(x_fit), linewidth=3, color=sns.xkcd_rgb["denim blue"], alpha=1)
-
-        text = np.poly1d([slope, intercept])
-        func = 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
-        plt.text(0.05, 0.95, f'{func}', fontdict={'weight': 'bold'}, color=sns.xkcd_rgb["denim blue"],
+        plt.text(0.05, 0.95, f'{text}', fontdict={'weight': 'bold'}, color=sns.xkcd_rgb["denim blue"],
                  ha='left', va='top', transform=ax.transAxes)
 
     if diagonal:
@@ -132,70 +123,117 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
     return fig, ax
 
 
+def _regression(x_data, y_data, color=sns.xkcd_rgb["denim blue"]):
+    x_fit = x_data.reshape(-1, 1)
+    y_fit = y_data.reshape(-1, 1)
+
+    model = LinearRegression().fit(x_fit, y_fit)
+
+    slope = round(model.coef_[0][0], 3)
+    intercept = round(model.intercept_[0], 3)
+    r_square = round(model.score(x_fit, y_fit), 3)
+
+    plt.plot(x_fit, model.predict(x_fit), linewidth=3, color=color, alpha=1, zorder=3)
+
+    text = np.poly1d([slope, intercept])
+    text = 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
+
+    return text
+
+
 @set_figure(figsize=(6, 5))
-def scatter_mutiReg(df, x, y1, y2, regression=None, diagonal=False, **kwargs):
-    # create fig
-    fig, ax = plt.subplots()
+def scatter_multiple_reg(df, x: str, y: Union[str, List[str]] = None, labels: Union[str, List[str]] = None, ax=None, regression=None, diagonal=False, **kwargs):
+    """
+    Create a scatter plot with multiple regression lines for the given data.
 
-    df = df.dropna(subset=[x, y1, y2])
+    Parameters
+    ----------
+    df : DataFrame
+        Input DataFrame containing the data.
+    x : str
+        Column name for the x-axis variable.
+    y : list of str or str
+        Column name(s) for the y-axis variable(s). Can be a single string or a list of strings.
+    labels : list of str or str, optional
+        Labels for the y-axis variable(s). If None, column names are used as labels. Default is None.
+    ax : AxesSubplot, optional
+        Matplotlib AxesSubplot to use for the plot. If None, a new subplot is created. Default is None.
+    regression : bool, optional
+        If True, regression lines are plotted for each y variable. Default is None.
+    diagonal : bool, optional
+        If True, a diagonal line (1:1 line) is added to the plot. Default is False.
+    **kwargs
+        Additional keyword arguments to customize the plot.
 
+    Returns
+    -------
+    AxesSubplot
+        Matplotlib AxesSubplot containing the scatter plot.
+
+    Notes
+    -----
+    - The function creates a scatter plot with the option to include multiple regression lines.
+    - If regression is True, regression lines are fitted for each y variable.
+    - Additional customization can be done using the **kwargs.
+
+    Example
+    -------
+    >>> scatter_multiple_reg(df, x='X', y=['Y1', 'Y2'], labels=['Label1', 'Label2'],
+    ...                      regression=True, diagonal=True, xlim=(0, 10), ylim=(0, 20),
+    ...                      xlabel="X-axis", ylabel="Y-axis", title="Scatter Plot with Regressions")
+    """
+
+    print('Plot: scatter_multiple_reg')
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    if not isinstance(y, list):
+        y = [y]
+
+    if labels is None:
+        labels = y
+
+    df = df.dropna(subset=[x, *y])
     x_data = np.array(df[x])
 
-    y_data1 = np.array(df[y1])
-    y_data2 = np.array(df[y2])
+    color_cycle = linecolor()
 
-    color1, color2, color3 = linecolor()
+    handles = []
+    text_list = []
 
-    scatter1 = ax.scatter(x_data, y_data1, s=25, color=color1['face'], alpha=0.8, edgecolors=color1['edge'], label='Internal')
-    scatter2 = ax.scatter(x_data, y_data2, s=25, color=color2['face'], alpha=0.8, edgecolors=color2['edge'], label='External')
+    for i, y_var in enumerate(y):
+        y_data = np.array(df[y_var])
+        color = color_cycle[i % len(color_cycle)]
+
+        scatter = ax.scatter(x_data, y_data, s=25, color=color['face'], edgecolors=color['edge'], alpha=0.8, label=f'{labels[i]}')
+        handles.append(scatter)
+
+        if regression:
+            text = _regression(x_data, y_data, color=color['line'])
+            text_list.append(f'{labels[i]}: {text}')
 
     xlim = kwargs.get('xlim')
     ylim = kwargs.get('ylim')
     xlabel = kwargs.get('xlabel') or unit(x) or ''
-    ylabel = kwargs.get('ylabel') or unit(y1) or ''
+    ylabel = kwargs.get('ylabel') or unit(y[0]) or ''  # Assuming all y variables have the same unit
+
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
     title = kwargs.get('title') or ''
     ax.set_title(title, fontdict={'fontweight': 'bold', 'fontsize': 20})
 
     if regression:
-        x_fit = x_data.reshape(-1, 1)
-        y_fit = y_data1.reshape(-1, 1)
+        # Add regression info to the legend
+        leg = plt.legend(handles=handles, labels=text_list, loc='upper left', prop={'weight': 'bold', 'size': 10})
+    else:
+        # Use default legend without regression info
+        leg = plt.legend(handles=handles, labels=labels, loc='upper left', prop={'weight': 'bold', 'size': 10})
 
-        model = LinearRegression().fit(x_fit, y_fit)
-
-        slope = round(model.coef_[0][0], 3)
-        intercept = round(model.intercept_[0], 3)
-        r_square = round(model.score(x_fit, y_fit), 3)
-
-        plt.plot(x_fit, model.predict(x_fit), linewidth=3, color=color1['line'], alpha=1, zorder=3)
-
-        text = np.poly1d([slope, intercept])
-        func = 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
-        plt.text(0.05, 0.75, f'{func}', fontdict={'weight': 'bold'}, color=color1['line'], ha='left', va='top',
-                 transform=ax.transAxes)
-
-        x_fit = x_data.reshape(-1, 1)
-        y_2d2 = y_data2.reshape(-1, 1)
-        model2 = LinearRegression().fit(x_fit, y_2d2)
-        slope = model2.coef_[0][0].__round__(3)
-        intercept = model2.intercept_[0].__round__(3)
-        r_square = model2.score(x_fit, y_2d2).__round__(3)
-
-        plt.plot(x_fit, model2.predict(x_fit), linewidth=3, color=color2['line'], alpha=1, zorder=3)
-
-        text = np.poly1d([slope, intercept])
-        func = 'y = ' + str(text).replace('\n', "") + '\n' + r'$\bf R^2 = $' + str(r_square)
-        plt.text(0.05, 0.95, f'{func}', fontdict={'weight': 'bold'}, color=color2['line'], ha='left',
-                 va='top',
-                 transform=ax.transAxes)
+    for text, color in zip(leg.get_texts(), [color['line'] for color in color_cycle]):
+        text.set_color(color)
 
     if diagonal:
         ax.axline((0, 0), slope=1., color='k', lw=2, ls='--', alpha=0.5, label='1:1')
-        plt.text(0.97, 0.5, r'$\bf 1:1\ Line$', color='k', ha='right', va='top', transform=ax.transAxes)
+        plt.text(0.97, 0.97, r'$\bf 1:1\ Line$', color='k', ha='right', va='top', transform=ax.transAxes)
 
-    # plt.legend(handles=[scatter1, scatter2], loc='best', prop={'weight': 'bold'})
-
-    # savefig
-
-    return fig, ax
+    return ax

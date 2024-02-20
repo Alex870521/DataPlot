@@ -4,10 +4,10 @@ from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from numpy import log, exp, pi, sqrt
 from tabulate import tabulate
-from DataPlot.plot.core import *
+from DataPlot.plot import set_figure
 
 
-def curvefit(dp, dist, mode=None, **kwargs):
+def curve_fitting(dp, dist, mode=None, **kwargs):
     """
     Fit a log-normal distribution to the given data and plot the result.
 
@@ -30,7 +30,7 @@ def curvefit(dp, dist, mode=None, **kwargs):
 
     Example
     -------
-    >>> curvefit(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
+    >>> curve_fitting(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
     """
     # Calculate total number concentration and normalize distribution
     total_num = np.sum(dist * log(dp))
