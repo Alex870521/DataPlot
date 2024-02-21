@@ -1,12 +1,10 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from tabulate import tabulate
+import matplotlib.pyplot as plt
 from pandas import concat
-from sklearn.linear_model import LinearRegression
 
 from DataPlot.process import DataBase, DataReader, Classifier
-from DataPlot.plot.templates import scatter, scatter_multiple_reg
+from DataPlot.plot.templates import scatter, linear_regression, multiple_linear_regression
 from DataPlot.plot.core import set_figure, getColor, unit
 
 
@@ -21,31 +19,6 @@ def residual_ext(_df):
         'SS_ext_dry']
 
     return _df[['residual_ext', 'POC', 'SOC']]
-
-
-def _multiple_linear_regression(_df, x: list, y: list, add_constant=True, plot=False, plot_title: str = None) -> list:
-    if add_constant:
-        _df = _df.assign(Const=1)
-
-    x_params: np.ndarray = _df[[*x, 'Const']].to_numpy()
-    y_actual: np.ndarray = _df[y].to_numpy()
-
-    model = LinearRegression(positive=True).fit(x_params, y_actual)
-
-    print(f"R^2: {model.score(x_params, y_actual).round(3)}")
-    # print(f"coefficients: {model.coef_[0].round(3)}")
-
-    y_predict = model.predict(x_params)
-    df_ = pd.DataFrame(np.concatenate([y_actual, y_predict], axis=1), columns=['y_actual', 'y_predict'])
-
-    # Creating a list of coefficients
-    tab = tabulate([model.coef_[0].round(3)], headers=[*x, 'Const'], floatfmt=".3f", tablefmt="fancy_grid")
-    print(tab)
-
-    if plot:
-        scatter(df_, 'y_actual', 'y_predict', regression=True, title=plot_title)
-
-    return model.coef_[0]
 
 
 @set_figure(figsize=(10, 6))
@@ -112,9 +85,10 @@ def MLR_IMPROVE():
                'AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'OM']
 
     df_cal = df[species].dropna().copy()
-    scat_coef = _multiple_linear_regression(df_cal, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y=['Scattering'],
-                                            add_constant=True)
-    abs_coef = _multiple_linear_regression(df_cal, x=['POC', 'SOC', 'EC'], y=['Absorption'], add_constant=True)
+
+    multiple_linear_regression(df_cal, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y='Scattering', add_constant=True)
+    multiple_linear_regression(df_cal, x=['POC', 'SOC', 'EC'], y='Absorption', add_constant=True)
+    multiple_linear_regression(df_cal, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], y='Extinction', add_constant=True)
 
     df_cal['Localized'] = df_cal[['AS', 'AN', 'POC', 'SOC', 'EC']].mul([2.74, 4.41, 11.5, 7.34, 12.27]).sum(axis=1)
     modify_IMPROVE = DataReader('modify_IMPROVE.csv')['total_ext_dry'].rename('Modified')
@@ -129,8 +103,9 @@ def MLR_IMPROVE():
     ext_dry_dict = {state: [new_dic[state][specie].mean() for specie in ['AS', 'AN', 'POC', 'SOC', 'EC']]
                     for state in ['Total', 'Clean', 'Transition', 'Event']}
 
-    scatter_multiple_reg(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
-                        title='', regression=True, diagonal=True)
+    # plot
+    linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
+                      regression=True, diagonal=True)
     donuts_ext(ext_dry_dict, labels=['AS', 'AN', 'POC', 'SOC', 'EC'])
 
 
