@@ -59,6 +59,18 @@ def color_maker(obj, cmap='Blues'):
     return scalar_map, colors
 
 
+def adjust_opacity(color: str, alpha: float):
+    # 將顏色轉換為RGB表示
+    r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+    # 調整透明度
+    r_new = int(alpha * r + (1 - alpha) * 255)
+    g_new = int(alpha * g + (1 - alpha) * 255)
+    b_new = int(alpha * b + (1 - alpha) * 255)
+    # 轉換為新的色碼
+    new_color = '#{:02X}{:02X}{:02X}'.format(r_new, g_new, b_new)
+    return new_color
+
+
 def linecolor():
     color1 = {'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'}
     color2 = {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'}

@@ -1,10 +1,11 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot import set_figure, unit, getColor, linecolor
+from DataPlot.plot import set_figure, unit, getColor, linecolor, adjust_opacity
 
-prop_text = {'fontsize': 14, }
-prop_legend = {'size': 14, }
+prop_text = {'fontsize': 12, 'fontweight': 'bold'}
+prop_legend = {'size': 12, 'weight': 'bold'}
+
 
 __all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext']
 
@@ -158,18 +159,6 @@ def donuts_mass(data_set, labels, style='donut', title='', symbol=True):
     values3 = np.array(list(data_set.values()))[1]
 
     colors1 = getColor(kinds='3-2')
-
-    def adjust_opacity(color, alpha):
-        # 將顏色轉換為RGB表示
-        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-        # 調整透明度
-        r_new = int(alpha * r + (1 - alpha) * 255)
-        g_new = int(alpha * g + (1 - alpha) * 255)
-        b_new = int(alpha * b + (1 - alpha) * 255)
-        # 轉換為新的色碼
-        new_color = '#{:02X}{:02X}{:02X}'.format(r_new, g_new, b_new)
-        return new_color
-
     colors2 = [adjust_opacity(color, 0.8) for color in colors1]
     colors3 = [adjust_opacity(color, 0.6) for color in colors1]
 
@@ -201,7 +190,7 @@ def donuts_mass(data_set, labels, style='donut', title='', symbol=True):
     fig.savefig(pth(f"IMPROVE_mass_donuts_{title}"), transparent=True)
 
 
-@set_figure(figsize=(10, 6))
+@set_figure(figsize=(8, 5))
 def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
     """
     Parameters
@@ -228,18 +217,6 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
     colors1 = getColor(kinds='3')
     if len(labels) == 9:
         colors1 = getColor(kinds='4-1')
-
-    def adjust_opacity(color, alpha):
-        # 將顏色轉換為RGB表示
-        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-        # 調整透明度
-        r_new = int(alpha * r + (1 - alpha) * 255)
-        g_new = int(alpha * g + (1 - alpha) * 255)
-        b_new = int(alpha * b + (1 - alpha) * 255)
-        # 轉換為新的色碼
-        new_color = '#{:02X}{:02X}{:02X}'.format(r_new, g_new, b_new)
-        return new_color
-
     colors2 = [adjust_opacity(color, 0.8) for color in colors1]
     colors3 = [adjust_opacity(color, 0.6) for color in colors1]
 
@@ -266,7 +243,7 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
 
     ax.legend(labels, loc='center', prop=prop_legend, title_fontproperties=dict(weight='bold'),
               title='Outer : Event' + '\n' + 'Middle : Transition' + '\n' + 'Inner : Clean',
-              bbox_to_anchor=(0.66, 0, 0.5, 1), frameon=False)
+              bbox_to_anchor=(0.75, 0, 0.5, 1), frameon=False)
     plt.show()
-    fig.savefig(pth(f"IMPROVE_ext_donuts_{title}"), transparent=True)
+    # fig.savefig(pth(f"IMPROVE_ext_donuts_{title}"), transparent=True)
 

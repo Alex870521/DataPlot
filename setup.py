@@ -8,7 +8,7 @@ setup(
     description="Aerosol science",
 
     url="",
-    python_requires=">=3.9",
+    python_requires=">=3.12",
 
     # Specify your project's dependencies
     install_requires=[

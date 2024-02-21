@@ -38,7 +38,7 @@ class MainProcessor(DataProcessor):
             # 3. Mass_volume
             chemical = ChemicalProcessor(reset=self.reset, filename='chemical.csv').process_data()
 
-            # 4. IMPROVE
+            # 4. improve
             improve = ImproveProcessor(reset=self.reset, filename='revised_IMPROVE.csv', version='revised').process_data()
 
             # 5. Number & Surface & volume & Extinction distribution
