@@ -4,15 +4,11 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from pandas import DataFrame, concat, date_range
 from DataPlot.process import *
-from DataPlot.plot import unit, set_figure, color_maker, inset_colorbar, timeseries, tms_bar
+from DataPlot.plot import unit, set_figure, timeseries
 
 
 @set_figure(fs=10)
 def time_series(df):
-    time = df.index.copy()
-    st_tm, fn_tm = df.index[0], df.index[-1]
-    tick_time = date_range(st_tm, fn_tm, freq='10d')
-
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
 
     ax1 = timeseries(df,
@@ -20,9 +16,7 @@ def time_series(df):
                      ax=ax1,
                      set_visible=False,
                      plot_kws=dict(color="b", label='Extinction'),
-                     title='',
                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                     xlim=tick_time,
                      ylim=[0., df.Extinction.max() * 1.1]
                      )
 
@@ -32,7 +26,6 @@ def time_series(df):
                      set_visible=False,
                      plot_kws=dict(color="g", label='Scattering'),
                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                     xlim=tick_time,
                      ylim=[0., df.Extinction.max() * 1.1]
                      )
 
@@ -42,7 +35,6 @@ def time_series(df):
                      set_visible=False,
                      plot_kws=dict(color="r", label='Absorption'),
                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                     xlim=tick_time,
                      ylim=[0., df.Extinction.max() * 1.1]
                      )
 
@@ -55,51 +47,48 @@ def time_series(df):
                      set_visible=False,
                      plot_kws=dict(color='r', label=unit('AT')),
                      ylabel=unit('AT'),
-                     ylim=(df.AT.min() - 2, df.AT.max() + 2))
+                     ylim=[df.AT.min() - 2, df.AT.max() + 2])
 
-    ax2_2 = ax2.twinx()
-    ax2_2 = timeseries(df,
-                       y='RH',
-                       ax=ax2_2,
-                       set_visible=False,
-                       plot_kws=dict(color='b', label=unit('RH')),
-                       ylabel=unit('RH'),
-                       ylim=(20, 100))
+    timeseries(df,
+               y='RH',
+               ax=ax2.twinx(),
+               set_visible=False,
+               plot_kws=dict(color='b', label=unit('RH')),
+               ylabel=unit('RH'),
+               ylim=[20, 100])
 
-    tms_bar(df,
-            y='VC',
-            c='PBLH',
-            ax=ax3,
-            set_visible=False,
-            plot_kws=dict(label=unit('VC')),
-            cbar=False,
-            cbar_kws=dict(ticks=[0, 200, 400, 600, 800], label=unit('PBLH'))
-    )
+    timeseries(df,
+               y='VC',
+               c='PBLH',
+               style='bar',
+               ax=ax3,
+               set_visible=False,
+               plot_kws=dict(label=unit('VC')),
+               cbar_kws=dict(label=unit('PBLH'))
+               )
 
     timeseries(df,
                y='WS',
                c='WD',
                ax=ax4,
                set_visible=False,
-               plot_kws=dict(cmap='hsv', marker='o', s=5, alpha=1.0, label=unit('WS')),
-               ylim=(0, df.WS.max() * 1.1),
-               cbar=True,
-               cbar_kws=dict(label=unit('WD'), orientation='vertical'))
+               plot_kws=dict(cmap='hsv', label=unit('WS')),
+               cbar_kws=dict(label=unit('WD')),
+               ylim=[0, df.WS.max() * 1.1]
+               )
 
-    sc_6 = timeseries(df,
-                      y='PM25',
-                      c='PM1/PM25',
-                      ax=ax5,
-                      set_visible=True,
-                      plot_kws=dict(vmin=0.2, vmax=1),
-                      ylim=(0, df.PM25.max() * 1.2),
-                      cbar=True,
-                      cbar_kws=dict(label=unit('PM1/PM25'), orientation='vertical')
-                      )
+    timeseries(df,
+               y='PM25',
+               c='PM1/PM25',
+               ax=ax5,
+               plot_kws=dict(label=unit('PM1/PM25')),
+               cbar_kws=dict(label=unit('PM1/PM25')),
+               ylim=[0, df.PM25.max() * 1.1]
+               )
 
     # fig.savefig(f'time2_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
     plt.show()
 
 
 if __name__ == '__main__':
-    time_series(DataBase[:300])
+    time_series(DataBase[:720])
