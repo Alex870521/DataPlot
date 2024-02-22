@@ -1,10 +1,6 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 from pandas import concat
 from DataPlot.process import DataBase, DataReader, Classifier
 from DataPlot.plot.templates import scatter, linear_regression, multiple_linear_regression, donuts_ext
-from DataPlot.plot.core import set_figure, getColor, unit, adjust_opacity
 
 
 def residual_PM(_df):

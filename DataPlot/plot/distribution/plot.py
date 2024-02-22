@@ -54,7 +54,7 @@ def heatmap(df: pd.DataFrame,
     Examples
     --------
     Plot a SPMS + APS data:
-    >>> ax = heatmap(x, y, data, cmap='jet')
+    >>> ax = heatmap(DataFrame, cmap='jet')
     """
     print('Plot: heatmap')
 

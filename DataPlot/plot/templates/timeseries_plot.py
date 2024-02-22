@@ -1,15 +1,24 @@
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import pandas as pd
+from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
-from DataPlot.plot.core import *
+from typing import Literal
+from DataPlot.plot.core import unit, set_figure, color_maker
+
 
 __all__ = ['timeseries',
            'tms_scatter',
            'tms_plot',
-           'tms_bar']
+           'tms_bar',
+           'inset_colorbar']
 
 
-def _inset_axes(ax, orientation='vertical', inset_kws={}):
+def _inset_axes(ax: plt.Axes,
+                orientation: Literal['vertical', 'horizontal'] = 'vertical',
+                inset_kws={}):
+
     default_inset_kws = {}
     if orientation == 'vertical':
         default_inset_kws = dict(
@@ -36,7 +45,12 @@ def _inset_axes(ax, orientation='vertical', inset_kws={}):
     return inset_axes(ax, **default_inset_kws)
 
 
-def inset_colorbar(axes_image, ax, orientation='vertical', inset_kws={}, cbar_kws={}):
+def inset_colorbar(axes_image: ScalarMappable,
+                   ax: plt.Axes,
+                   orientation: Literal['vertical', 'horizontal'] = 'vertical',
+                   inset_kws={},
+                   cbar_kws={}):
+
     # create cax for colorbar
     cax = _inset_axes(ax, orientation=orientation, inset_kws=inset_kws)
 
@@ -51,8 +65,8 @@ def inset_colorbar(axes_image, ax, orientation='vertical', inset_kws={}, cbar_kw
     plt.colorbar(mappable=axes_image, cax=cax, **default_cbar_kws)
 
 
-def timeseries(df,
-               y,
+def timeseries(df: pd.DataFrame,
+               y: str,
                c=None,
                ax=None,
                set_visible=False,
@@ -61,6 +75,7 @@ def timeseries(df,
                cbar=False,
                cbar_kws={},
                **kwargs):
+
     time = df.index.copy()
 
     if ax is None:
@@ -104,12 +119,14 @@ def timeseries(df,
             xlabel=kwargs.get('xlabel', ''),
             ylabel=kwargs.get('ylabel', unit(f'{y}')),
             xticks=kwargs.get('xticks', tick_time),
-            xticklabels=kwargs.get('xticklabels', [_tm.strftime('%Y-%m-%d') for _tm in tick_time]),
+            xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
             # yticks=kwargs.get('yticks', ''),
             # yticklabels=kwargs.get('yticklabels', ''),
             xlim=kwargs.get('xlim', [st_tm, fn_tm]),
             ylim=kwargs.get('ylim', [None, None]),
         )
+
+    return ax
 
 
 def tms_scatter(): pass
@@ -120,7 +137,7 @@ def tms_plot(): pass
 
 def tms_bar(df,
             y,
-            color=None,
+            c=None,
             ax=None,
             set_visible=False,
             fig_kws={},
@@ -144,7 +161,7 @@ def tms_bar(df,
 
     default_plot_kws.update(plot_kws)
 
-    scalar_map, colors = color_maker(df[f'{color}'].values, cmap=default_plot_kws.pop('cmap'))
+    scalar_map, colors = color_maker(df[f'{c}'].values, cmap=default_plot_kws.pop('cmap'))
     ax.bar(time, df[f'{y}'], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
 
     if not set_visible:
@@ -162,7 +179,7 @@ def tms_bar(df,
             xlabel=kwargs.get('xlabel', ''),
             ylabel=kwargs.get('ylabel', unit(f'{y}')),
             xticks=kwargs.get('xticks', tick_time),
-            xticklabels=kwargs.get('xticklabels', [_tm.strftime('%Y-%m-%d') for _tm in tick_time]),
+            xticklabels=kwargs.get('xticklabels', [_tm.strftime('%F') for _tm in tick_time]),
             # yticks=kwargs.get('yticks', ''),
             # yticklabels=kwargs.get('yticklabels', ''),
             xlim=kwargs.get('xlim', [st_tm, fn_tm]),

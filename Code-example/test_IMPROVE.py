@@ -1,8 +1,5 @@
 from DataPlot import *
 
-
-print(dir())
-
 df = DataBase
 
 # plot.fRH_plot()

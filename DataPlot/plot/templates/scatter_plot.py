@@ -11,7 +11,6 @@ from sklearn.linear_model import LinearRegression
 
 __all__ = ['scatter',
            'linear_regression',
-           '_LinearRegression',
            'multiple_linear_regression'
            ]
 
@@ -24,10 +23,10 @@ def _range(series, **kwargs):
     return _data, max_value, min_value, range_from_kwargs or data_range
 
 
-def _LinearRegression(x_array: np.ndarray,
-                      y_array: np.ndarray,
-                      columns=None,
-                      positive: bool = True):
+def _linear_regression(x_array: np.ndarray,
+                       y_array: np.ndarray,
+                       columns=None,
+                       positive: bool = True):
     def check_second_dimension(arr):
         if len(arr.shape) > 1 and arr.shape[1] >= 2:
             return 1
@@ -130,7 +129,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         color_bar.set_label(label=unit(c) or 'clabel', size=14)
 
     if regression:
-        slope, intercept, r_square, y_predict, text = _LinearRegression(x_data, y_data)
+        slope, intercept, r_square, y_predict, text = _linear_regression(x_data, y_data)
         plt.plot(x_data, y_predict, linewidth=3, color=sns.xkcd_rgb["denim blue"], alpha=1, zorder=3)
 
         plt.text(0.05, 0.95, f'{text}', fontdict={'weight': 'bold'}, color=sns.xkcd_rgb["denim blue"],
@@ -251,7 +250,7 @@ def linear_regression(df: pd.DataFrame,
                              label=f'{labels[i]}')
         handles.append(scatter)
 
-        text, y_predict = _LinearRegression(x_array, y_array)
+        text, y_predict = _linear_regression(x_array, y_array)
         text_list.append(f'{labels[i]}: {text}')
         plt.plot(x_array, y_predict, linewidth=3, color=color['line'], alpha=1, zorder=3)
 
@@ -306,7 +305,7 @@ def multiple_linear_regression(df: pd.DataFrame,
     x_array: np.ndarray = df[[*x, 'Const']].to_numpy()
     y_array: np.ndarray = df[[y]].to_numpy()
 
-    text, y_predict, coefficients = _LinearRegression(x_array, y_array, columns=[*x, 'Const'], positive=True)
+    text, y_predict, coefficients = _linear_regression(x_array, y_array, columns=[*x, 'Const'], positive=True)
 
     df = pd.DataFrame(np.concatenate([y_array, y_predict], axis=1), columns=['y_actual', 'y_predict'])
 

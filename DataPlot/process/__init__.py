@@ -70,11 +70,11 @@ Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
 
 
 class _Classifier:
-    def __new__(cls, df):
+    def __new__(cls, df) -> DataFrame:
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df):
+    def classify(cls, df) -> DataFrame:
         pass
 
 
@@ -168,10 +168,10 @@ class Classifier:
     season = SeasonClassifier
     hour = HourClassifier
 
-    def __new__(cls, df: DataFrame, clf: str):
-        if clf == 'state':
+    def __new__(cls, df: DataFrame, by: str):
+        if by == 'state':
             return cls.state(df)
-        elif clf == 'season':
+        elif by == 'season':
             return cls.season(df)
         else:
             return cls.hour(df)
