@@ -4,10 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.optimize import curve_fit
-from DataPlot.templates import set_figure
+from DataPlot.plot import set_figure
+from DataPlot.process import DataReader, DataBase
 
-Path_Data = Path('/Data-example')
-df = pd.read_excel(Path_Data / 'Koschmieder.xlsx', sheet_name=0)
+
+df = DataBase
 # x = Visibility, y = Extinction, log-log fit!!
 
 
@@ -43,17 +44,17 @@ def reciprocal_fit(x, y, func = lambda x, a, b : a / (x**b)):
 
 @set_figure
 def kos_naked(df):
-    _df1 = df[['Extinction_dry', 'Ext_gas', 'Vis_Naked']].dropna().copy()
-    _df2 = df[['IMPROVE_ext', 'Ext_gas', 'Vis_Naked']].dropna().copy()
+    _df1 = df[['Extinction', 'ExtinctionByGas', 'Vis_Naked']].dropna().copy()
+    _df2 = df[['total_ext_dry', 'ExtinctionByGas', 'Vis_Naked']].dropna().copy()
 
     x_data1 = _df1['Vis_Naked']
-    y_data1 = _df1['Extinction_dry'] + _df1['Ext_gas']
+    y_data1 = _df1['Extinction'] + _df1['ExtinctionByGas']
 
     x_data2 = _df2['Vis_Naked']
-    y_data2 = _df2['IMPROVE_ext'] + _df2['Ext_gas']
+    y_data2 = _df2['total_ext_dry'] + _df2['ExtinctionByGas']
 
     # figure
-    fig, axes = plt.subplots(1, 1, figsize=(5, 6), dpi=150, constrained_layout=True)
+    fig, axes = plt.subplots(1, 1, figsize=(5, 6))
 
     para_coeff = []
     boxcolors = ['#3f83bf', '#a5bf6b']
@@ -99,8 +100,8 @@ def kos_naked(df):
     plt.legend(handles=[line1, line2],
                # labels=[r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[0])) + '\ /\ Ext\ (Dry\ Extinction)$',
                #         r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[1])) + '\ /\ Ext\ (Amb\ Extinction)$'],
-               labels=[r'$\bf Ext\ =\ ' + '{:.0f}\ /\ Vis^{{{:.3f}}}'.format(*para_coeff[0]) + '\ (Dry\ Extinction)$',
-                       r'$\bf Ext\ =\ ' + '{:.0f}\ /\ Vis^{{{:.3f}}}'.format(*para_coeff[1]) + '\ (Amb\ Extinction)$'],
+               labels=[f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
+                       f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
                handlelength=1.5, loc='upper right', prop=dict(size=12), frameon=False, bbox_to_anchor=(0.99, 0.99))
 
     plt.xticks(ticks=np.array(range(0, 51, 5)), labels=np.array(range(0, 51, 5)))
@@ -115,14 +116,14 @@ def kos_naked(df):
 
 @set_figure
 def kos_LPV(df,):
-    _df1 = df[['Extinction_dry', 'Ext_gas', 'Vis_LPV']].dropna().copy()
-    _df2 = df[['IMPROVE_ext', 'Ext_gas', 'Vis_LPV']].dropna().copy()
+    _df1 = df[['Extinction', 'ExtinctionByGas', 'Vis_LPV']].dropna().copy()
+    _df2 = df[['total_ext_dry', 'ExtinctionByGas', 'Vis_LPV']].dropna().copy()
 
     x_data1 = _df1['Vis_LPV']
-    y_data1 = _df1['Extinction_dry'] + _df1['Ext_gas']
+    y_data1 = _df1['Extinction'] + _df1['ExtinctionByGas']
 
     x_data2 = _df2['Vis_LPV']
-    y_data2 = _df2['IMPROVE_ext'] + _df2['Ext_gas']
+    y_data2 = _df2['total_ext_dry'] + _df2['ExtinctionByGas']
 
     # figure
     fig, axes = plt.subplots(1, 1, figsize=(5, 6), dpi=150, constrained_layout=True)
@@ -177,8 +178,8 @@ def kos_LPV(df,):
     plt.legend(handles=[line1, line2],
                # labels=[r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[0])) + '\ /\ Ext\ (Dry\ Extinction)$',
                #         r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[1])) + '\ /\ Ext\ (Amb\ Extinction)$'],
-               labels=[r'$\bf Ext\ =\ ' + '{:.0f}\ /\ Vis^{{{:.3f}}}'.format(*para_coeff[0]) + '\ (Dry\ Extinction)$',
-                       r'$\bf Ext\ =\ ' + '{:.0f}\ /\ Vis^{{{:.3f}}}'.format(*para_coeff[1]) + '\ (Amb\ Extinction)$'],
+               labels=[f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
+                       f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
                handlelength=1.5, loc='upper right', prop=dict(size=12), frameon=False, bbox_to_anchor=(0.99, 0.99))
     plt.xticks(ticks=np.array(range(0, 71, 5)), labels=np.array(range(0, 71, 5)))
     plt.xlim(0, 50)
@@ -192,4 +193,4 @@ def kos_LPV(df,):
 
 if __name__ == '__main__':
     kos_naked(df)
-    # kos_LPV(df)
+    kos_LPV(df)
