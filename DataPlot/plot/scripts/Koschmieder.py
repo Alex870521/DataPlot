@@ -2,7 +2,6 @@ import numpy as np
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-from pathlib import Path
 from scipy.optimize import curve_fit
 from DataPlot.plot import set_figure
 from DataPlot.process import DataReader, DataBase
@@ -92,16 +91,15 @@ def kos_naked(df):
 
     # Plot lines (ref & Measurement)
     x_fit = np.linspace(0.1, 70, 1000)
-    # line1, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
-    # line2, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
+
     line1, = axes.plot(x_fit, func(x_fit, *para_coeff[0]), c='b', lw=3)
     line2, = axes.plot(x_fit, func(x_fit, *para_coeff[1]), c='g', lw=3)
 
     plt.legend(handles=[line1, line2],
                # labels=[r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[0])) + '\ /\ Ext\ (Dry\ Extinction)$',
                #         r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[1])) + '\ /\ Ext\ (Amb\ Extinction)$'],
-               labels=[f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
-                       f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
+               labels=[f'Ext = ' + '{:.0f} / Vis ^ {:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
+                       f'Ext = ' + '{:.0f} / Vis ^ {:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
                handlelength=1.5, loc='upper right', prop=dict(size=12), frameon=False, bbox_to_anchor=(0.99, 0.99))
 
     plt.xticks(ticks=np.array(range(0, 51, 5)), labels=np.array(range(0, 51, 5)))
@@ -126,7 +124,7 @@ def kos_LPV(df,):
     y_data2 = _df2['total_ext_dry'] + _df2['ExtinctionByGas']
 
     # figure
-    fig, axes = plt.subplots(1, 1, figsize=(5, 6), dpi=150, constrained_layout=True)
+    fig, axes = plt.subplots(1, 1, figsize=(5, 6))
 
     para_coeff = []
     boxcolors = ['#3f83bf', '#a5bf6b']
@@ -139,7 +137,7 @@ def kos_LPV(df,):
 
         df_[f'{x_data.name}' + '_bins'] = pd.cut(x=x_data, bins=bins, labels=wid)
 
-        grouped = df_.groupby(f'{x_data.name}' + '_bins')
+        grouped = df_.groupby(f'{x_data.name}' + '_bins', observed=False)
 
         vals, median_vals, vis = [], [], []
         for j, (name, subdf) in enumerate(grouped):
@@ -166,20 +164,20 @@ def kos_LPV(df,):
         func = lambda x, a, b: a / (x**b)
         coeff, pcov = reciprocal_fit(x, y)
         para_coeff.append(coeff)
+
     # Plot lines (ref & Measurement)
 
     # func = lambda x, a: a / x
     x_fit = np.linspace(0.1, 70, 1000)
-    # line1, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[0])), c='b', lw=3)
-    # line2, = axes.core(x_fit, func(x_fit, math.exp(para_coeff[1])), c='g', lw=3)
+
     line1, = axes.plot(x_fit, func(x_fit, *para_coeff[0]), c='b', lw=3)
     line2, = axes.plot(x_fit, func(x_fit, *para_coeff[1]), c='g', lw=3)
 
     plt.legend(handles=[line1, line2],
                # labels=[r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[0])) + '\ /\ Ext\ (Dry\ Extinction)$',
                #         r'$\bf Vis\ (km)\ =\ ' + '{:.0f}'.format(math.exp(para_coeff[1])) + '\ /\ Ext\ (Amb\ Extinction)$'],
-               labels=[f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
-                       f'Ext = ' + '{:.0f} / Vis^{:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
+               labels=[f'Ext = ' + '{:.0f} / Vis ^ {:.3f}'.format(*para_coeff[0]) + ' (Dry Extinction)',
+                       f'Ext = ' + '{:.0f} / Vis ^ {:.3f}'.format(*para_coeff[1]) + ' (Amb Extinction)'],
                handlelength=1.5, loc='upper right', prop=dict(size=12), frameon=False, bbox_to_anchor=(0.99, 0.99))
     plt.xticks(ticks=np.array(range(0, 71, 5)), labels=np.array(range(0, 71, 5)))
     plt.xlim(0, 50)
