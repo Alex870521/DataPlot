@@ -1,16 +1,16 @@
 from matplotlib.ticker import (AutoMinorLocator)
 import matplotlib.pyplot as plt
 from DataPlot.plot import set_figure, unit
-from DataPlot.process import data
-from DataPlot.plot.scripts import StateClassifier
+from DataPlot.process import *
+from DataPlot.plot import *
 
 # Read file
-df = data
+df = DataBase
 df['Hour'] = df.index.strftime('%H')
 Hour = range(0, 24)
 
 # Define Event & Clean
-dic_sta = StateClassifier(df)
+dic_sta = Classifier(df, 'state')
 
 # Calculate Mean & Standard deviation
 df_mean_all = dic_sta['Total'].groupby('Hour').mean(numeric_only=True)
