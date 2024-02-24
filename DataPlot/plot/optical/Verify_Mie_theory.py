@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-PATH_MAIN = Path(__file__).parent.parent / 'Data-Code-example'
+PATH_MAIN = Path(__file__).parent.parent / 'Data-example'
 PATH_DIST = PATH_MAIN / 'Level2' / 'distribution'
 
 PNSD, All = DataReader('PNSD_dNdlogdp.csv'), DataReader('All_data.csv')
