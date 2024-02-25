@@ -1,21 +1,65 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
-from pandas import read_csv
+from pandas import qcut, concat
 from matplotlib.collections import PolyCollection
 from matplotlib.ticker import FuncFormatter
-from DataPlot.templates import set_figure
-from DataPlot.process import main
-from DataPlot.process.method.mie_theory import Mie_PESD
+from DataPlot.plot import set_figure
+from DataPlot.process import DataReader, DataBase, Mie_PESD
 
 
-PATH_MAIN = Path(__file__).parents[1] / "Data-example"
-
-with open(PATH_MAIN / 'Level2' / 'distribution' / 'PNSD_dNdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-    PNSD = read_csv(f, parse_dates=['Time']).set_index('Time')
+PNSD = DataReader('PNSD_dNdlogdp.csv')
+PSSD = DataReader('PSSD_dSdlogdp.csv')
+PVSD = DataReader('PVSD_dVdlogdp.csv')
+PESD = DataReader('PESD_dextdlogdp_internal.csv')
 
 dp = np.array(PNSD.columns, float)
 dlogdp = 0.014
+
+df = DataBase
+
+
+# if ((PATH_MAIN / '3D_plot.pkl').exists()) & (~reset):
+#     with open(PATH_MAIN / '3D_plot.pkl', 'rb') as f:
+#         return pickle.load(f)
+x_bin = [f'E_{x}' for x in np.arange(1, 11) * 10]
+
+df['x'] = qcut(df['Extinction'], 10, labels=x_bin)
+new_df = concat([df[['x', 'n_amb', 'k_amb', 'GMDn', 'GMDs', 'GMDv', 'GSDn', 'GSDs', 'GSDv']], PNSD, PESD, PSSD, PVSD],
+                axis=1).dropna()
+
+df_x_group = new_df.groupby('x')
+data = {'n_amb': [],
+        'k_amb': [],
+        'GMDn': [],
+        'GSDn': [],
+        'GMDs': [],
+        'GSDs': [],
+        'GMDv': [],
+        'GSDv': [],
+        'SD': [],
+        'SSD':[],
+        'ED': [],
+        'VD':[]
+        }
+
+for _grp, _df in df_x_group:
+    breakpoint()
+    Mean = _df.mean()
+    for key, lst_contain in data.items():
+        if key == 'SD':
+            lst_contain.append(Mean[8:175].values)
+        elif key == 'ED':
+            lst_contain.append(Mean[175:342].values)
+        elif key == 'SSD':
+            lst_contain.append(Mean[342:509].values)
+        elif key == 'VD':
+            lst_contain.append(Mean[509:].values)
+        else:
+            lst_contain.append(Mean[key])
+
+# with open(PATH_MAIN / '3D_plot.pkl', 'wb') as f:
+#     pickle.dump(data, f)
+
 
 def Mie_SurfaceLognormal(m, wavelength, geoMean, geoStdDev, numberOfParticles, nMedium=1.0, numberOfBins=167, lower=1, upper=2500, gamma=1):
     nMedium = nMedium.real
@@ -34,20 +78,9 @@ def Mie_SurfaceLognormal(m, wavelength, geoMean, geoStdDev, numberOfParticles, n
     return Bext, Bsca, Babs
 
 
-def _get(reset=False):
-    with open(PATH_MAIN / 'Level2' / 'distribution' / 'PESD_dextdlogdp_internal.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD = read_csv(f, parse_dates=['Time']).set_index('Time')
+def rsm():
+    print('Plot: Response surface methodology (RSM)')
 
-    with open(PATH_MAIN / 'Level2' / 'distribution' / 'PSSD_dSdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PSSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(PATH_MAIN / 'Level2' / 'distribution' / 'PVSD_dVdlogdp.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PVSD = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    return main(reset=False)
-
-
-def rsm(): # Response surface methodology (RSM)
     def function(RI, GMD):
         Z = np.zeros_like(RI)  # 使用 np.zeros_like 可以確保 Z 和 RI 具有相同的形狀
 
@@ -79,16 +112,20 @@ def rsm(): # Response surface methodology (RSM)
 
         xlabel = kwargs.get('xlabel', r'$\bf Real\ part\ (n)$')
         ylabel = kwargs.get('ylabel', r'$\bf GMD (nm)$')
-        zlabel = kwargs.get('zlabel', r'$\bf Extinction\ (1/Mm)$')
+        zlabel = kwargs.get('zlabel', r'$\bf Extinction$')
         title = kwargs.get('title', r'$\bf Sensitive\ test\ of\ Extinction$')
         ax.set(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, title=title)
+
+        # Label and MathText is overlap
         ax.ticklabel_format(axis='z', style='sci', scilimits=(0, 1), useMathText=True)
 
     plot(real, gmd, ext)
 
 
 def three_dimension_distribution():
-    data = _get()
+    print('Plot: three_dimension_distribution')
+
+    data = DataBase
     line = np.arange(10)
     weighting = {'SD': {'zlim': (0, 1.5e5),
                         'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
@@ -104,7 +141,7 @@ def three_dimension_distribution():
         # fig 1 -> dp, Ext_dis * 10
         X, Y = np.meshgrid(dp, line)
         Z = np.zeros((10, 167))
-        for i in range(10): # SD SSD ED VD
+        for i in range(10):  # SD SSD ED VD
             Z[i] = data[key][i]
 
         def log_tick_formatter(val, pos=None):
@@ -141,13 +178,14 @@ def three_dimension_distribution():
                 '$\\times\\mathdefault{10^{%d}}$' % exponent)
         ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
         plt.show()
-    #
-    #     fig.savefig(f'3D_{key}')
+
+        # fig.savefig(f'3D_{key}')
     pass
 
 
 if __name__ == '__main__':
-    rsm()
+    # rsm()
+    three_dimension_distribution()
 
 
 

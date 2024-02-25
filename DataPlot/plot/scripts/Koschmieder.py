@@ -1,5 +1,4 @@
 import numpy as np
-import math
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -137,7 +136,7 @@ def koschmieder(df: pd.DataFrame,
 
     plt.legend(handles=[line1, line2],
                labels=labels,
-               handlelength=1.5, loc='upper right', prop=dict(size=12), frameon=False, bbox_to_anchor=(0.99, 0.99))
+               handlelength=1.5, loc='upper right', prop=dict(size=10, weight='bold'), frameon=False, bbox_to_anchor=(0.99, 0.99))
 
     plt.xticks(ticks=np.array(range(0, 51, 5)), labels=np.array(range(0, 51, 5)))
     plt.xlim(0, 50)

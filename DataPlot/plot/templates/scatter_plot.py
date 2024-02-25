@@ -33,6 +33,9 @@ def _linear_regression(x_array: np.ndarray,
         else:
             return 0
 
+    x_array = x_array.reshape(-1, 1)
+    y_array = y_array.reshape(-1, 1)
+
     model = LinearRegression(positive=positive).fit(x_array, y_array)
 
     if check_second_dimension(x_array):
@@ -129,7 +132,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         color_bar.set_label(label=unit(c) or 'clabel', size=14)
 
     if regression:
-        slope, intercept, r_square, y_predict, text = _linear_regression(x_data, y_data)
+        text, y_predict = _linear_regression(x_data, y_data)
         plt.plot(x_data, y_predict, linewidth=3, color=sns.xkcd_rgb["denim blue"], alpha=1, zorder=3)
 
         plt.text(0.05, 0.95, f'{text}', fontdict={'weight': 'bold'}, color=sns.xkcd_rgb["denim blue"],

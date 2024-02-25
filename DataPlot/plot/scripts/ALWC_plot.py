@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from DataPlot.process import main
-from DataPlot.templates import set_figure, unit, getColor
-from DataPlot.templates import scatter, violin, pie_ext
+from DataPlot.process import DataBase, Classifier
+from DataPlot.plot import set_figure, unit, getColor, scatter, violin, pie_ext
 
-from DataPlot.process.Data_classify import state_classify, season_classify
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
 textprops = {'fontsize': 14, 'fontfamily': 'Times New Roman', 'fontweight': 'bold'}
@@ -35,9 +33,9 @@ def outer_pct(pct, symbol=True):
 
 if __name__ == '__main__':
     print('--- building data ---')
-    df = main()['2020-10-01':'2021-05-06']
+    df = DataBase['2020-10-01':'2021-05-06']
 
-    dic_grp_sta = state_classify(df)
+    dic_grp_sta = Classifier(df, 'state')
     dic_grp_sta['Clean']['fRH_PNSD'].mean()
     dic_grp_sta['Transition']['fRH_PNSD'].mean()
     dic_grp_sta['Event']['fRH_PNSD'].mean()
@@ -97,7 +95,7 @@ if __name__ == '__main__':
 
         ax.axis('equal')
         ax.set_title(rf'$\bf {title}$')
-        fig.savefig(f'gRH_{title}', transparent=True)
+        # fig.savefig(f'gRH_{title}', transparent=True)
         plt.show()
 
 
