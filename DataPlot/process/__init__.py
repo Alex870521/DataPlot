@@ -81,14 +81,17 @@ class Classifier:
         'Hour': hour
     }
 
-    def __new__(cls, df: DataFrame, by: Literal["State", "Season", "Hour"]):
+    def __new__(cls, df: DataFrame,
+                by: Literal["State", "Season", "Hour"],
+                statistic: Literal["Table", "Array"] = 'Array'):
+
         if f'{by}' not in df.columns:
             _df = cls.method_map[by](DataBase)
             df = concat([df, _df[f'{by}']], axis=1)
 
         group = df.groupby(f'{by}')
 
-        if (by == 'State') or (by == 'Season'):
+        if statistic == 'Array':
             return cls.statistic_array(group)
         else:
             return cls.statistic_table(group)

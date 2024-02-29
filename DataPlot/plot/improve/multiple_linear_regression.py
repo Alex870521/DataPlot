@@ -1,6 +1,7 @@
 from pandas import concat
 from DataPlot.process import DataBase, DataReader, Classifier
 from DataPlot.plot.templates import scatter, linear_regression, multiple_linear_regression, donuts_ext
+import numpy as np
 
 
 def residual_PM(_df):
@@ -37,11 +38,9 @@ def MLR_IMPROVE():
     df = concat([df, revised_IMPROVE, modify_IMPROVE], axis=1)
 
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'EC']].mul(multiplier)
-    new_df = concat([df['Extinction'], n_df], axis=1)
-    new_dic = Classifier(new_df, 'State')
+    mean, std = Classifier(n_df, 'State', statistic='Table')
 
-    ext_dry_dict = {state: [new_dic[state][specie].mean() for specie in ['AS', 'AN', 'POC', 'SOC', 'EC']]
-                    for state in ['Total', 'Clean', 'Transition', 'Event']}
+    ext_dry_dict = {state: mean.loc[state].values for state in ['Clean', 'Transition', 'Event']}
 
     # plot
     linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],

@@ -210,9 +210,9 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
     """
     labels = labels
 
-    values1 = np.array(list(data_set.values()))[3]
-    values2 = np.array(list(data_set.values()))[2]
-    values3 = np.array(list(data_set.values()))[1]
+    values1 = np.array(list(data_set.values()))[2]
+    values2 = np.array(list(data_set.values()))[1]
+    values3 = np.array(list(data_set.values()))[0]
 
     colors1 = getColor(kinds='3')
     if len(labels) == 9:
