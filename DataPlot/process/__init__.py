@@ -2,13 +2,12 @@
 from .core import DataReader, DataProcessor, timer, HourClassifier, StateClassifier, SeasonClassifier
 from .method import Mie_PESD, other_process
 from .script import ImpactProcessor, ImproveProcessor, SizeDist, ChemicalProcessor
-
+from numpy import array
 from pathlib import Path
 from pandas import read_csv, concat
 from datetime import datetime
 from pandas import DataFrame
-from typing import Literal
-
+from typing import Literal, Dict, Any
 
 __all__ = ['DataBase',
            'DataReader',
@@ -71,14 +70,44 @@ Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
 
 
 class Classifier:
+    by = None
     state = StateClassifier
     season = SeasonClassifier
     hour = HourClassifier
 
-    def __new__(cls, df: DataFrame, by: Literal['state', 'season', 'hour']):
-        if by == 'state':
-            return cls.state(df)
-        elif by == 'season':
-            return cls.season(df)
+    def __new__(cls, df: DataFrame, by: Literal["State", "Season", "Hour"]):
+        cls.by = by
+        if f'{by}' not in df.columns:
+            if by == 'State':
+                group = cls.state(DataBase)
+            elif by == 'Season':
+                group = cls.season(DataBase)
+            else:
+                group = cls.hour(DataBase)
+
+            for _grp, _df in group:
+                data = df.merge(_df[f'{by}'], left_index=True, right_index=True)
+
+
+
+            breakpoint()
+            group = df.groupby(f'{by}')
+
         else:
-            return cls.hour(df)
+            if by == 'State':
+                group = cls.state(df)
+            elif by == 'Season':
+                group = cls.season(df)
+            else:
+                group = cls.hour(df)
+
+        return group.mean(numeric_only=True), group.mean(numeric_only=True)
+
+    @classmethod
+    def statistic(cls, instance, state='Total'):
+        mean = instance[f'{state}'].groupby(f'{cls.by}').mean(numeric_only=True)
+        std = instance[f'{state}'].groupby(f'{cls.by}').std(numeric_only=True)
+        return mean, std
+
+    def mark_status(self):
+        pass

@@ -1,9 +1,14 @@
+from typing import Dict, Any
+from pandas.core.groupby import DataFrameGroupBy
+import pandas as pd
 from pandas import DataFrame
 from datetime import datetime
 
 __all__ = ['HourClassifier',
            'StateClassifier',
            'SeasonClassifier']
+
+
 
 Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
            '2020-Autumn': (datetime(2020, 9, 22), datetime(2020, 12, 29, 23)),
@@ -23,11 +28,11 @@ class _Classifier:
 
 
 class HourClassifier(_Classifier):
-    def __new__(cls, df) -> DataFrame:
+    def __new__(cls, df) -> DataFrameGroupBy:
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df) -> DataFrame:
+    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
 
@@ -35,17 +40,17 @@ class HourClassifier(_Classifier):
         df.loc[(df['Hour'] <= 23) & (df['Hour'] >= 19), 'Diurnal'] = 'Night'
         df.loc[(df['Hour'] <= 6) & (df['Hour'] >= 0), 'Diurnal'] = 'Night'
 
-        return df
+        return df.groupby('Hour')
 
 
 class SeasonClassifier(_Classifier):
     Seasons = Seasons
 
-    def __new__(cls, df) -> dict:
+    def __new__(cls, df) -> DataFrameGroupBy:
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df) -> dict:
+    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
@@ -55,32 +60,35 @@ class SeasonClassifier(_Classifier):
         for season, (season_start, season_end) in cls.Seasons.items():
             df.loc[season_start:season_end, 'Season'] = season
 
-        dic_grp_sea = {}
+        # dic_grp_sea = {}
         df_group_season = df.groupby('Season')
 
-        for _grp, _df in df_group_season:
-            clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
-            _df_ext = _df.Extinction.copy()
+        # for _grp, _df in df_group_season:
+        #     clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
+        #     _df_ext = _df.Extinction.copy()
+        #
+        #     _df.loc[_df_ext >= event_low_boud, 'State'] = 'Event'
+        #     _df.loc[(_df_ext < event_low_boud) & (_df_ext > clean_upp_boud), 'State'] = 'Transition'
+        #     _df.loc[_df_ext <= clean_upp_boud, 'State'] = 'Clean'
+        #
+        #     cond_event = _df.State == 'Event'
+        #     cond_transition = _df.State == 'Transition'
+        #     cond_clean = _df.State == 'Clean'
+        #
+        #     dic_grp_sea[_grp] = {'Total': _df.copy(),
+        #                          'Clean': _df.loc[cond_clean].copy(),
+        #                          'Transition': _df.loc[cond_transition].copy(),
+        #                          'Event': _df.loc[cond_event].copy()}
 
-            _df.loc[_df_ext >= event_low_boud, 'State'] = 'Event'
-            _df.loc[(_df_ext < event_low_boud) & (_df_ext > clean_upp_boud), 'State'] = 'Transition'
-            _df.loc[_df_ext <= clean_upp_boud, 'State'] = 'Clean'
-
-            cond_event = _df.State == 'Event'
-            cond_transition = _df.State == 'Transition'
-            cond_clean = _df.State == 'Clean'
-
-            dic_grp_sea[_grp] = {'Total': _df.copy(),
-                                 'Clean': _df.loc[cond_clean].copy(),
-                                 'Transition': _df.loc[cond_transition].copy(),
-                                 'Event': _df.loc[cond_event].copy()}
-
-        return dic_grp_sea
+        return df_group_season
 
 
 class StateClassifier(_Classifier):
+    def __new__(cls, df) -> DataFrameGroupBy:
+        return cls.classify(df)
+
     @classmethod
-    def classify(cls, df) -> dict:
+    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
@@ -98,9 +106,11 @@ class StateClassifier(_Classifier):
         cond_transition = df.State == 'Transition'
         cond_clean = df.State == 'Clean'
 
-        dic_grp_sta = {'Total': df.copy(),
-                       'Clean': df.loc[cond_clean].copy(),
-                       'Transition': df.loc[cond_transition].copy(),
-                       'Event': df.loc[cond_event].copy()}
+        # dic_grp_sta = {'Total': df.copy(),
+        #                'Clean': df.loc[cond_clean].copy(),
+        #                'Transition': df.loc[cond_transition].copy(),
+        #                'Event': df.loc[cond_event].copy()}
 
-        return dic_grp_sta
+        # return dic_grp_sta
+
+        return df.groupby('State')

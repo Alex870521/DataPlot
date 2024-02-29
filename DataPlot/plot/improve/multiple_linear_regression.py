@@ -38,7 +38,7 @@ def MLR_IMPROVE():
 
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'EC']].mul(multiplier)
     new_df = concat([df['Extinction'], n_df], axis=1)
-    new_dic = Classifier(new_df, 'state')
+    new_dic = Classifier(new_df, 'State')
 
     ext_dry_dict = {state: [new_dic[state][specie].mean() for specie in ['AS', 'AN', 'POC', 'SOC', 'EC']]
                     for state in ['Total', 'Clean', 'Transition', 'Event']}

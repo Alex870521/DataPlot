@@ -35,7 +35,7 @@ if __name__ == '__main__':
     print('--- building data ---')
     df = DataBase['2020-10-01':'2021-05-06']
 
-    dic_grp_sta = Classifier(df, 'state')
+    dic_grp_sta = Classifier(df, 'State')
     dic_grp_sta['Clean']['fRH_PNSD'].mean()
     dic_grp_sta['Transition']['fRH_PNSD'].mean()
     dic_grp_sta['Event']['fRH_PNSD'].mean()

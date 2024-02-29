@@ -13,11 +13,18 @@ PESD_exter = DataReader('PESD_dextdlogdp_external.csv')
 df = DataBase
 
 
-Classifier(df, 'state')
+# classifier_instance, _ = Classifier(df, by='State')
+mean, std = Classifier(PESD_inter, by='State')
+breakpoint()
 
 
-def mark_status_get_group_statistic(df, df_, by: str):
-    group = concat([df[f'{by}'], df_], axis=1).dropna().groupby(f'{by}')
+def mark_status_get_group_statistic(df: pd.DataFrame,
+                                    df_: pd.DataFrame,
+                                    by: str):
+    if f'{by}' in df.columns:
+        group = df.dropna().groupby(f'{by}')
+    else:
+        concat()
 
     _avg, _std = {}, {}
     for name, subdf in group:

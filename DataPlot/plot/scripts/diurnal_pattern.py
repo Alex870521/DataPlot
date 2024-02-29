@@ -6,18 +6,10 @@ from DataPlot.plot import *
 
 # Read file
 df = DataBase
-df['Hour'] = df.index.strftime('%H')
+df['Hour'] = df.index.hour
 
 # Define Event & Clean
-dic_sta = Classifier(df, 'state')
-
-# Calculate Mean & Standard deviation
-df_mean_all = dic_sta['Total'].groupby('Hour').mean(numeric_only=True)
-# df_mean_all = dic_sta['Event'].groupby('Hour').mean(numeric_only=True)
-# df_mean1_all = dic_sta['Clean'].groupby('Hour').mean(numeric_only=True)
-df_std_all = dic_sta['Total'].groupby('Hour').std(numeric_only=True)
-# df_std_all = dic_sta['Event'].groupby('Hour').std()
-# df_std1_all = dic_sta['Clean'].groupby('Hour').std()
+df_mean_all, df_std_all = Classifier(df, 'Hour')
 
 
 @set_figure(figsize=(6, 6), fs=16)
@@ -33,7 +25,6 @@ def diurnal(data, data2, y, ax=None, std_area=0.5):
     df_std = data2[f'{y}'] * std_area
 
     # Plot Diurnal pattern
-
     linecolors = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange', 'tab:brown', 'tab:grey', 'tab:pink', 'tab:olive']
     ax.plot(Hour, df_mean, 'r', linewidth=2)
 
