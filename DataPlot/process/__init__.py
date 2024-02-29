@@ -2,7 +2,7 @@
 from .core import DataReader, DataProcessor, timer, HourClassifier, StateClassifier, SeasonClassifier
 from .method import Mie_PESD, other_process
 from .script import ImpactProcessor, ImproveProcessor, SizeDist, ChemicalProcessor
-from numpy import array
+import numpy as np
 from pathlib import Path
 from pandas import read_csv, concat
 from datetime import datetime
@@ -70,44 +70,39 @@ Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
 
 
 class Classifier:
-    by = None
     state = StateClassifier
     season = SeasonClassifier
     hour = HourClassifier
+    DataBase = DataBase
+
+    method_map = {
+        'State': state,
+        'Season': season,
+        'Hour': hour
+    }
 
     def __new__(cls, df: DataFrame, by: Literal["State", "Season", "Hour"]):
-        cls.by = by
         if f'{by}' not in df.columns:
-            if by == 'State':
-                group = cls.state(DataBase)
-            elif by == 'Season':
-                group = cls.season(DataBase)
-            else:
-                group = cls.hour(DataBase)
+            _df = cls.method_map[by](DataBase)
+            df = concat([df, _df[f'{by}']], axis=1)
 
-            for _grp, _df in group:
-                data = df.merge(_df[f'{by}'], left_index=True, right_index=True)
+        group = df.groupby(f'{by}')
 
-
-
-            breakpoint()
-            group = df.groupby(f'{by}')
-
+        if (by == 'State') or (by == 'Season'):
+            return cls.statistic_array(group)
         else:
-            if by == 'State':
-                group = cls.state(df)
-            elif by == 'Season':
-                group = cls.season(df)
-            else:
-                group = cls.hour(df)
+            return cls.statistic_table(group)
 
+    @staticmethod
+    def statistic_array(group):
+        _avg, _std = {}, {}
+
+        for name, subdf in group:
+            _avg[name] = np.array(subdf.mean(numeric_only=True))
+            _std[name] = np.array(subdf.std(numeric_only=True))
+
+        return _avg, _std
+
+    @staticmethod
+    def statistic_table(group):
         return group.mean(numeric_only=True), group.mean(numeric_only=True)
-
-    @classmethod
-    def statistic(cls, instance, state='Total'):
-        mean = instance[f'{state}'].groupby(f'{cls.by}').mean(numeric_only=True)
-        std = instance[f'{state}'].groupby(f'{cls.by}').std(numeric_only=True)
-        return mean, std
-
-    def mark_status(self):
-        pass

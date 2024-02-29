@@ -6,7 +6,6 @@ from DataPlot.plot import *
 
 # Read file
 df = DataBase
-df['Hour'] = df.index.hour
 
 # Define Event & Clean
 df_mean_all, df_std_all = Classifier(df, 'Hour')

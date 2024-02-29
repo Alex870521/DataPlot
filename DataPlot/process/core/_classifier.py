@@ -32,7 +32,8 @@ class HourClassifier(_Classifier):
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
+    def classify(cls, df) -> DataFrameGroupBy:
+        df = df.copy()
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
 
@@ -40,7 +41,7 @@ class HourClassifier(_Classifier):
         df.loc[(df['Hour'] <= 23) & (df['Hour'] >= 19), 'Diurnal'] = 'Night'
         df.loc[(df['Hour'] <= 6) & (df['Hour'] >= 0), 'Diurnal'] = 'Night'
 
-        return df.groupby('Hour')
+        return df
 
 
 class SeasonClassifier(_Classifier):
@@ -50,7 +51,8 @@ class SeasonClassifier(_Classifier):
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
+    def classify(cls, df) -> DataFrameGroupBy:
+        df = df.copy()
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
@@ -80,7 +82,7 @@ class SeasonClassifier(_Classifier):
         #                          'Transition': _df.loc[cond_transition].copy(),
         #                          'Event': _df.loc[cond_event].copy()}
 
-        return df_group_season
+        return df
 
 
 class StateClassifier(_Classifier):
@@ -88,7 +90,8 @@ class StateClassifier(_Classifier):
         return cls.classify(df)
 
     @classmethod
-    def classify(cls, df) -> pd.api.typing.DataFrameGroupBy:
+    def classify(cls, df) -> DataFrameGroupBy:
+        df = df.copy()
         df['Month'] = df.index.strftime('%Y-%m')
         df['Hour'] = df.index.hour
         df.loc[(df['Hour'] <= 18) & (df['Hour'] >= 7), 'Diurnal'] = 'Day'
@@ -113,4 +116,4 @@ class StateClassifier(_Classifier):
 
         # return dic_grp_sta
 
-        return df.groupby('State')
+        return df
