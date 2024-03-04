@@ -33,13 +33,13 @@ class MainProcessor(DataProcessor):
             minion = DataReader('EPB.csv')
 
             # 2. IMPACT
-            impact = ImpactProcessor(reset=self.reset, filename='IMPACT.csv').process_data()
+            impact = ImpactProcessor(reset=False, filename='IMPACT.csv').process_data()
 
             # 3. Mass_volume
-            chemical = ChemicalProcessor(reset=self.reset, filename='chemical.csv').process_data()
+            chemical = ChemicalProcessor(reset=False, filename='chemical.csv').process_data()
 
             # 4. improve
-            improve = ImproveProcessor(reset=self.reset, filename='revised_IMPROVE.csv', version='revised').process_data()
+            improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
 
             # 5. Number & Surface & volume & Extinction distribution
             PSD = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv')

@@ -31,3 +31,21 @@ def external(ser, dp, dlogdp, wavelength=550) -> dict:
         abs_dist += _Abs_dist
 
     return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
+
+
+def fix_PNSD(ser, dp, dlogdp, PNSD, wavelength=550):
+    m = ser['n_amb'] + 1j * ser['k_amb']
+    ndp = PNSD
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    ext = np.sum(ext_dist * dlogdp)
+
+    return ext
+
+
+def fix_RI(ser, dp, dlogdp, RI, wavelength=550):
+    m = RI
+    ndp = np.array(ser[:np.size(dp)])
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    ext = np.sum(ext_dist * dlogdp)
+
+    return ext

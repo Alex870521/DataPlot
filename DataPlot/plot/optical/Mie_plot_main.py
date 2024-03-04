@@ -1,11 +1,5 @@
 import numpy as np
-from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
-from Mie_plot import Q_plot, Q_size_para_plot, MEE_plot
-
-prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
-textprops = {'fontname': 'Times New Roman', 'weight': 'bold', 'fontsize': 16}
-
-dp = np.geomspace(10, 10000, 5000)
+from Mie_plot import Q_plot, All_species_Q, RRI_2D, IJ_couple, scattering_phase
 
 
 RI_dic = {'AS': 1.53 + 0j,
@@ -24,13 +18,13 @@ Density_dic = {'AS': 1.73,
                'BC': 1.50,
                'water': 1}
 
-Title_dic = {'AS': fr'$\bf Ammonium\ sulfate$',
-             'AN': fr'$\bf Ammonium\ nitrate$',
-             'OM': fr'$\bf Organic\ matter$',
-             'Soil': fr'$\bf Soil$',
-             'SS': fr'$\bf Sea\ salt$',
-             'BC': fr'$\bf Black\ carbon$',
-             'water': fr'$\bf Water$', }
+Title_dic = {'AS': 'Ammonium sulfate',
+             'AN': 'Ammonium nitrate',
+             'OM': 'Organic matter',
+             'Soil': 'Soil',
+             'SS': 'Sea salt',
+             'BC': 'Black carbon',
+             'water': 'Water', }
 
 combined_dict = {key: {'m': value,
                        'm_format': fr'$\bf m\ =\ {value.real}\ +\ {value.imag}\ j$',
@@ -38,19 +32,15 @@ combined_dict = {key: {'m': value,
                        'title': Title_dic[key]}
                  for key, value in RI_dic.items()}
 
-for key, values in combined_dict.items():
-    values['Q'] = Mie_Q(values['m'], 550, dp)
-    values['MEE'] = Mie_MEE(values['m'], 550, dp, values['density'])
-
 
 if __name__ == '__main__':
     for species, subdic in combined_dict.items():
-        Q_plot(species, subdic)
-        MEE_plot(species, subdic)
-        Q_size_para_plot(species, subdic)
+        Q_plot(subdic, y='Q')
+        Q_plot(subdic, x='sp', y='Q')
         break
-    # All_species_Q(combined_dict)
-    # All_species_MEE(combined_dict)
+
+    All_species_Q(combined_dict, y="MEE")
     # RRI_2D()
     # IJ_couple()
+    # scattering_phase()
 

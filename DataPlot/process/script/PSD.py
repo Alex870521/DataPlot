@@ -1,8 +1,8 @@
 from pandas import DataFrame, read_csv
 from pathlib import Path
+from functools import partial
 from ..core import *
 from ..method import *
-from functools import partial
 import math
 import pandas as pd
 import numpy as np
@@ -74,7 +74,6 @@ class SizeDist(DataProcessor):
         self.dlogdp = np.full_like(self.dp, 0.014)
 
     __slots__ = ("data", "index", "dp", "dlogdp")
-
 
     def number(self, filename='PNSD_dSdlogdp.csv'):
         """
@@ -163,8 +162,17 @@ class SizeDist(DataProcessor):
 
         return pd.concat([ext_prop, sca_prop['Bsca_external'], abs_prop['Babs_external']], axis=1)
 
-    def process_data(self):
-        pass
+    def extinction_sensitivity(self):
+        psd_data, m_data = self.data, DataReader('chemical.csv')[['gRH', 'n_dry', 'n_amb', 'k_dry', 'k_amb']]
+        data = pd.concat([psd_data, m_data], axis=1).dropna()
+
+        Fixed_PNSD = np.array(data.iloc[:, :len(self.dp)].mean())
+        Fixed_m = np.array(data['n_amb'].mean() + 1j * data['k_amb'].mean())
+
+        fix_PNSD_ = data.apply(fix_PNSD, args=(self.dp, self.dlogdp, Fixed_PNSD), axis=1, result_type='expand')
+        fix_RI_ = data.apply(fix_RI, args=(self.dp, self.dlogdp, Fixed_m), axis=1, result_type='expand')
+
+        return pd.concat([fix_PNSD_, fix_RI_], axis=1).rename(columns={0: 'Bext_Fixed_PNSD', 1: 'Bext_Fixed_RI'})
 
     @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
@@ -184,7 +192,7 @@ class SizeDist(DataProcessor):
             with open(file, 'r', encoding='utf-8', errors='ignore') as f:
                 return read_csv(f, parse_dates=['Time']).set_index('Time')
 
-        result_df = pd.concat([self.extinction_internal(), self.extinction_external()], axis=1).reindex(self.index)
+        result_df = pd.concat([self.extinction_internal(), self.extinction_external(), self.extinction_sensitivity()], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 

@@ -71,6 +71,7 @@ def _linear_regression(x_array: np.ndarray,
 
 @set_figure(figsize=(6, 5))
 def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=False, box=False, **kwargs):
+    print('Plot: scatter')
     df = _df.dropna(subset=[x, y])
     x_data, x_max, x_min, x_range = _range(df[x], range=kwargs.get('x_range'))
     y_data, y_max, y_min, y_range = _range(df[y], range=kwargs.get('y_range'))
@@ -198,8 +199,6 @@ def linear_regression(df: pd.DataFrame,
         Labels for the y-axis variable(s). If None, column names are used as labels. Default is None.
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot to use for the plot. If None, a new subplot is created. Default is None.
-    regression : bool, optional
-        If True, regression lines are plotted for each y variable. Default is None.
     diagonal : bool, optional
         If True, a diagonal line (1:1 line) is added to the plot. Default is False.
     **kwargs
