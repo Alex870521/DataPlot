@@ -5,7 +5,7 @@ from .distribution import *
 from .improve import *
 from .optical import *
 from .meteorology import *
-from .scripts import time_series
+from .scripts import time_series, response_surface
 
 __all__ = ['set_figure',
            'ammonium_rich',

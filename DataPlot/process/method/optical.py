@@ -5,7 +5,7 @@ from .mie_theory import Mie_PESD
 def internal(ser, dp, dlogdp, wavelength=550) -> dict:
     m = ser['n_amb'] + 1j * ser['k_amb']
     ndp = np.array(ser[:np.size(dp)])
-    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, ndp)
 
     return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
 
@@ -24,7 +24,7 @@ def external(ser, dp, dlogdp, wavelength=550) -> dict:
 
     for _specie, _m in refractive_dic.items():
         _ndp = ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp
-        _Ext_dist, _Sca_dist, _Abs_dist = Mie_PESD(_m, wavelength, dp, dlogdp, _ndp)
+        _Ext_dist, _Sca_dist, _Abs_dist = Mie_PESD(_m, wavelength, dp, _ndp)
 
         ext_dist += _Ext_dist
         sca_dist += _Sca_dist
@@ -36,7 +36,7 @@ def external(ser, dp, dlogdp, wavelength=550) -> dict:
 def fix_PNSD(ser, dp, dlogdp, PNSD, wavelength=550):
     m = ser['n_amb'] + 1j * ser['k_amb']
     ndp = PNSD
-    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, ndp)
     ext = np.sum(ext_dist * dlogdp)
 
     return ext
@@ -45,7 +45,7 @@ def fix_PNSD(ser, dp, dlogdp, PNSD, wavelength=550):
 def fix_RI(ser, dp, dlogdp, RI, wavelength=550):
     m = RI
     ndp = np.array(ser[:np.size(dp)])
-    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, ndp)
     ext = np.sum(ext_dist * dlogdp)
 
     return ext

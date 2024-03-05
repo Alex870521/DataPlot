@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from typing import Optional
+from typing import Optional, Literal
 from scipy.stats import norm, lognorm
-from numpy import nan_to_num
-from matplotlib.ticker import ScalarFormatter
+from matplotlib.ticker import ScalarFormatter, FuncFormatter
+from matplotlib.collections import PolyCollection
 from DataPlot.plot.core import set_figure
 
 color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
@@ -62,7 +62,7 @@ def heatmap(df: pd.DataFrame,
     time = df.index
     dp = np.array(df.columns, dtype=float)
     data = df.copy().to_numpy()
-    data = nan_to_num(data)
+    data = np.nan_to_num(data)
 
     # Set the colorbar min and max based on the min and max of the values
     cbar_min = cbar_kws.pop('cbar_min', data.min() if data.min() > 0.0 else 1.)
@@ -108,7 +108,8 @@ def heatmap(df: pd.DataFrame,
 
 
 @set_figure
-def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None, enhancement=False, fig_kws={}, plot_kws={}, **kwargs):
+def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None, enhancement=False, fig_kws={},
+                 plot_kws={}, **kwargs):
     """
     Plot particle size distribution curves and optionally show enhancements.
 
@@ -208,7 +209,8 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
 
 
 @set_figure(figsize=(10, 4))
-def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np.ndarray, ax: Optional[plt.Axes] = None, fig_kws={}, plot_kws={}, **kwargs):
+def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np.ndarray, ax: Optional[plt.Axes] = None,
+                  fig_kws={}, plot_kws={}, **kwargs):
     """
     Plot particle size distribution curves on three separate subplots.
 
@@ -623,3 +625,55 @@ def psd_example(ax=None, **kwargs):
     plot_distribution(ax6, x, lognormpdf(x, gmean=0.8, gstd=1.5), 'r-', linewidth=2)
     ax6.set_xlim(0.01, 20)
     ax6.semilogx()
+
+
+@set_figure
+def three_dimension(dp:np.ndarray, data: np.ndarray, weighting: Literal["PNSD", "PSSD", "PVSD", "PESD"]):
+    print('Plot: three_dimension_distribution')
+
+    mapping = {'PNSD': {'zlim': (0, 1.5e5),
+                        'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
+               'PSSD': {'zlim': (0, 1.5e9),
+                        'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
+               'PESD': {'zlim': (0, 700),
+                        'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
+               'PVSD': {'zlim': (0, 1e11),
+                        'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'}
+               }
+
+    def log_tick_formatter(val, pos=None):
+        return "{:.0f}".format(np.exp(val))
+
+    lines = data.shape[0]
+    dp_ = np.insert(dp, 0, 11.7)
+    dp_extend = np.append(dp_, 2437.4)
+
+    _X, _Y = np.meshgrid(np.log(dp_extend), np.arange(lines))
+    _Z = np.pad(data, ((0, 0), (1, 1)), 'constant')
+
+    verts = []
+    for i in range(_X.shape[0]):
+        verts.append(list(zip(_X[i, :], _Z[i, :])))
+
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "3d"})
+    facecolors = plt.colormaps['viridis_r'](np.linspace(0, 1, len(verts)))
+    poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
+    ax.add_collection3d(poly, zs=range(1, lines+1), zdir='y')
+    # ax.set_xscale('log') <- dont work
+    ax.set(xlim=(np.log(50), np.log(2437.4)), ylim=(1, lines), zlim=mapping[weighting]['zlim'],
+           xlabel=r'$\bf D_{p}\ (nm)$', ylabel=r'$\bf $', zlabel=mapping[weighting]['label'])
+    ax.set_xlabel(r'$\bf D_{p}\ (nm)$', labelpad=10)
+    ax.set_ylabel(r'$\bf Class$', labelpad=10)
+    ax.set_zlabel(mapping[weighting]['label'], labelpad=15)
+
+    major_ticks = np.log([10, 100, 1000])
+    minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
+    ax.set_xticks(major_ticks)
+    ax.set_xticks(minor_ticks, minor=True)
+    ax.xaxis.set_major_formatter(FuncFormatter(log_tick_formatter))
+    ax.zaxis.get_offset_text().set_visible(False)
+    exponent = int('{:.2e}'.format(np.max(data)).split('e')[1])
+    ax.text(ax.get_xlim()[1] * 1.05, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1,
+            '$\\times\\mathdefault{10^{%d}}$' % exponent)
+    ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
+    plt.show()

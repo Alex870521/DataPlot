@@ -3,7 +3,10 @@ import numpy as np
 import math
 
 
-def Mie_Q(m: complex, wavelength: float, dp: np.ndarray) -> tuple[np.ndarray]:
+def Mie_Q(m: complex,
+          wavelength: float,
+          dp: np.ndarray
+          ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate Mie scattering efficiency (Q) for a distribution of spherical particles.
 
@@ -30,22 +33,23 @@ def Mie_Q(m: complex, wavelength: float, dp: np.ndarray) -> tuple[np.ndarray]:
     >>> dp = np.array([0.1, 0.2, 0.5, 1.0])  # particle diameters in micrometers
     >>> result = Mie_Q(m, wavelength, dp)
     """
-    nMedium = 1.0
-    m /= nMedium
-    wavelength /= nMedium
+
     try:
         _length = len(dp)
-        result_list = list(map(lambda i: AutoMieQ(m, wavelength, dp[i], nMedium), range(_length)))
+        result_list = list(map(lambda i: AutoMieQ(m, wavelength, dp[i], nMedium=1.0), range(_length)))
         Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = map(np.array, zip(*result_list))
 
     except TypeError:
         _length = 1
-        Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = AutoMieQ(m, wavelength, dp, nMedium)
+        Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = AutoMieQ(m, wavelength, dp, nMedium=1.0)
 
     return Q_ext, Q_sca, Q_abs
 
 
-def Mie_MEE(m, wavelength, dp, density):
+def Mie_MEE(m: complex,
+            wavelength: float,
+            dp: np.ndarray,
+            density: float):
     """
     Calculate mass extinction efficiency and other parameters.
 
@@ -75,13 +79,8 @@ def Mie_MEE(m, wavelength, dp, density):
     >>> density = 1.2  # density of particles
     >>> result = Mie_MEE(m, wavelength, dp, density)
     """
-    nMedium = 1.0
-    m /= nMedium
-    wavelength /= nMedium
-    _length = len(dp)
 
-    result_list = list(map(lambda i: AutoMieQ(m, wavelength, dp[i], nMedium), range(_length)))
-    Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = map(np.array, zip(*result_list))
+    Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     MEE = (3 * Q_ext) / (2 * density * dp) * 1000
     MSE = (3 * Q_sca) / (2 * density * dp) * 1000
@@ -90,8 +89,11 @@ def Mie_MEE(m, wavelength, dp, density):
     return MEE, MSE, MAE
 
 
-def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
-    """ Mie_SD
+def Mie_PESD(m: complex,
+             wavelength: float,
+             dp: np.ndarray,
+             ndp: np.ndarray):
+    """
     Simultaneously calculate "extinction distribution" and "integrated results" using the Mie_Q method.
 
     Parameters
@@ -102,15 +104,13 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
         The wavelength of the incident light.
     dp : list
         Particle sizes.
-    dlogdp : list
-        Logarithmic particle diameter bin widths.
     ndp : list
         Number concentration from SMPS or APS in the units of dN/dlogdp.
 
     Returns
     -------
     result : ...
-        Description of the result.
+        return dext/dlogdp. Therefore, please make sure input the dNdlogdp data
 
     Examples
     --------
@@ -119,12 +119,10 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
     >>> m = 1.5 + 0.02j
     >>> wavelength = 550  # in nm
     >>> dp = [0.1, 0.2, 0.5, 1.0]  # list of particle diameters in micrometers
-    >>> dlogdp = [0.05, 0.1, 0.2, 0.5]  # list of dlogdp
     >>> ndp = [100, 50, 30, 20]  # number concentration of particles
-    >>> result = Mie_PESD(m, wavelength, dp, dlogdp, ndp)
+    >>> result = Mie_PESD(m, wavelength, dp, ndp)
     """
 
-    # Q
     Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     # dN / dlogdp
@@ -132,9 +130,61 @@ def Mie_PESD(m, wavelength, dp, dlogdp, ndp):
 
     # dN = equal to the area under n(dp)
     # The 1E-6 here is so that the final value is the same as 1/10^6m.
-    # return dext/dlogdp
     Ext = Q_ext * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
     Sca = Q_sca * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
     Abs = Q_abs * (math.pi / 4 * dp ** 2) * dNdlogdp * 1e-6
 
     return Ext, Sca, Abs
+
+
+def Mie_Lognormal(m: complex,
+                  wavelength: float,
+                  geoMean: float,
+                  geoStdDev: float,
+                  numberOfParticles: float,
+                  numberOfBins: int = 167,
+                  lower: float = 1,
+                  upper: float = 2500,
+                  gamma: float = 1):
+    """
+    Calculate Mie scattering properties for a lognormal particle size distribution.
+
+    Parameters:
+    - m (complex): Complex refractive index of the particle.
+    - wavelength (float): Wavelength of the incident light.
+    - geoMean (float): Geometric mean of the particle size distribution.
+    - geoStdDev (float): Geometric standard deviation of the particle size distribution.
+    - numberOfParticles (float): Number of particles.
+    - numberOfBins (int, optional): Number of bins for the lognormal distribution. Default is 167.
+    - lower (float, optional): Lower limit of the particle size distribution. Default is 1.
+    - upper (float, optional): Upper limit of the particle size distribution. Default is 2500.
+    - gamma (float, optional): Parameter for lognormal distribution. Default is 1.
+
+    Returns:
+    - tuple: A tuple containing the extinction cross-section (Bext), scattering cross-section (Bsca),
+      and absorption cross-section (Babs).
+
+    Example:
+    >>> m = complex(1.5, 0.02)
+    >>> wavelength = 0.55
+    >>> geoMean = 300
+    >>> geoStdDev = 1.5
+    >>> numberOfParticles = 1e6
+
+    >>> Bext, Bsca, Babs = Mie_Lognormal(m, wavelength, geoMean, geoStdDev, numberOfParticles)
+    ```
+
+    Note:
+    The function uses the Mie_PESD function to calculate the scattering properties based on a lognormal size distribution.
+    """
+
+    ithPart = lambda gammai, dp, geoMean, geoStdDev: (
+            (gammai / (np.sqrt(2 * np.pi) * np.log(geoStdDev) * dp)) * np.exp(-(np.log(dp) - np.log(geoMean)) ** 2 / (2 * np.log(geoStdDev) ** 2)))
+
+    dp = np.logspace(np.log10(lower), np.log10(upper), numberOfBins)
+
+    ndp = numberOfParticles * ithPart(gamma, dp, geoMean, geoStdDev)
+
+    Bext, Bsca, Babs = Mie_PESD(m, wavelength, dp, ndp)
+
+    return Bext, Bsca, Babs

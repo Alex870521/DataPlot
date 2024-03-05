@@ -8,8 +8,6 @@ from pathlib import Path
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
 from DataPlot.plot import set_figure
 
-prop_legend = {'family': 'Times New Roman', 'weight': 'normal', 'size': 14}
-textprops = {'fontname': 'Times New Roman', 'weight': 'bold', 'fontsize': 16}
 
 PATH_MAIN = Path(__file__).resolve().parent / 'Figure'
 
@@ -63,7 +61,7 @@ def Q_plot(subdic,
         plt.semilogx()
 
     plt.text(0.04, 0.92, subdic['m_format'], transform=ax.transAxes)
-    plt.legend(loc='upper right', prop=prop_legend, handlelength=1.5, frameon=False)
+    plt.legend(loc='upper right', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
 
     xlim = kwargs.get('xlim') or (dp[0], dp[-1])
     ylim = kwargs.get('ylim') or (0, None)
@@ -107,7 +105,7 @@ def All_species_Q(dic,
 
         plt.plot(dp, subdic[f'{y}'][typ], color=color[i], label=legend_label[i], linestyle='-', alpha=alpha, lw=2)
 
-    plt.legend(loc='upper left', prop=prop_legend, handlelength=1.5, frameon=False)
+    plt.legend(loc='upper left', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=1, alpha=0.4)
     plt.semilogx()
 

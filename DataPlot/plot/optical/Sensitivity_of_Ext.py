@@ -1,5 +1,5 @@
 from DataPlot.plot import scatter, linear_regression
-from DataPlot.process import DataBase, DataReader, SizeDist
+from DataPlot.process import DataBase
 
 
 def verify_scat_plot():
