@@ -1,7 +1,7 @@
 
-from .Mie_plot import *
+from .plot import *
 
 __all__ = ['Q_plot',
-           'All_species_Q',
            'IJ_couple',
-           'RRI_2D']
+           'RRI_2D',
+           'scattering_phase']

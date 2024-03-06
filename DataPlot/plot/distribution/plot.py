@@ -628,7 +628,7 @@ def psd_example(ax=None, **kwargs):
 
 
 @set_figure
-def three_dimension(dp:np.ndarray, data: np.ndarray, weighting: Literal["PNSD", "PSSD", "PVSD", "PESD"]):
+def three_dimension(dp: np.ndarray, data: np.ndarray, weighting: Literal["PNSD", "PSSD", "PVSD", "PESD"]):
     print('Plot: three_dimension_distribution')
 
     mapping = {'PNSD': {'zlim': (0, 1.5e5),
@@ -658,7 +658,7 @@ def three_dimension(dp:np.ndarray, data: np.ndarray, weighting: Literal["PNSD", 
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "3d"})
     facecolors = plt.colormaps['viridis_r'](np.linspace(0, 1, len(verts)))
     poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
-    ax.add_collection3d(poly, zs=range(1, lines+1), zdir='y')
+    ax.add_collection3d(poly, zs=range(1, lines + 1), zdir='y')
     # ax.set_xscale('log') <- dont work
     ax.set(xlim=(np.log(50), np.log(2437.4)), ylim=(1, lines), zlim=mapping[weighting]['zlim'],
            xlabel=r'$\bf D_{p}\ (nm)$', ylabel=r'$\bf $', zlabel=mapping[weighting]['label'])

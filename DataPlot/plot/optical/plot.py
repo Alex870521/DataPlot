@@ -3,83 +3,64 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from PyMieScatt import ScatteringFunction
-from typing import Literal
+from typing import Literal, Sequence, Union, List
 from pathlib import Path
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
 from DataPlot.plot import set_figure
 
-
-PATH_MAIN = Path(__file__).resolve().parent / 'Figure'
+PATH_MAIN = Path(__file__).parent / 'Figure'
 
 dp = np.geomspace(10, 10000, 5000)
 
+RI_dic = {'AS': 1.53 + 0j,
+          'AN': 1.55 + 0j,
+          'OM': 1.54 + 0j,
+          'Soil': 1.56 + 0.01j,
+          'SS': 1.54 + 0j,
+          'BC': 1.80 + 0.54j,
+          'Water': 1.333 + 0j, }
+
+Density_dic = {'AS': 1.73,
+               'AN': 1.77,
+               'OM': 1.40,
+               'Soil': 2.60,
+               'SS': 1.90,
+               'BC': 1.50,
+               'Water': 1}
+
+legend_mapping = {'AS': fr'$\bf NH_{4}NO_{3}$',
+                  'AN': fr'$\bf (NH_{4})_{2}SO_{4}$',
+                  'OM': fr'$\bf OM$',
+                  'Soil': fr'$\bf Soil$',
+                  'SS': fr'$\bf NaCl$',
+                  'BC': fr'$\bf BC$',
+                  'Water': fr'$\bf Water$'}
+
+color_mapping = {'AS': '#A65E58',
+                 'AN': '#A5BF6B',
+                 'OM': '#F2BF5E',
+                 'Soil': '#3F83BF',
+                 'SS': '#B777C2',
+                 'BC': '#D1CFCB',
+                 'Water': '#96c8e6'}
+
+combined_dict = {key: {'m': value,
+                       'density': Density_dic[key]} for key, value in RI_dic.items()}
+
 
 @set_figure(figsize=(6, 6))
-def Q_plot(subdic,
-           x: Literal["dp", "sp"] = 'dp',
-           y: Literal["Q", "MEE"] = "Q",
-           **kwargs):
-
+def Q_plot(
+        species: Union[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"], List[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]]],
+        x: Literal["dp", "sp"] = 'dp',
+        y: Literal["Q", "MEE"] = "Q",
+        mode: Literal["ext", "sca", "abs"] = 'ext',
+        **kwargs):
     dp = np.geomspace(10, 10000, 5000)
 
-    subdic['Q'] = Mie_Q(subdic['m'], 550, dp)
-    subdic['MEE'] = Mie_MEE(subdic['m'], 550, dp, subdic['density'])
+    mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
     xlabel_mapping = {'dp': r'$\bf Particle\ Diameter\ (nm)$',
                       'sp': r'$\bf Size\ parameter\ (\alpha)$'}
-
-    ylabel_mapping = {'Q': r'$\bf Optical\ efficiency\ (Q)$',
-                      'MEE': r'$\bf Mass\ Optical\ Efficiency\ (m^2/g)$'}
-
-    legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
-                    'MEE': [r'$\bf MEE$', r'$\bf MSE$', r'$\bf MAE$']}
-
-    xlabel = xlabel_mapping.get(x, None)
-    ylabel = ylabel_mapping.get(y, None)
-    leg = legend_label.get(y, None)
-
-    fig, ax = plt.subplots()
-
-    if x == "sp":
-        size_para = math.pi * dp / 550
-        Q_max = subdic['Q'][0].max()
-        dp_max = dp[subdic['Q'][0].argmax()]
-        alp_max = size_para[subdic['Q'][0].argmax()]
-
-        plt.vlines(x=alp_max, ymin=0, ymax=Q_max, color='gray', alpha=0.7, ls='--', lw=2.5, label='__nolegend__')
-        plt.annotate(fr'$\bf \alpha\ =\ {alp_max.round(2)} = {dp_max.round(2)}\ nm $',
-                     xy=(alp_max, Q_max),
-                     xytext=(20, 3.5),
-                     arrowprops={'color': 'blue'})
-        dp = size_para
-
-    plt.plot(dp, subdic[f'{y}'][0], color='b', label=leg[0], linestyle='-', alpha=1, lw=2.5, zorder=3)
-
-    if x == "dp":
-        plt.plot(dp, subdic[f'{y}'][1], color='g', label=leg[0], linestyle='-', alpha=1, lw=2.5)
-        plt.plot(dp, subdic[f'{y}'][2], color='r', label=leg[0], linestyle='-', alpha=1, lw=2.5)
-        plt.semilogx()
-
-    plt.text(0.04, 0.92, subdic['m_format'], transform=ax.transAxes)
-    plt.legend(loc='upper right', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
-
-    xlim = kwargs.get('xlim') or (dp[0], dp[-1])
-    ylim = kwargs.get('ylim') or (0, None)
-    xlabel = kwargs.get('xlabel') or r'$\bf Particle\ Diameter\ (nm)$'
-    ylabel = kwargs.get('ylabel') or ylabel
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=subdic['title'])
-
-    plt.show()
-    # fig.savefig(PATH_MAIN/f'Q_{species}')
-
-
-@set_figure(figsize=(8, 6), fs=16)
-def All_species_Q(dic,
-                  x: Literal["dp"] = 'dp',
-                  y: Literal["Q", "MEE"] = 'Q',
-                  mode: Literal["ext", "sca", "abs"] = 'ext',
-                  **kwargs):
-    mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
     ylabel_mapping = {'Q': {'ext': r'$\bf Extinction\ efficiency\ (Q_{{ext}})$',
                             'sca': r'$\bf Scattering\ efficiency\ (Q_{{sca}})$',
@@ -89,35 +70,60 @@ def All_species_Q(dic,
                               'abs': r'$\bf MAE\ (m^2/g)$'}}
 
     typ = mode_mapping.get(mode, None)
-    ylabel = ylabel_mapping.get(y).get(mode, None)
-
-    color = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-    legend_label = [fr'$\bf NH_{4}NO_{3}$', fr'$\bf (NH_{4})_{2}SO_{4}$', fr'$\bf OM$', fr'$\bf Soil$', fr'$\bf NaCl$',
-                    fr'$\bf BC$', fr'$\bf Water$']
+    xlabel = xlabel_mapping.get(x, None)
+    ylabel = ylabel_mapping.get(y, None).get(mode, None)
 
     fig, ax = plt.subplots()
 
-    alpha = 1
+    if x == "sp":
+        size_para = math.pi * dp.copy() / 550
+        dp_ = size_para
 
-    for i, (species, subdic) in enumerate(dic.items()):
+    if x == "dp":
+        plt.semilogx()
+        dp_ = dp.copy()
+
+    if isinstance(species, list):
+        for i, specie in enumerate(species):
+            subdic = combined_dict[specie]
+            leg = legend_mapping.get(specie, None)
+            color = color_mapping.get(specie, None)
+
+            subdic['Q'] = Mie_Q(subdic['m'], 550, dp)
+            subdic['MEE'] = Mie_MEE(subdic['m'], 550, dp, subdic['density'])
+
+            plt.plot(dp_, subdic[f'{y}'][typ], color=color, label=leg, linestyle='-', alpha=1, lw=2.5, zorder=3)
+
+    else:
+        legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
+                        'MEE': [r'$\bf MEE$', r'$\bf MSE$', r'$\bf MAE$']}
+
+        ylabel_mapping = {'Q': r'$\bf Optical\ efficiency\ (Q)$',
+                          'MEE': r'$\bf Mass\ Optical\ Efficiency\ (m^2/g)$'}
+
+        subdic = combined_dict[species]
+        leg = legend_label.get(y, None)
+        ylabel = ylabel_mapping.get(y, None)
+
         subdic['Q'] = Mie_Q(subdic['m'], 550, dp)
         subdic['MEE'] = Mie_MEE(subdic['m'], 550, dp, subdic['density'])
 
-        plt.plot(dp, subdic[f'{y}'][typ], color=color[i], label=legend_label[i], linestyle='-', alpha=alpha, lw=2)
+        plt.plot(dp_, subdic[f'{y}'][0], color='b', label=leg[0], linestyle='-', alpha=1, lw=2.5, zorder=3)
+        plt.plot(dp_, subdic[f'{y}'][1], color='g', label=leg[1], linestyle='-', alpha=1, lw=2.5)
+        plt.plot(dp_, subdic[f'{y}'][2], color='r', label=leg[2], linestyle='-', alpha=1, lw=2.5)
+        plt.text(0.04, 0.92, legend_mapping[species], transform=ax.transAxes)
 
-    plt.legend(loc='upper left', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
+    plt.legend(loc='best', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=1, alpha=0.4)
-    plt.semilogx()
 
-    xlim = kwargs.get('xlim') or (dp[0], dp[-1])
-    ylim = kwargs.get('ylim')
-    xlabel = kwargs.get('xlabel') or r'$\bf Particle\ Diameter\ (nm)$'
+    xlim = kwargs.get('xlim') or (dp_[0], dp_[-1])
+    ylim = kwargs.get('ylim') or (0, None)
+    xlabel = kwargs.get('xlabel') or xlabel
     ylabel = kwargs.get('ylabel') or ylabel
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
-    plt.title('')
     plt.show()
-    # fig.savefig(PATH_MAIN/f'Q_ALL_{mode}')
+    # fig.savefig(PATH_MAIN/f'Q_{species}')
 
 
 @set_figure(figsize=(12, 5))
