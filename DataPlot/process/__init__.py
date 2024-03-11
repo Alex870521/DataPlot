@@ -19,34 +19,43 @@ class MainProcessor(DataProcessor):
         self.file_path = Path(__file__).parents[1] / 'data' / filename
 
     def process_data(self):
-        if self.file_path.exists() and not self.reset:
-            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                return read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')
-        else:
-            # 1. EPB
-            minion = DataReader('EPB.csv')
+        with tqdm(total=20, desc="Loading Data", unit="step") as progress_bar:
 
-            # 2. IMPACT
-            impact = ImpactProcessor(reset=False, filename='IMPACT.csv').process_data()
+            if self.file_path.exists() and not self.reset:
+                with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    progress_bar.update(20)
+                    return read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')
+            else:
+                # 1. EPB
+                minion = DataReader('EPB.csv')
+                progress_bar.update(1)
 
-            # 3. Mass_volume
-            chemical = ChemicalProcessor(reset=False, filename='chemical.csv').process_data()
+                # 2. IMPACT
+                impact = ImpactProcessor(reset=False, filename='IMPACT.csv').process_data()
+                progress_bar.update(1)
 
-            # 4. improve
-            improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
+                # 3. Mass_volume
+                chemical = ChemicalProcessor(reset=False, filename='chemical.csv').process_data()
+                progress_bar.update(1)
 
-            # 5. Number & Surface & volume & Extinction distribution
-            psd = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv').process_data()
+                # 4. improve
+                improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
+                progress_bar.update(5)
 
-            _df = concat([minion, impact, chemical, improve, psd], axis=1)
+                # 5. Number & Surface & volume & Extinction distribution
+                psd = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv').process_data()
+                progress_bar.update(11)
 
-            # 7. others
-            _df = OthersProcessor(reset=False, data=_df).process_data()
+                _df = concat([minion, impact, chemical, improve, psd], axis=1)
 
-            # 8. save result
-            _df.to_csv(self.file_path)
+                # 6. others
+                _df = OthersProcessor(reset=False, data=_df).process_data()
+                progress_bar.update(1)
 
-            return _df.copy()
+                # 7. save result
+                _df.to_csv(self.file_path)
+
+                return _df.copy()
 
 
 DataBase = MainProcessor(reset=False).process_data()
