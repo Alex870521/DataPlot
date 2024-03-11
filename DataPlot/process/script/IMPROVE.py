@@ -1,17 +1,6 @@
 from pandas import read_csv, concat
+from typing import Literal
 from ..core import *
-
-
-def frh(_RH, version=None):
-    _frh = DataReader('fRH.json')
-    if _RH is not None:
-        if _RH > 95:
-            _RH = 95
-        _RH = round(_RH)
-        return _frh.loc[_RH].values.T
-
-    return 1, 1, 1, 1
-    pass
 
 
 class ImproveProcessor(DataProcessor):
@@ -56,17 +45,24 @@ class ImproveProcessor(DataProcessor):
 
     """
 
-    def __init__(self, reset=False, filename=None, version=None):
+    def __init__(self, reset=False, filename=None, version: Literal["revised", "modified"] = "revised"):
         super().__init__(reset)
-        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
 
-        if version not in ['revised', 'modified']:
-            raise ValueError("Invalid data_type. Allowed values are 'revised' and 'modified'.")
-        else:
-            self.version = version or 'revised'
+        self.file_path = self.default_path / 'Level2' / filename
+        self.version = version
 
     @staticmethod
-    def revised(_df):
+    def frh(_RH):
+        _frh = DataReader('fRH.json')
+        if _RH is not None:
+            if _RH > 95:
+                _RH = 95
+            _RH = round(_RH)
+            return _frh.loc[_RH].values.T
+
+        return 1, 1, 1, 1
+
+    def revised(self, _df):
         def mode(Mass):
             if Mass < 20:
                 L_mode = Mass ** 2 / 20
@@ -77,7 +73,7 @@ class ImproveProcessor(DataProcessor):
 
             return L_mode, S_mode
 
-        _frh, _frhss, _frhs, _frhl = frh(_df['RH'], 'revised')
+        _frh, _frhss, _frhs, _frhl = self.frh(_df['RH'])
 
         L_AS, S_AS = mode(_df['AS'])
         L_AN, S_AN = mode(_df['AN'])
@@ -108,9 +104,8 @@ class ImproveProcessor(DataProcessor):
 
         return _df['AS_ext_dry':]
 
-    @staticmethod
-    def modified(_df):
-        _frh, _frhss, _frhs, _frhl = frh(_df['RH'], 'modified')
+    def modified(self, _df):
+        _frh, _frhss, _frhs, _frhl = self.frh(_df['RH'])
 
         _df['AS_ext_dry'] = 3 * 1 * _df['AS']
         _df['AN_ext_dry'] = 3 * 1 * _df['AN']
@@ -124,7 +119,7 @@ class ImproveProcessor(DataProcessor):
         _df['AN_ext'] = (3 * _frh * _df['AN'])
         _df['OM_ext'] = (4 * _df['OM'])
         _df['Soil_ext'] = (1 * _df['Soil'])
-        _df['SS_ext'] = (1.7 * _frhs * _df['SS'])
+        _df['SS_ext'] = (1.7 * _frhss * _df['SS'])
         _df['EC_ext'] = (10 * _df['EC'])
         _df['total_ext'] = sum(_df['AS_ext':'EC_ext'])
 
@@ -157,7 +152,7 @@ class ImproveProcessor(DataProcessor):
             if self.version == 'revised':
                 df_improve = improve_input_df.dropna().copy().apply(self.revised, axis=1)
 
-            if self.version == 'modified':
+            else:
                 df_improve = improve_input_df.dropna().copy().apply(self.modified, axis=1)
 
             # gas contribution

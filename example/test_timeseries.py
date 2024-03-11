@@ -10,7 +10,7 @@ if __name__ == '__main__':
     Data = DataBase
 
     # Season timeseries
-    for season, (st_tm_, fn_tm_) in Seasons.items():
+    for season, (st_tm_, fn_tm_) in SEASONS.items():
         st_tm, fn_tm = pd.Timestamp(st_tm_), pd.Timestamp(fn_tm_)
 
         df = Data.loc[st_tm:fn_tm].copy()

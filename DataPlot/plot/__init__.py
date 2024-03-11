@@ -5,7 +5,7 @@ from .distribution import *
 from .improve import *
 from .optical import *
 from .meteorology import *
-from .scripts import time_series, response_surface
+from .scripts import time_series, rsm
 
 __all__ = ['set_figure',
            'ammonium_rich',
@@ -13,5 +13,6 @@ __all__ = ['set_figure',
            'wind_rose',
            'wind_heatmap',
            'scatter',
-           'time_series'
+           'time_series',
+           'rsm'
            ]

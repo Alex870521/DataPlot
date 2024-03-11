@@ -1,19 +1,54 @@
 import numpy as np
-import pandas as pd
-from pathlib import Path
 from pandas import read_csv, concat
-from ..core import DataReader
+from ..core import *
 from DataPlot.process.script.PSD import SizeDist
 
-PATH_MAIN = Path(__file__).parent.parent.parent / 'Data-example' / 'Level2'
-PATH_DIST = PATH_MAIN / 'distribution'
 
+class DryPSDProcessor(DataProcessor):
+    """
+    A class for process impact data.
 
-PNSD = DataReader('PNSD_dNdlogdp.csv')
-chemical = DataReader('chemical.csv')
+    Parameters:
+    -----------
+    reset : bool, optional
+        If True, resets the process. Default is False.
+    filename : str, optional
+        The name of the file to process. Default is None.
+
+    Methods:
+    --------
+    process_data():
+        Process data and save the result.
+
+    Attributes:
+    -----------
+    DEFAULT_PATH : Path
+        The default path for data files.
+
+    Examples:
+    ---------
+    >>> df = DryPSDProcessor(reset=True, filename='PNSD_dNdlogdp_dry.csv').process_data()
+
+    """
+
+    def __init__(self, reset=False, filename=None):
+        super().__init__(reset)
+        self.file_path = self.default_path / 'Level2' / 'distribution'
+
+    def process_data(self):
+        if self.file_path.exists() and not self.reset:
+            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return read_csv(f, parse_dates=['Time']).set_index('Time')
+        else:
+            PNSD = DataReader('PNSD_dNdlogdp.csv')
+            chemical = DataReader('chemical.csv')
+
+            # _df.to_csv(self.file_path)
+            # return _df
+
 
 psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
-
+breakpoint()
 
 
 def dry_PNSD_process(**kwargs):
@@ -78,22 +113,4 @@ def resloved_gRH(length, gRH=1.31, uniform=True):
         arr = np.where(abc < 1, 1, abc)
 
     return arr
-
-
-def score():
-    with open(PATH_MAIN / 'PESD_dry.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        PESD_dry = read_csv(f, parse_dates=['Time']).set_index('Time')
-
-    with open(Path("/Data-example") / 'All_data.csv', 'r', encoding='utf-8', errors='ignore') as f:
-        Measurement = read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')[['Extinction', 'gRH']]
-
-    df = concat([Measurement, PESD_dry], axis=1)
-
-    return 'R'
-
-
-if __name__ == '__main__':
-    dry_PNSD_process(reset=True)
-    # score()
-
 

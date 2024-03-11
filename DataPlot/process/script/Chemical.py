@@ -43,7 +43,7 @@ class ChemicalProcessor(DataProcessor):
 
     def __init__(self, reset=False, filename=None):
         super().__init__(reset)
-        self.file_path = super().DEFAULT_PATH / 'Level2' / filename
+        self.file_path = self.default_path / 'Level2' / filename
 
     @staticmethod
     def mass(_df):  # Series like
@@ -155,19 +155,18 @@ class ChemicalProcessor(DataProcessor):
         _df['kappa_chem'] = np.nan
         _df['kappa_vam'] = np.nan
 
-        def kappa(df, dp=0.5):
-            water_surface_tension = 0.072
-            water_Mw = 18
-            water_density = 1
-            universal_gas_constant = 8.314  # J/mole*K
-            diameter = dp  # um
-            A = 4 * (water_surface_tension * water_Mw) / (water_density * universal_gas_constant * (df['AT'] + 273))
-            power = A / diameter
-            a_w = (df['RH'] / 100) * (np.exp(-power))
-            Kappa = (df['gRH'] ** 3 - 1) * (1 - a_w) / a_w
-            return Kappa
-
-        return _df['n_dry':]
+    @staticmethod
+    def kappa(_df, dp=0.5):
+        water_surface_tension = 0.072
+        water_Mw = 18
+        water_density = 1
+        universal_gas_constant = 8.314  # J/mole*K
+        diameter = dp  # um
+        A = 4 * (water_surface_tension * water_Mw) / (water_density * universal_gas_constant * (_df['AT'] + 273))
+        power = A / diameter
+        a_w = (_df['RH'] / 100) * (np.exp(-power))
+        Kappa = (_df['gRH'] ** 3 - 1) * (1 - a_w) / a_w
+        return Kappa
 
     def process_data(self):
         if self.file_path.exists() and not self.reset:

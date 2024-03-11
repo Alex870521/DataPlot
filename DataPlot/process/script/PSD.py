@@ -65,7 +65,7 @@ class SizeDist(DataProcessor):
 
     def __init__(self, reset=False, filename='PNSD_dNdlogdp.csv'):
         super().__init__(reset)
-        self.file_path = super().DEFAULT_PATH / 'Level2' / 'distribution'
+        self.file_path = self.default_path / 'Level2' / 'distribution'
 
         self.data: pd.DataFrame = DataReader(filename).dropna()
 

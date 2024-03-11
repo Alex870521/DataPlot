@@ -3,10 +3,6 @@ from pandas import read_csv, read_json, read_excel, DataFrame
 from DataPlot.process.core._DEFAULT_PATH import *
 
 
-class FileNotFound(Exception):
-    pass
-
-
 class DataReader:
     """
     A class for reading data files with different extensions (.csv, .json, .xls, .xlsx).
@@ -44,7 +40,7 @@ class DataReader:
             return file_path
 
         except IndexError:
-            raise FileNotFound(f"File '{filename}' not found.")
+            raise FileNotFoundError(f"File '{filename}' not found.")
 
     @classmethod
     def read_data(cls, file_path) -> Optional[DataFrame]:

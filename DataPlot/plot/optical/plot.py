@@ -3,58 +3,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from PyMieScatt import ScatteringFunction
-from typing import Literal, Sequence, Union, List
+from typing import Literal
 from pathlib import Path
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
 from DataPlot.plot import set_figure
 
 PATH_MAIN = Path(__file__).parent / 'Figure'
 
-dp = np.geomspace(10, 10000, 5000)
-
-RI_dic = {'AS': 1.53 + 0j,
-          'AN': 1.55 + 0j,
-          'OM': 1.54 + 0j,
-          'Soil': 1.56 + 0.01j,
-          'SS': 1.54 + 0j,
-          'BC': 1.80 + 0.54j,
-          'Water': 1.333 + 0j, }
-
-Density_dic = {'AS': 1.73,
-               'AN': 1.77,
-               'OM': 1.40,
-               'Soil': 2.60,
-               'SS': 1.90,
-               'BC': 1.50,
-               'Water': 1}
-
-legend_mapping = {'AS': fr'$\bf NH_{4}NO_{3}$',
-                  'AN': fr'$\bf (NH_{4})_{2}SO_{4}$',
-                  'OM': fr'$\bf OM$',
-                  'Soil': fr'$\bf Soil$',
-                  'SS': fr'$\bf NaCl$',
-                  'BC': fr'$\bf BC$',
-                  'Water': fr'$\bf Water$'}
-
-color_mapping = {'AS': '#A65E58',
-                 'AN': '#A5BF6B',
-                 'OM': '#F2BF5E',
-                 'Soil': '#3F83BF',
-                 'SS': '#B777C2',
-                 'BC': '#D1CFCB',
-                 'Water': '#96c8e6'}
-
-combined_dict = {key: {'m': value,
-                       'density': Density_dic[key]} for key, value in RI_dic.items()}
+mapping_dic = {'AS':    {'m': 1.53 + 0j,    'density': 1.73, 'label': fr'$NH_{4}NO_{3}$',       'color': '#A65E58'},
+               'AN':    {'m': 1.55 + 0j,    'density': 1.77, 'label': fr'$(NH_{4})_{2}SO_{4}$', 'color': '#A5BF6B'},
+               'OM':    {'m': 1.54 + 0j,    'density': 1.40, 'label': 'OM',                     'color': '#F2BF5E'},
+               'Soil':  {'m': 1.56 + 0.01j, 'density': 2.60, 'label': 'Soil',                   'color': '#3F83BF'},
+               'SS':    {'m': 1.54 + 0j,    'density': 1.90, 'label': 'SS',                     'color': '#B777C2'},
+               'BC':    {'m': 1.80 + 0.54j, 'density': 1.50, 'label': 'BC',                     'color': '#D1CFCB'},
+               'Water': {'m': 1.333 + 0j,   'density': 1.00, 'label': 'Water',                  'color': '#96c8e6'}}
 
 
 @set_figure(figsize=(6, 6))
 def Q_plot(
-        species: Union[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"], List[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]]],
+        species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
         x: Literal["dp", "sp"] = 'dp',
         y: Literal["Q", "MEE"] = "Q",
         mode: Literal["ext", "sca", "abs"] = 'ext',
         **kwargs):
+
     dp = np.geomspace(10, 10000, 5000)
 
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
@@ -79,41 +51,39 @@ def Q_plot(
         size_para = math.pi * dp.copy() / 550
         dp_ = size_para
 
-    if x == "dp":
+    else:
         plt.semilogx()
         dp_ = dp.copy()
 
     if isinstance(species, list):
         for i, specie in enumerate(species):
-            subdic = combined_dict[specie]
-            leg = legend_mapping.get(specie, None)
-            color = color_mapping.get(specie, None)
+            label = mapping_dic[specie].get('label', None)
+            color = mapping_dic[specie].get('color', None)
 
-            subdic['Q'] = Mie_Q(subdic['m'], 550, dp)
-            subdic['MEE'] = Mie_MEE(subdic['m'], 550, dp, subdic['density'])
+            mapping_dic[specie]['Q'] = Mie_Q(mapping_dic[specie]['m'], 550, dp)
+            mapping_dic[specie]['MEE'] = Mie_MEE(mapping_dic[specie]['m'], 550, dp, mapping_dic[specie]['density'])
 
-            plt.plot(dp_, subdic[f'{y}'][typ], color=color, label=leg, linestyle='-', alpha=1, lw=2.5, zorder=3)
+            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2.5, zorder=3)
 
     else:
         legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
                         'MEE': [r'$\bf MEE$', r'$\bf MSE$', r'$\bf MAE$']}
 
-        ylabel_mapping = {'Q': r'$\bf Optical\ efficiency\ (Q)$',
+        ylabel_mapping = {'Q': r'$\bf Optical\ efficiency\ (Q_{{ext, sca, abs}})$',
                           'MEE': r'$\bf Mass\ Optical\ Efficiency\ (m^2/g)$'}
 
-        subdic = combined_dict[species]
-        leg = legend_label.get(y, None)
+        legend = legend_label.get(y, None)
         ylabel = ylabel_mapping.get(y, None)
 
-        subdic['Q'] = Mie_Q(subdic['m'], 550, dp)
-        subdic['MEE'] = Mie_MEE(subdic['m'], 550, dp, subdic['density'])
+        mapping_dic[species]['Q'] = Mie_Q(mapping_dic[species]['m'], 550, dp)
+        mapping_dic[species]['MEE'] = Mie_MEE(mapping_dic[species]['m'], 550, dp, mapping_dic[species]['density'])
 
-        plt.plot(dp_, subdic[f'{y}'][0], color='b', label=leg[0], linestyle='-', alpha=1, lw=2.5, zorder=3)
-        plt.plot(dp_, subdic[f'{y}'][1], color='g', label=leg[1], linestyle='-', alpha=1, lw=2.5)
-        plt.plot(dp_, subdic[f'{y}'][2], color='r', label=leg[2], linestyle='-', alpha=1, lw=2.5)
-        plt.text(0.04, 0.92, legend_mapping[species], transform=ax.transAxes)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2.5, zorder=3)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1], linestyle='-', alpha=1, lw=2.5)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2], linestyle='-', alpha=1, lw=2.5)
+        plt.text(0.04, 0.92, mapping_dic[species]['label'], transform=ax.transAxes, weight='bold')
 
-    plt.legend(loc='best', prop={'weight': 'normal', 'size': 14}, handlelength=1.5, frameon=False)
+    plt.legend(loc='best', prop={'weight': 'bold', 'size': 14}, handlelength=1.5, frameon=False)
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=1, alpha=0.4)
 
     xlim = kwargs.get('xlim') or (dp_[0], dp_[-1])
@@ -132,6 +102,7 @@ def IJ_couple():
 
     :return:
     """
+    dp = np.geomspace(10, 10000, 5000)
 
     a = Mie_Q(1.50 + 0.01j, 550, dp)
     b = Mie_Q(1.50 + 0.1j, 550, dp)

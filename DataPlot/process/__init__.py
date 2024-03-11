@@ -1,27 +1,25 @@
-from datetime import datetime
+import numpy as np
 from pathlib import Path
 from typing import Literal
-
-import numpy as np
 from pandas import DataFrame
 from pandas import read_csv, concat
 
-from .core import DataReader, DataProcessor, timer, HourClassifier, StateClassifier, SeasonClassifier
+from .core import DataReader, DataProcessor, timer, Classifier, SEASONS
 from .method import other_process
-from .script import ImpactProcessor, ImproveProcessor, SizeDist, ChemicalProcessor
+from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist
 
 __all__ = ['DataBase',
            'DataReader',
            'SizeDist',
-           'Seasons',
-           'Classifier',
+           'SEASONS',
+           'Classify',
            ]
 
 
 class MainProcessor(DataProcessor):
     def __init__(self, reset=False, filename='All_data.csv'):
         super().__init__(reset)
-        self.file_path = Path(__file__).parents[1] / 'Data-example' / filename
+        self.file_path = Path(__file__).parents[1] / 'data' / filename
 
     @timer
     def process_data(self):
@@ -56,38 +54,22 @@ class MainProcessor(DataProcessor):
             # 8. save result
             _df.to_csv(self.file_path)
 
-            return _df
+            return _df.copy()
 
 
 DataBase = MainProcessor(reset=False).process_data()
 
-Seasons = {'2020-Summer': (datetime(2020, 9, 4), datetime(2020, 9, 21, 23)),
-           '2020-Autumn': (datetime(2020, 9, 22), datetime(2020, 12, 29, 23)),
-           '2020-Winter': (datetime(2020, 12, 30), datetime(2021, 3, 25, 23)),
-           '2021-Spring': (datetime(2021, 3, 26), datetime(2021, 5, 6, 23))}
-           # '2021-Summer': (datetime(2021, 5, 7), datetime(2021, 10, 16, 23))
-           # '2021-Autumn': (datetime(2021, 10, 17), datetime(2021, 12, 31, 23))
 
-
-class Classifier:
-
-    state = StateClassifier
-    season = SeasonClassifier
-    hour = HourClassifier
+class Classify(Classifier):
+    Seasons = SEASONS
     DataBase = DataBase
-
-    method_map = {
-        'State': state,
-        'Season': season,
-        'Hour': hour
-    }
 
     def __new__(cls, df: DataFrame,
                 by: Literal["State", "Season", "Hour"],
                 statistic: Literal["Table", "Array"] = 'Array'):
 
         if f'{by}' not in df.columns:
-            _df = cls.method_map[by](DataBase)
+            _df = cls.classify(DataBase)
             df = concat([df, _df[f'{by}']], axis=1)
 
         group = df.groupby(f'{by}')
@@ -96,6 +78,38 @@ class Classifier:
             return cls.statistic_array(group)
         else:
             return cls.statistic_table(group)
+
+    @classmethod
+    def classify(cls, df) -> DataFrame:
+        df = df.copy()
+        df['Month'] = df.index.strftime('%Y-%m')
+        df['Hour'] = df.index.hour
+        df['Diurnal'] = df['Hour'].apply(cls.map_diurnal)
+
+        clean_upp_boud, event_low_boud = df.Extinction.quantile([0.2, 0.8])
+
+        df['State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud, event_low_boud=event_low_boud)
+
+        for season, (season_start, season_end) in cls.Seasons.items():
+            df.loc[season_start:season_end, 'Season'] = season
+
+        # dic_grp_sea = {}
+        df_group_season = df.groupby('Season')
+
+        for _grp, _df in df_group_season:
+            clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
+            df['Season_State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud, event_low_boud=event_low_boud)
+
+        #     cond_event = _df.State == 'Event'
+        #     cond_transition = _df.State == 'Transition'
+        #     cond_clean = _df.State == 'Clean'
+        #
+        #     dic_grp_sea[_grp] = {'Total': _df.copy(),
+        #                          'Clean': _df.loc[cond_clean].copy(),
+        #                          'Transition': _df.loc[cond_transition].copy(),
+        #                          'Event': _df.loc[cond_event].copy()}
+
+        return df
 
     @staticmethod
     def statistic_array(group):
@@ -110,3 +124,4 @@ class Classifier:
     @staticmethod
     def statistic_table(group):
         return group.mean(numeric_only=True), group.mean(numeric_only=True)
+

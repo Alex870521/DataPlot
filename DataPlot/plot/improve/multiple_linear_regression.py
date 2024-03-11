@@ -1,5 +1,5 @@
 from pandas import concat
-from DataPlot.process import DataBase, DataReader, Classifier
+from DataPlot.process import DataBase, DataReader, Classify
 from DataPlot.plot.templates import scatter, linear_regression, multiple_linear_regression, donuts_ext
 
 
@@ -37,7 +37,7 @@ def MLR_IMPROVE():
     df = concat([df, revised_IMPROVE, modify_IMPROVE], axis=1)
 
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'EC']].mul(multiplier)
-    mean, std = Classifier(n_df, 'State', statistic='Table')
+    mean, std = Classify(n_df, 'State', statistic='Table')
 
     ext_dry_dict = {state: mean.loc[state].values for state in ['Clean', 'Transition', 'Event']}
 

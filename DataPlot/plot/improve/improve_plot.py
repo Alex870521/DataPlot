@@ -17,8 +17,8 @@ colors4 = getColor(kinds='4')
 colors5 = getColor(kinds='5')
 
 df = DataBase['2020-09-04':'2021-05-06']
-dic_grp_sea = Classifier(df, 'Season')
-dic_grp_sta = Classifier(df, 'State')
+dic_grp_sea = Classify(df, 'Season')
+dic_grp_sta = Classify(df, 'State')
 
 Species1 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
 Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry',
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         df_RH_group = df.groupby('RH_cut')
         dic = {}
         for _grp, _df in df_RH_group:
-            dic_grp_sta = Classifier(_df, 'State')
+            dic_grp_sta = Classify(_df, 'State')
             dic[_grp] = {state: [dic_grp_sta[state][specie].mean() for specie in Species3] for state in States1}
 
         for label in labels:

@@ -8,7 +8,7 @@ from DataPlot.plot import *
 df = DataBase
 
 # Define Event & Clean
-df_mean_all, df_std_all = Classifier(df, 'Hour', statistic='Table')
+df_mean_all, df_std_all = Classify(df, 'Hour', statistic='Table')
 
 
 @set_figure(figsize=(6, 6), fs=16)

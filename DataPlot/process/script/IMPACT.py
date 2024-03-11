@@ -31,7 +31,7 @@ class ImpactProcessor(DataProcessor):
 
     def __init__(self, reset=False, filename=None):
         super().__init__(reset)
-        self.file_path = super().DEFAULT_PATH / 'Level1' / filename
+        self.file_path = self.default_path / 'Level1' / filename
 
     def process_data(self):
         if self.file_path.exists() and not self.reset:
