@@ -2,15 +2,14 @@ import numpy as np
 from pathlib import Path
 from typing import Literal
 from pandas import read_csv, concat, DataFrame
-
+from tqdm import tqdm
 from .core import DataReader, DataProcessor, Classifier
-from .method import other_process
-from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist
+from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist, OthersProcessor
 
 __all__ = ['DataBase',
            'DataReader',
-           'SizeDist',
-           'Classify',
+           'DataClassifier',
+           'SizeDist'
            ]
 
 
@@ -42,7 +41,7 @@ class MainProcessor(DataProcessor):
             _df = concat([minion, impact, chemical, improve, psd], axis=1)
 
             # 7. others
-            _df = other_process(_df.copy())
+            _df = OthersProcessor(reset=False, data=_df).process_data()
 
             # 8. save result
             _df.to_csv(self.file_path)
@@ -53,11 +52,10 @@ class MainProcessor(DataProcessor):
 DataBase = MainProcessor(reset=False).process_data()
 
 
-class Classify(Classifier):
-    DataBase = DataBase
+class DataClassifier(Classifier):
 
     def __new__(cls, df: DataFrame,
-                by: Literal["State", "Season", "Hour"],
+                by: Literal["Hour", "State", "Season", "Season_state"],
                 statistic: Literal["Table", "Array"] = 'Array'):
 
         if f'{by}' not in df.columns:
@@ -87,7 +85,8 @@ class Classify(Classifier):
 
         for _grp, _df in df.groupby('Season'):
             clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
-            df['Season_State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud, event_low_boud=event_low_boud)
+            df['Season_State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud,
+                                          event_low_boud=event_low_boud)
 
         return df
 
@@ -137,4 +136,3 @@ class Classify(Classifier):
                                  'Event': _df.loc[cond_event].copy()}
 
         return dic_grp_sea
-

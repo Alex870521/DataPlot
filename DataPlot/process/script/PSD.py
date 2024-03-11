@@ -173,7 +173,6 @@ class SizeDist(DataProcessor):
 
         return pd.concat([fix_PNSD_, fix_RI_], axis=1).rename(columns={0: 'Bext_Fixed_PNSD', 1: 'Bext_Fixed_RI'})
 
-    @timer
     def psd_process(self, reset=None, filename='PSD.csv'):
         file = self.file_path.parent / filename
         if file.exists() and not self.reset:
@@ -184,7 +183,6 @@ class SizeDist(DataProcessor):
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
 
-    @timer
     def ext_process(self, reset=None, filename='PESD.csv'):
         file = self.file_path.parent / filename
         if file.exists() and not self.reset:

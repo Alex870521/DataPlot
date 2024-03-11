@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from DataPlot.process import DataBase, Classify
+from DataPlot.process import DataBase, DataClassifier
 from DataPlot.plot import set_figure, unit, getColor, scatter, violin, pie_ext
 
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     print('--- building data ---')
     df = DataBase['2020-10-01':'2021-05-06']
 
-    dic_grp_sta = Classify(df, 'State')
+    dic_grp_sta = DataClassifier(df, 'State')
     dic_grp_sta['Clean']['fRH_PNSD'].mean()
     dic_grp_sta['Transition']['fRH_PNSD'].mean()
     dic_grp_sta['Event']['fRH_PNSD'].mean()

@@ -1,4 +1,3 @@
-from typing import Optional
 from pandas import read_csv, read_json, read_excel, DataFrame
 from DataPlot.process.core._DEFAULT_PATH import *
 
@@ -30,8 +29,8 @@ class DataReader:
 
     def __new__(cls, filename: str) -> DataFrame:
         file_path: Path = cls.find_file(filename)
-        data:      DataFrame = cls.read_data(file_path)
-        return data
+
+        return cls.read_data(file_path)
 
     @classmethod
     def find_file(cls, filename: str) -> Path:
@@ -43,7 +42,7 @@ class DataReader:
             raise FileNotFoundError(f"File '{filename}' not found.")
 
     @classmethod
-    def read_data(cls, file_path) -> Optional[DataFrame]:
+    def read_data(cls, file_path) -> DataFrame:
         file_extension = file_path.suffix.lower()
 
         if file_extension == '.csv':

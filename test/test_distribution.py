@@ -10,13 +10,13 @@ PESD_dry_inter = DataReader('PESD_dextdlogdp_dry_internal.csv')
 PESD_exter = DataReader('PESD_dextdlogdp_external.csv')
 df = DataBase
 
-Ext_amb_dis_internal, Ext_amb_dis_std_internal = Classify(PESD_inter, by='State')
-Ext_dry_dis_internal, Ext_dry_dis_std_internal = Classify(PESD_dry_inter, by='State')
-Ext_amb_dis_external, Ext_amb_dis_std_external = Classify(PESD_exter, by='State')
+Ext_amb_dis_internal, Ext_amb_dis_std_internal = DataClassifier(PESD_inter, by='State')
+Ext_dry_dis_internal, Ext_dry_dis_std_internal = DataClassifier(PESD_dry_inter, by='State')
+Ext_amb_dis_external, Ext_amb_dis_std_external = DataClassifier(PESD_exter, by='State')
 
-PNSD_amb_dis, PNSD_amb_dis_std = Classify(PNSD, by='State')
-PSSD_amb_dis, PSSD_amb_dis_std = Classify(PSSD, by='State')
-PVSD_amb_dis, PVSD_amb_dis_std = Classify(PVSD, by='State')
+PNSD_amb_dis, PNSD_amb_dis_std = DataClassifier(PNSD, by='State')
+PSSD_amb_dis, PSSD_amb_dis_std = DataClassifier(PSSD, by='State')
+PVSD_amb_dis, PVSD_amb_dis_std = DataClassifier(PVSD, by='State')
 
 
 def classifier(psd: pd.DataFrame, q: int = 10):
