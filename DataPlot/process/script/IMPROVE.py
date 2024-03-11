@@ -45,7 +45,7 @@ class ImproveProcessor(DataProcessor):
 
     """
 
-    def __init__(self, reset=False, filename=None, version: Literal["revised", "modified"] = "revised"):
+    def __init__(self, reset=False, filename='revised_IMPROVE.csv', version: Literal["revised", "modified"] = "revised"):
         super().__init__(reset)
 
         self.file_path = self.default_path / 'Level2' / filename

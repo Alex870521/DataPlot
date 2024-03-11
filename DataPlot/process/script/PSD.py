@@ -68,7 +68,6 @@ class SizeDist(DataProcessor):
         self.file_path = self.default_path / 'Level2' / 'distribution'
 
         self.data: pd.DataFrame = DataReader(filename).dropna()
-
         self.index = self.data.index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
@@ -195,6 +194,9 @@ class SizeDist(DataProcessor):
         result_df = pd.concat([self.extinction_internal(), self.extinction_external(), self.extinction_sensitivity()], axis=1).reindex(self.index)
         result_df.to_csv(self.file_path.parent / filename)
         return result_df
+
+    def process_data(self):
+        return pd.concat([self.psd_process(), self.ext_process()], axis=1).reindex(self.index)
 
     def __dist_prop(self, ser, weighting):
         dist = np.array(ser) * self.dlogdp

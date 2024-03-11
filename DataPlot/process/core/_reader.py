@@ -29,8 +29,8 @@ class DataReader:
     DEFAULT_PATH = DEFAULT_PATH
 
     def __new__(cls, filename: str) -> DataFrame:
-        file_path: Optional[Path] = cls.find_file(filename)
-        data:      Optional[DataFrame] = cls.read_data(file_path)
+        file_path: Path = cls.find_file(filename)
+        data:      DataFrame = cls.read_data(file_path)
         return data
 
     @classmethod

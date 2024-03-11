@@ -29,7 +29,7 @@ class ImpactProcessor(DataProcessor):
 
     """
 
-    def __init__(self, reset=False, filename=None):
+    def __init__(self, reset=False, filename='IMPACT.csv'):
         super().__init__(reset)
         self.file_path = self.default_path / 'Level1' / filename
 

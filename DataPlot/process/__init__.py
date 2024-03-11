@@ -1,17 +1,15 @@
 import numpy as np
 from pathlib import Path
 from typing import Literal
-from pandas import DataFrame
-from pandas import read_csv, concat
+from pandas import read_csv, concat, DataFrame
 
-from .core import DataReader, DataProcessor, timer, Classifier, SEASONS
+from .core import DataReader, DataProcessor, Classifier
 from .method import other_process
 from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist
 
 __all__ = ['DataBase',
            'DataReader',
            'SizeDist',
-           'SEASONS',
            'Classify',
            ]
 
@@ -21,7 +19,6 @@ class MainProcessor(DataProcessor):
         super().__init__(reset)
         self.file_path = Path(__file__).parents[1] / 'data' / filename
 
-    @timer
     def process_data(self):
         if self.file_path.exists() and not self.reset:
             with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -40,13 +37,9 @@ class MainProcessor(DataProcessor):
             improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
 
             # 5. Number & Surface & volume & Extinction distribution
-            PSD = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv')
+            psd = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv').process_data()
 
-            psd = PSD.psd_process()
-            ext = PSD.ext_process()
-
-            # Extinction_PNSD_dry = dataproc.Extinction_dry_PSD_internal_process(reset=False)
-            _df = concat([minion, impact, chemical, improve, psd, ext], axis=1)
+            _df = concat([minion, impact, chemical, improve, psd], axis=1)
 
             # 7. others
             _df = other_process(_df.copy())
@@ -61,7 +54,6 @@ DataBase = MainProcessor(reset=False).process_data()
 
 
 class Classify(Classifier):
-    Seasons = SEASONS
     DataBase = DataBase
 
     def __new__(cls, df: DataFrame,
@@ -93,23 +85,29 @@ class Classify(Classifier):
         for season, (season_start, season_end) in cls.Seasons.items():
             df.loc[season_start:season_end, 'Season'] = season
 
-        # dic_grp_sea = {}
-        df_group_season = df.groupby('Season')
-
-        for _grp, _df in df_group_season:
+        for _grp, _df in df.groupby('Season'):
             clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
             df['Season_State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud, event_low_boud=event_low_boud)
 
-        #     cond_event = _df.State == 'Event'
-        #     cond_transition = _df.State == 'Transition'
-        #     cond_clean = _df.State == 'Clean'
-        #
-        #     dic_grp_sea[_grp] = {'Total': _df.copy(),
-        #                          'Clean': _df.loc[cond_clean].copy(),
-        #                          'Transition': _df.loc[cond_transition].copy(),
-        #                          'Event': _df.loc[cond_event].copy()}
-
         return df
+
+    @staticmethod
+    def map_diurnal(hour):
+        if 7 <= hour <= 18:
+            return 'Day'
+        elif 19 <= hour <= 23:
+            return 'Night'
+        elif 0 <= hour <= 6:
+            return 'Night'
+
+    @staticmethod
+    def map_state(row, clean_upp_boud, event_low_boud):
+        if row['Extinction'] >= event_low_boud:
+            return 'Event'
+        elif clean_upp_boud < row['Extinction'] < event_low_boud:
+            return 'Transition'
+        else:
+            return 'Clean'
 
     @staticmethod
     def statistic_array(group):
@@ -124,4 +122,19 @@ class Classify(Classifier):
     @staticmethod
     def statistic_table(group):
         return group.mean(numeric_only=True), group.mean(numeric_only=True)
+
+    @staticmethod
+    def returnStateDict(group):
+        dic_grp_sea = {}
+        for _grp, _df in group:
+            cond_event = _df.State == 'Event'
+            cond_transition = _df.State == 'Transition'
+            cond_clean = _df.State == 'Clean'
+
+            dic_grp_sea[_grp] = {'Total': _df.copy(),
+                                 'Clean': _df.loc[cond_clean].copy(),
+                                 'Transition': _df.loc[cond_transition].copy(),
+                                 'Event': _df.loc[cond_event].copy()}
+
+        return dic_grp_sea
 

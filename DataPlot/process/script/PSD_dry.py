@@ -1,5 +1,5 @@
 import numpy as np
-from pandas import read_csv, concat
+from pandas import read_csv, concat, DataFrame
 from ..core import *
 from DataPlot.process.script.PSD import SizeDist
 
@@ -98,7 +98,7 @@ def dry_PNSD_process(**kwargs):
 
         out_dis['dry_dist'].append(new_dry_ndp)
 
-    dry_PNSD = pd.DataFrame(out_dis['dry_dist']).set_index(_index).set_axis(dp, axis=1).reindex(index)
+    dry_PNSD = DataFrame(out_dis['dry_dist']).set_index(_index).set_axis(dp, axis=1).reindex(index)
 
     return dry_PNSD
 
