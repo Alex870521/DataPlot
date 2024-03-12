@@ -1,4 +1,4 @@
-## <div align="center">DataPlot</div>
+## <div align="center">DataPlot for Aerosol Science</div>
 
 ### Provide tools for visualizing research data for newcomers to the *aerosol field*.
 
@@ -15,15 +15,12 @@ To install the package, run
 
     $ git clone https://github.com/Alex870521/DataPlot.git
 
-## <div align="center">Dependencies</div>
-* matplotlib
-* pandas
 
 ## <div align="center">Some Related Dependencies</div>
-* PyMieScatt
-  - <https://github.com/bsumlin/PyMieScatt.git>
-* py-smps
-  - <https://github.com/quant-aq/py-smps.git>
+* #### [matplotlib](https://matplotlib.org/)
+* #### [pandas](https://pandas.pydata.org/)
+* #### [PyMieScatt](https://github.com/bsumlin/PyMieScatt.git)
+* #### [py-smps](https://github.com/quant-aq/py-smps.git)
 
 
 ## <div align="center">Contact</div>
