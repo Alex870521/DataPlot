@@ -28,6 +28,7 @@ To install the package, run
 For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).
 <br>
 <div align="center">
+
   <a href="https://github.com/Alex870521/DataPlot"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
@@ -39,5 +40,9 @@ For bug reports and feature requests please visit [GitHub Issues](https://github
   <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href=""><img src="assets/media/logo-social-twitter.png" width="3%" alt="Alex870521 Twitter"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href=""><img src="assets/media/logo-social-tiktok.png" width="3%" alt="Alex870521 Tiktok"></a>
 
 </div>
