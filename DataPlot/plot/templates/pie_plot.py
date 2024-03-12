@@ -1,7 +1,7 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot import set_figure, unit, getColor, linecolor, adjust_opacity
+from DataPlot.plot import set_figure, unit, getColor, linecolor, Color
 
 prop_text = {'fontsize': 12, 'fontweight': 'bold'}
 prop_legend = {'size': 12, 'weight': 'bold'}
@@ -159,8 +159,8 @@ def donuts_mass(data_set, labels, style='donut', title='', symbol=True):
     values3 = np.array(list(data_set.values()))[1]
 
     colors1 = getColor(kinds='3-2')
-    colors2 = [adjust_opacity(color, 0.8) for color in colors1]
-    colors3 = [adjust_opacity(color, 0.6) for color in colors1]
+    colors2 = Color.adjust_opacity(colors1, 0.8)
+    colors3 = Color.adjust_opacity(colors1, 0.6)
 
     fig, ax = plt.subplots(1, 1)
     ax.pie(values1, labels=None, colors=colors1, textprops=prop_text,
@@ -217,8 +217,8 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
     colors1 = getColor(kinds='3')
     if len(labels) == 9:
         colors1 = getColor(kinds='4-1')
-    colors2 = [adjust_opacity(color, 0.8) for color in colors1]
-    colors3 = [adjust_opacity(color, 0.6) for color in colors1]
+    colors2 = Color.adjust_opacity(colors1, 0.8)
+    colors3 = Color.adjust_opacity(colors1, 0.6)
 
     fig, ax = plt.subplots(1, 1)
     ax.pie(values1, labels=None, colors=colors1, textprops=prop_text,

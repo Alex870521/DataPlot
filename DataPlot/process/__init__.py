@@ -19,7 +19,7 @@ class MainProcessor(DataProcessor):
         self.file_path = Path(__file__).parents[1] / 'data' / filename
 
     def process_data(self):
-        with tqdm(total=20, desc="Loading Data", unit="step") as progress_bar:
+        with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|", unit="it") as progress_bar:
 
             if self.file_path.exists() and not self.reset:
                 with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:

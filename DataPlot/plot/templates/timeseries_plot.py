@@ -4,7 +4,7 @@ from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
 from typing import Literal, Optional
-from DataPlot.plot.core import unit, set_figure, color_maker
+from DataPlot.plot.core import unit, set_figure, Color
 
 
 __all__ = ['timeseries',
@@ -109,7 +109,7 @@ def timeseries(df: pd.DataFrame,
 
         default_plot_kws.update(plot_kws)
 
-        scalar_map, colors = color_maker(df[f'{c}'].values, cmap=default_plot_kws.pop('cmap'))
+        scalar_map, colors = Color.color_maker(df[f'{c}'].values, cmap=default_plot_kws.pop('cmap'))
 
         ax.bar(time, df[f'{y}'], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
 

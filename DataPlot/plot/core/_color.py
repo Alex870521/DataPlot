@@ -50,27 +50,6 @@ def getColor(num=6, kinds='default', colormap='jet_r', **kwargs):
         return colors5
 
 
-def color_maker(obj, cmap='Blues'):
-    colors = np.nan_to_num(obj, nan=0)
-    colors_alpha = np.where(colors == 0, 0, 1)
-    cmap = plt.cm.get_cmap('Blues')  # choose a colormap
-    scalar_map = plt.cm.ScalarMappable(cmap=cmap)  # create a scalar map for the colorbar
-    scalar_map.set_array(colors)
-    return scalar_map, colors
-
-
-def adjust_opacity(color: str, alpha: float):
-    # 將顏色轉換為RGB表示
-    r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-    # 調整透明度
-    r_new = int(alpha * r + (1 - alpha) * 255)
-    g_new = int(alpha * g + (1 - alpha) * 255)
-    b_new = int(alpha * b + (1 - alpha) * 255)
-    # 轉換為新的色碼
-    new_color = '#{:02X}{:02X}{:02X}'.format(r_new, g_new, b_new)
-    return new_color
-
-
 def linecolor():
     color1 = {'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'}
     color2 = {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'}
@@ -83,8 +62,37 @@ class Color:
     def __init__(self):
         pass
 
-    def palplot(self):
+    @staticmethod
+    def palplot(*args, **kwargs):
+        sns.palplot(*args, **kwargs)
         pass
+
+    @staticmethod
+    def adjust_opacity(colors: str | list[str], alpha: float):
+        if isinstance(colors, str):
+            colors = [colors]
+
+        adjusted_colors = []
+        for color in colors:
+            # 將顏色轉換為RGB表示
+            r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+            # 調整透明度
+            r_new = int(alpha * r + (1 - alpha) * 255)
+            g_new = int(alpha * g + (1 - alpha) * 255)
+            b_new = int(alpha * b + (1 - alpha) * 255)
+            # 轉換為新的色碼
+            new_color = '#{:02X}{:02X}{:02X}'.format(r_new, g_new, b_new)
+            adjusted_colors.append(new_color)
+        return adjusted_colors
+
+    @staticmethod
+    def color_maker(obj, cmap='Blues'):
+        colors = np.nan_to_num(obj, nan=0)
+        colors_alpha = np.where(colors == 0, 0, 1)
+        cmap = plt.cm.get_cmap(cmap)  # choose a colormap
+        scalar_map = plt.cm.ScalarMappable(cmap=cmap)  # create a scalar map for the colorbar
+        scalar_map.set_array(colors)
+        return scalar_map, colors
 
 
 if __name__ == '__main__':
@@ -92,4 +100,4 @@ if __name__ == '__main__':
     # sns.palplot(sns.color_palette("Set3", 15))
 
     for a in range(1, 6):
-        sns.palplot(getColor(kinds=str(a)))
+        Color.palplot(getColor(kinds=str(a)))
