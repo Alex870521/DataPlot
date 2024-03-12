@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot import set_figure, unit
+from DataPlot.plot import set_figure, Unit
 
 __all__ = ['barplot_extend',
            'barplot_concen',
@@ -86,7 +86,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
 
     if orientation == 'va':
         plt.xticks(groups_arr + (species / 2 + 0.5) * (width + block), category_names, weight='bold')
-        plt.ylabel(unit('Extinction'))
+        plt.ylabel(Unit('Extinction'))
         plt.title(fr'$\bf {title}$')
         plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
         plt.show()
@@ -95,7 +95,7 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
     if orientation == 'ha':
         ax.invert_yaxis()
         plt.yticks(groups_arr + 3.5 * (width + block), category_names, weight='bold')
-        plt.xlabel(unit('Extinction'))
+        plt.xlabel(Unit('Extinction'))
         plt.title(fr'$\bf {title}$')
         plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
         plt.show()
@@ -266,7 +266,7 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
             axx.append(__)
 
     plt.xticks(groups_arr + (species / 2 + 0.5) * (width + block), category_names, weight='bold')
-    plt.ylabel(unit('Extinction'))
+    plt.ylabel(Unit('Extinction'))
     plt.title(fr'$\bf {title}$')
     plt.legend(axx, labels, loc='upper right', prop={'size': 12}, frameon=False)
     plt.show()

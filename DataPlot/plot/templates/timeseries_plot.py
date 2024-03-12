@@ -4,7 +4,7 @@ from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
 from typing import Literal, Optional
-from DataPlot.plot.core import unit, set_figure, Color
+from DataPlot.plot.core import set_figure, Unit, Color
 
 
 __all__ = ['timeseries',
@@ -130,7 +130,7 @@ def timeseries(df: pd.DataFrame,
 
         ax.set(
             xlabel=kwargs.get('xlabel', ''),
-            ylabel=kwargs.get('ylabel', unit(f'{y}')),
+            ylabel=kwargs.get('ylabel', Unit(f'{y}')),
             xticks=kwargs.get('xticks', tick_time),
             xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
             # yticks=kwargs.get('yticks', ''),

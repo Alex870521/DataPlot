@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot import set_figure, unit
+from DataPlot.plot import set_figure, Unit
 from DataPlot.process import DataBase
 
 
@@ -37,7 +37,7 @@ def gf_pm_ext():
         s = f"{x:.0f} 1/Mm"
         return rf"{s}"
 
-    plt.xlabel(unit('PM25'))
+    plt.xlabel(Unit('PM25'))
     plt.ylabel('GF(RH)')
     plt.xlim(df.PM25.min(), df.PM25.max())
     plt.ylim(df.gRH.min(), df.gRH.max())

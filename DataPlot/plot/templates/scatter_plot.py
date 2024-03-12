@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tabulate import tabulate
-from typing import Union, List
-from DataPlot.plot import set_figure, unit, Color
+from typing import Union
+from DataPlot.plot import set_figure, Unit, Color
 from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html
@@ -91,7 +91,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         for dott in dot[1:-1]:
             plt.scatter([], [], c='k', alpha=0.8, s=300 * (dott / s_data.max()) ** 1.5, label='{:.0f}'.format(dott))
 
-        plt.legend(scatterpoints=1, frameon=False, labelspacing=0.5, title=unit(s))
+        plt.legend(scatterpoints=1, frameon=False, labelspacing=0.5, title=Unit(s))
 
     elif c is not None:
         c_data, c_max, c_min, c_range = _range(df[c], range=kwargs.get('c_range'))
@@ -112,7 +112,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         for dott in dot[1:-1]:
             plt.scatter([], [], c='k', alpha=0.8, s=300 * (dott / s_data.max()) ** 1.5, label='{:.0f}'.format(dott))
 
-        plt.legend(scatterpoints=1, frameon=False, labelspacing=0.5, title=unit(s))
+        plt.legend(scatterpoints=1, frameon=False, labelspacing=0.5, title=Unit(s))
 
     else:
         scatter = ax.scatter(x_data, y_data, s=30, color='#7a97c9', alpha=0.7, edgecolors='white')
@@ -120,8 +120,8 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
 
     xlim = kwargs.get('xlim') or x_range
     ylim = kwargs.get('ylim') or y_range
-    xlabel = kwargs.get('xlabel') or unit(x) or 'xlabel'
-    ylabel = kwargs.get('ylabel') or unit(y) or 'ylabel'
+    xlabel = kwargs.get('xlabel') or Unit(x) or 'xlabel'
+    ylabel = kwargs.get('ylabel') or Unit(y) or 'ylabel'
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
     title = kwargs.get('title') or 'title'
@@ -130,7 +130,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
     # color_bar
     if colorbar:
         color_bar = plt.colorbar(scatter, extend='both')
-        color_bar.set_label(label=unit(c) or 'clabel', size=14)
+        color_bar.set_label(label=Unit(c) or 'clabel', size=14)
 
     if regression:
         text, y_predict = _linear_regression(x_data, y_data)
@@ -176,9 +176,9 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
 
 @set_figure(figsize=(6, 5))
 def linear_regression(df: pd.DataFrame,
-                      x: str | List[str],
-                      y: str | List[str],
-                      labels: str | List[str] = None,
+                      x: str | list[str],
+                      y: str | list[str],
+                      labels: str | list[str] = None,
                       ax: plt.Axes = None,
                       diagonal=False,
                       add_constant=True,
@@ -258,8 +258,8 @@ def linear_regression(df: pd.DataFrame,
 
     xlim = kwargs.get('xlim')
     ylim = kwargs.get('ylim')
-    xlabel = kwargs.get('xlabel') or unit(x) or ''
-    ylabel = kwargs.get('ylabel') or unit(y[0]) or ''  # Assuming all y variables have the same unit
+    xlabel = kwargs.get('xlabel') or Unit(x) or ''
+    ylabel = kwargs.get('ylabel') or Unit(y[0]) or ''  # Assuming all y variables have the same unit
 
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
@@ -281,9 +281,9 @@ def linear_regression(df: pd.DataFrame,
 
 @set_figure(figsize=(6, 5))
 def multiple_linear_regression(df: pd.DataFrame,
-                               x: str | List[str],
-                               y: str | List[str],
-                               labels: str | List[str] = None,
+                               x: str | list[str],
+                               y: str | list[str],
+                               labels: str | list[str] = None,
                                ax: plt.Axes = None,
                                diagonal=False,
                                add_constant=True,

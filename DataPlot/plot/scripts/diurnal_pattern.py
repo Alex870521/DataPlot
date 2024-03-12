@@ -1,6 +1,6 @@
 from matplotlib.ticker import (AutoMinorLocator)
 import matplotlib.pyplot as plt
-from DataPlot.plot import set_figure, unit
+from DataPlot.plot import set_figure, Unit
 from DataPlot.process import *
 from DataPlot.plot import *
 
@@ -32,7 +32,7 @@ def diurnal(data, data2, y, ax=None, std_area=0.5):
 
     # plt.title(r'$\bf Extinction$', weight='bold', fontsize=20)
     plt.xlabel('Hours')
-    plt.ylabel(unit(f'{y}'))
+    plt.ylabel(Unit(f'{y}'))
     plt.xlim([0, 23])
     ax.set_xticks([0, 4, 8, 12, 16, 20])
     plt.ylim(0, 5)

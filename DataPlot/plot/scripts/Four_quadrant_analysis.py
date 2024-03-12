@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot import set_figure, unit
+from DataPlot.plot import set_figure, Unit
 from DataPlot.process import DataBase
 
 df = DataBase
@@ -16,7 +16,7 @@ def four_quar(subdf):
     sc = ax.scatter(subdf['PM25'], subdf['Vis_LPV'], s=50 * (subdf[item] / subdf[item].max())**4, c=subdf['VC'], norm=plt.Normalize(vmin=0, vmax=2000), cmap='YlGnBu')
     axins = inset_axes(ax, width="48%", height="5%", loc=9)
     color_bar = plt.colorbar(sc, cax=axins, orientation='horizontal')
-    color_bar.set_label(label=unit('VC'))
+    color_bar.set_label(label=Unit('VC'))
 
     ax.tick_params(axis='x', which='major', direction="out", length=6)
     ax.tick_params(axis='y', which='major', direction="out", length=6)
@@ -30,7 +30,7 @@ def four_quar(subdf):
     for dott in dot[1:-1]:
         ax.scatter([], [], c='k', alpha=0.8, s=200 * (dott / subdf[item].max()) ** 4, label='{:.0f}'.format(dott))
 
-    ax.legend(loc='center right', bbox_to_anchor=(0.8, 0.3, 0.2, 0.2), scatterpoints=1, frameon=False, labelspacing=0.5, title=unit('RH'))
+    ax.legend(loc='center right', bbox_to_anchor=(0.8, 0.3, 0.2, 0.2), scatterpoints=1, frameon=False, labelspacing=0.5, title=Unit('RH'))
 
     plt.show()
 

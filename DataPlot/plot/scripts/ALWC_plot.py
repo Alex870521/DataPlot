@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from DataPlot.process import DataBase, DataClassifier
-from DataPlot.plot import set_figure, unit, Color, scatter, violin, pie_ext
+from DataPlot.plot import set_figure, Unit, Color, scatter, violin, pie_ext
 
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}

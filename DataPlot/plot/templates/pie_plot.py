@@ -1,7 +1,7 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot import set_figure, unit, Color
+from DataPlot.plot import set_figure, Unit, Color
 
 prop_text = {'fontsize': 12, 'fontweight': 'bold'}
 prop_legend = {'size': 12, 'weight': 'bold'}

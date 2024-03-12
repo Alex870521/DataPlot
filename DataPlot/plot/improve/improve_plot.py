@@ -8,21 +8,12 @@ from DataPlot.plot.core import *
 from DataPlot.plot.templates import *
 
 
-colors1 = Color.colors1
-colors2 = Color.colors2
-colors3 = Color.colors3
-colors3b = Color.colors3_3
-colors3c = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-colors4 = Color.colors4
-colors5 = Color.getColor(num=4, cmap="Paired")
-
 df = DataBase['2020-09-04':'2021-05-06']
 dic_grp_sea = DataClassifier(df, 'Season')
 dic_grp_sta = DataClassifier(df, 'State')
 
 Species1 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
-Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry',
-            'ALWC_SS_ext', 'EC_ext_dry']
+Species2 = ['AS_ext_dry', 'ALWC_AS_ext', 'AN_ext_dry', 'ALWC_AN_ext', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'ALWC_SS_ext', 'EC_ext_dry']
 Species3 = ['AS_ext', 'AN_ext', 'OM_ext', 'Soil_ext', 'SS_ext', 'EC_ext']
 
 dry_particle = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
@@ -42,6 +33,7 @@ if __name__ == '__main__':
     mass_comp3_dict = {state: [dic_grp_sta[state][specie].mean() for specie in mass_3] for state in States1}
     mass_comp4_dict = {state: [dic_grp_sta[state][specie].mean() for specie in mass_4] for state in States1}
     mass_comp4_dict_std = {state: [dic_grp_sta[state][specie].std() for specie in mass_4] for state in States1}
+
     ext_dry_dict = {state: [dic_grp_sta[state][specie].mean() for specie in Species1] for state in States1}
     ext_dry_std = {state: [dic_grp_sta[state][specie].std() for specie in Species1] for state in States1}
     ext_amb_dict = {state: [dic_grp_sta[state][specie].mean() for specie in Species2] for state in States1}
@@ -58,9 +50,10 @@ if __name__ == '__main__':
 
     def extinction_by_particle_gas():  # PG : sum of ext by particle and gas
         def total_light_ext_violin():
-            PG_means = [df['PG'].mean()] + [dic_grp_sea[season]['Total']['PG'].mean() for season in Seasons]
+            PG_means = [df['PG'].mean()] + [dic_grp_sea[season]['Total']['PG'].mean() for season in
+                                            DataClassifier.Seasons]
             PG_vals = [df['PG'].dropna().values] + [dic_grp_sea[season]['Total']['PG'].dropna().values for season in
-                                                    Seasons]
+                                                    DataClassifier.Seasons]
             ticks = ['Total', '2020 \n Summer  ', '2020 \n Autumn  ', '2020 \n Winter  ', '2021 \n Spring  ']
             violin(means=PG_means, data_set=PG_vals, ticks=ticks, title='Distribution pattern of light extinction')
 
@@ -112,8 +105,8 @@ if __name__ == '__main__':
             ax.fill_between(x=ext, y1=val[:, 0] - std[:, 0], y2=val[:, 0] + std[:, 0])
             # line1, = ax.core(ext, val[:, 0], 'o-', linewidth=2, color='#115162', label=r'$\rm VC$')
             ax.set_xticks(bins)
-            ax.set_xlabel(unit('Extinction'))
-            ax.set_ylabel(unit('VC'))
+            ax.set_xlabel(Unit('Extinction'))
+            ax.set_ylabel(Unit('VC'))
             ax.tick_params(axis='y', colors=line1.get_color())
             ax.yaxis.label.set_color(line1.get_color())
             ax.spines['right'].set_color(line1.get_color())
@@ -123,7 +116,7 @@ if __name__ == '__main__':
             line2, _, __ = ax2.errorbar(ext, val[:, 1], std[:, 1], color='#7FAE80', linestyle='None', marker='o',
                                         label='$PM_{2.5}$')
             # line2, = ax2.core(ext, val[:, 1], 'o-', linewidth=2, color='#7FAE80', label='$PM_{2.5}$')
-            ax2.set_ylabel(unit('PM25'))
+            ax2.set_ylabel(Unit('PM25'))
             ax2.tick_params(axis='y', colors=line2.get_color())
             ax2.yaxis.label.set_color(line2.get_color())
             ax2.spines['right'].set_color(line2.get_color())
@@ -135,7 +128,6 @@ if __name__ == '__main__':
             plt.show()
 
         # aaaa()
-
 
     # 以RH分類畫圖
     def RH_based():
@@ -166,7 +158,7 @@ if __name__ == '__main__':
             val = np.array(mass_comp4_dict[state])
             std = (0,) * 8, np.array(mass_comp4_dict_std[state])
 
-            _ = plt.bar(x + (i + 1) * (width + block), val, yerr=std, width=width, color=colors3c,
+            _ = plt.bar(x + (i + 1) * (width + block), val, yerr=std, width=width, color=Color.colors3_4,
                         alpha=0.6 + (0.2 * i),
                         edgecolor=None, capsize=None, label=state)
             leg_cont.append(_)
@@ -214,7 +206,7 @@ if __name__ == '__main__':
                         data_ALWC=ext_ALWC_dict,
                         data_ALWC_std=ext_ALWC_std,
                         labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'ALWC'],
-                        colors=colors3b,
+                        colors=Color.colors3_3,
                         title='',
                         orientation='va',
                         figsize=(12, 12))
@@ -238,63 +230,9 @@ if __name__ == '__main__':
         donuts_ext(data_set=ext_amb_dict,
                    labels=['AS', 'AS_ALWC', 'AN', 'AN_ALWC', 'OM', 'Soil', 'SS', 'SS_ALWC', 'EC'], title='Ambient')
 
-
     pie_plot()
     ext_mass_barplot()
     chemical_enhancement()
     extinction_by_particle_gas()
     RH_based()
     Ext_based()
-
-    # for items in ['Extinction', 'Scattering', 'Absorption', 'SSA',
-    #               'MEE', 'MSE', 'MAE', 'PM1', 'PM25', 'WS', 'PBLH',
-    #               'VC', 'AT', 'RH', 'ALWC']:
-    #     print(f'{items}: ' + str(df[items].mean().__round__(2)) + ' + ' + str(df[items].std().__round__(2)))
-
-    # for state in States1:
-    #     print(state)
-    #     for items in ['Extinction', 'Scattering', 'Absorption', 'SSA',
-    #                   'MEE', 'MSE', 'MAE', 'PM1', 'PM25', 'WS', 'PBLH',
-    #                   'VC', 'AT', 'RH', 'ALWC']:
-    #
-    #         print(f'{items}: ' + str(dic_grp_sta[state][items].mean().__round__(2)) + ' + ' + str(
-    #             dic_grp_sta[state][items].std().__round__(2)))
-
-    # for season in Seasons:
-    #     # unclass.ammonium_rich(dic_grp_sea[season]['Total'], title=season)
-    #     for items in ['Extinction', 'Scattering', 'Absorption', 'SSA',
-    #                   'MEE', 'MSE', 'MAE', 'PM1', 'PM25', 'WS', 'PBLH',
-    #                   'VC', 'AT', 'RH', 'ALWC']:
-    #         print(season)
-    #         print(f'{items}: ' + str(dic_grp_sea[season]['Total'][items].mean().__round__(2)) + ' + ' + str(
-    #             dic_grp_sea[season]['Total'][items].std().__round__(2)))
-
-    # Extinction CDF to define the event
-    # st_tm, fn_tm = pd.Timestamp('2020-09-04'), pd.Timestamp('2021-05-06')
-    # data = df.loc[st_tm:fn_tm].Extinction.dropna().values
-    #
-    # fig, ax = plt.subplots(1, 1, figsize=(4, 4), dpi=150, constrained_layout=True)
-    # count, bins_count = np.histogram(data, bins=50)
-    #
-    # pdf = count / sum(count)
-    # cdf = np.cumsum(pdf)
-    #
-    # plt.core(bins_count[1:], pdf, label="CDF")
-    # plt.xlabel('a')
-    # plt.ylabel(r'$\bf Cumulative\ Distribution$')
-    # plt.xlim(0,)
-    # plt.ylim(0,)
-
-    # for state in States1:
-    #     print(state)
-    #     print(dic_grp_sta[state]['Bext_dry'].mean(), dic_grp_sta[state]['Bext_dry'].std())
-    #     print(dic_grp_sta[state]['Bext'].mean(), dic_grp_sta[state]['Bext'].std())
-    #     print(dic_grp_sta[state]['MEE_dry_PNSD'].mean(), dic_grp_sta[state]['MEE_dry_PNSD'].std())
-    #     print(dic_grp_sta[state]['MEE_PNSD'].mean(), dic_grp_sta[state]['MEE_PNSD'].std())
-    # for state in ['Clean', 'Event']:
-    # aaa = dic_grp_sta[state]
-    # scatter(aaa, x='Extinction', y='MSE', c='OM_mass_ratio', y_range=[0, 10], c_range=[0, 0.5], title=state)
-    # scatter(aaa, x='GMDs', y='MSE', c='AS_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
-    # scatter(aaa, x='GMDs', y='MSE', c='AN_mass_ratio', y_range=[0, 10], c_range=[0, 0.4], title=state)
-    # scatter(aaa, x='Ox', y='SOC_mass', y_range=[0, 10], title=state)
-    # scatter(df, x='Extinction', y='SSA', c='EC_ratio', s='PM25', y_range=[0, 1], c_range=[0, 0.07], box=True, title="")

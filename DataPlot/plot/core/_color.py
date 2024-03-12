@@ -14,7 +14,7 @@ class Color:
     colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB']
     colors3_2 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#748690']
     colors3_3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-    colors3_4 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#b87e0f', '#D1CFCB']
+    colors3_4 = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
     colors4 = ['#af6e68', '#c18e8a', '#b0c77d', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
     colors4_2 = ['#af6e68', '#96c8e6', '#b0c77d', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']
 
@@ -60,4 +60,6 @@ class Color:
 
 
 if __name__ == '__main__':
-    Color.palplot(Color.getColor())
+    Color.palplot(Color.colors4)
+    Color.palplot(Color.colors4_2)
+

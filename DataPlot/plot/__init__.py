@@ -8,7 +8,7 @@ from .meteorology import *
 from .scripts import time_series, rsm
 
 __all__ = ['set_figure',
-           'unit',
+           'Unit',
            'Color',
            'ammonium_rich',
            'fRH_plot',

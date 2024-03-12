@@ -25,7 +25,7 @@ def ammonium_rich(_df: DataFrame, title='') -> plt.Axes:
     ax.legend(lines, labels, loc='best')
 
     color_bar = plt.colorbar(scatter, extend='both')
-    color_bar.set_label(label=unit('PM25'), size=14)
+    color_bar.set_label(label=Unit('PM25'), size=14)
 
     # fig.savefig(f'Ammonium_rich_{title}')
     return ax
