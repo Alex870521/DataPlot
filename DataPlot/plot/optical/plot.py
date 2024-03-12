@@ -6,7 +6,8 @@ from PyMieScatt import ScatteringFunction
 from typing import Literal
 from pathlib import Path
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
-from DataPlot.plot import set_figure
+from DataPlot.plot import set_figure, scatter, linear_regression
+from DataPlot.process import DataBase
 
 PATH_MAIN = Path(__file__).parent / 'Figure'
 
@@ -191,3 +192,15 @@ def scattering_phase(m: complex = 1.55 + 0.01j,
     plt.legend(prop={'weight': 'bold'}, loc='best', bbox_to_anchor=(1, 0, 0.2, 1), frameon=False)
     plt.title(r'$\bf Scattering\ phase\ function$')
     plt.show()
+
+
+def verify_scat_plot():
+    linear_regression(DataBase, x='Extinction', y=['Bext_internal', 'Bext_external'], xlim=[0, 300], ylim=[0, 600])
+    linear_regression(DataBase, x='Scattering', y=['Bsca_internal', 'Bsca_external'], xlim=[0, 300], ylim=[0, 600])
+    linear_regression(DataBase, x='Absorption', y=['Babs_internal', 'Babs_external'], xlim=[0, 100], ylim=[0, 200])
+
+
+def extinction_sensitivity():
+    scatter(DataBase, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD', regression=True, diagonal=True)
+    scatter(DataBase, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI', regression=True, diagonal=True)
+

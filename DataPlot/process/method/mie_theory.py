@@ -170,7 +170,6 @@ def Mie_Lognormal(m: complex,
     >>> geoMean = 300
     >>> geoStdDev = 1.5
     >>> numberOfParticles = 1e6
-
     >>> Bext, Bsca, Babs = Mie_Lognormal(m, wavelength, geoMean, geoStdDev, numberOfParticles)
     ```
 
