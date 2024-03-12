@@ -31,10 +31,16 @@ To install the package, run
 For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).
 <br>
 <div align="center">
-  <a href="https://github.com/Alex870521/DataPlot"><img src="assets/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
-  <img src="assets/logo-transparent.png" width="3%">
-  <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
-  <img src="assets/logo-transparent.png" width="3%">
-  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/logo-social-youtube.png" width="3%" alt="Alex870521 YouTube"></a>
-  </div>
+  <a href="https://github.com/Alex870521/DataPlot"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-youtube.png" width="3%" alt="Alex870521 YouTube"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-discord.png" width="3%" alt="Alex870521 Discord"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
+  <img src="assets/media/logo-transparent.png" width="3%">
+  <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
 
+</div>
