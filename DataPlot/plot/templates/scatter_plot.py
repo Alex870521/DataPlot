@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from tabulate import tabulate
 from typing import Union, List
-from DataPlot.plot import set_figure, unit, getColor, linecolor
+from DataPlot.plot import set_figure, unit, Color
 from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html
@@ -239,7 +239,7 @@ def linear_regression(df: pd.DataFrame,
     df = df.dropna(subset=[x, *y])
     x_array = df[[x]].to_numpy()
 
-    color_cycle = linecolor()
+    color_cycle = Color.linecolor
 
     handles = []
     text_list = []
@@ -302,7 +302,7 @@ def multiple_linear_regression(df: pd.DataFrame,
     if add_constant:
         df = df.assign(Const=1)
 
-    color_cycle = linecolor()
+    color_cycle = Color.linecolor
 
     x_array: np.ndarray = df[[*x, 'Const']].to_numpy()
     y_array: np.ndarray = df[[y]].to_numpy()

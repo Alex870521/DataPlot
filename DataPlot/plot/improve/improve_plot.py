@@ -8,13 +8,13 @@ from DataPlot.plot.core import *
 from DataPlot.plot.templates import *
 
 
-colors1 = getColor(kinds='1')
-colors2 = getColor(kinds='2')
-colors3 = getColor(kinds='3')
-colors3b = getColor(kinds='3-3')
+colors1 = Color.colors1
+colors2 = Color.colors2
+colors3 = Color.colors3
+colors3b = Color.colors3_3
 colors3c = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-colors4 = getColor(kinds='4')
-colors5 = getColor(kinds='5')
+colors4 = Color.colors4
+colors5 = Color.getColor(num=4, cmap="Paired")
 
 df = DataBase['2020-09-04':'2021-05-06']
 dic_grp_sea = DataClassifier(df, 'Season')

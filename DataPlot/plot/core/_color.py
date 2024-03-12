@@ -4,68 +4,32 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as plc
 
 
-def getColor(num=6, kinds='default', colormap='jet_r', **kwargs):
-    if kinds == 'default':
-        category_colors = plt.colormaps[colormap](np.linspace(0.1, 0.9, num))
-        color = [plc.to_hex(category_colors[i]) for i in range(num)]
-        return color
-
-    if kinds == '1':
-        colors1 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA']
-        return colors1
-
-    if kinds == '2':
-        colors2 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA', '#748690']
-        return colors2
-
-    if kinds == '3':
-        colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB']
-        return colors3
-
-    if kinds == '3-2':
-        colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#748690']
-        return colors3
-
-    if kinds == '3-3':
-        colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-        return colors3
-
-    if kinds == '3-4':
-        colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#b87e0f', '#D1CFCB']
-        return colors3
-
-    if kinds == '4':
-        colors4 = ['#af6e68', '#c18e8a', '#b0c77d', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
-        return colors4
-
-    if kinds == '4-1':
-        colors4 = ['#af6e68', '#96c8e6', '#b0c77d', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']
-        return colors4
-
-    if kinds == '5':
-        colors5 = ['#479ed3', '#afe0f5', '#35ab62', '#b5e6c5']
-        category_colors = sns.color_palette("Paired")[:4]
-        lst = [plc.to_hex(category_colors[i]) for i in range(4)]
-
-        return colors5
-
-
-def linecolor():
-    color1 = {'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'}
-    color2 = {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'}
-    color3 = {'line': '#c81e1e', 'edge': '#f05252', 'face': '#f98080'}
-    color_lst = [color1, color2, color3]
-    return color_lst
-
-
 class Color:
+    linecolor = [{'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'},
+                 {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'},
+                 {'line': '#c81e1e', 'edge': '#f05252', 'face': '#f98080'}]
+
+    colors1 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA']
+    colors2 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA', '#748690']
+    colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB']
+    colors3_2 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#748690']
+    colors3_3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
+    colors3_4 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#b87e0f', '#D1CFCB']
+    colors4 = ['#af6e68', '#c18e8a', '#b0c77d', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
+    colors4_2 = ['#af6e68', '#96c8e6', '#b0c77d', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']
+
     def __init__(self):
         pass
 
     @staticmethod
+    def getColor(num=6, cmap='jet_r', **kwargs):
+        category_colors = plt.colormaps[cmap](np.linspace(0.1, 0.9, num))
+
+        return [plc.to_hex(category_colors[i]) for i in range(num)]
+
+    @staticmethod
     def palplot(*args, **kwargs):
         sns.palplot(*args, **kwargs)
-        pass
 
     @staticmethod
     def adjust_opacity(colors: str | list[str], alpha: float):
@@ -96,8 +60,4 @@ class Color:
 
 
 if __name__ == '__main__':
-    # sns.palplot(getColor(num=15))
-    # sns.palplot(sns.color_palette("Set3", 15))
-
-    for a in range(1, 6):
-        Color.palplot(getColor(kinds=str(a)))
+    Color.palplot(Color.getColor())

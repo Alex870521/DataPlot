@@ -1,7 +1,7 @@
 from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
-from DataPlot.plot import set_figure, unit, getColor, linecolor, Color
+from DataPlot.plot import set_figure, unit, Color
 
 prop_text = {'fontsize': 12, 'fontweight': 'bold'}
 prop_legend = {'size': 12, 'weight': 'bold'}
@@ -57,7 +57,7 @@ def pie_mass(data_set, labels, style='pie', title='', symbol=True):
     data = np.array(list(data_set.values()))
 
     pies, species = data.shape
-    label_colors = getColor(kinds='1') if species == 6 else getColor(kinds='2')
+    label_colors = Color.colors1 if species == 6 else Color.getColor(num=species)
 
     radius = 4
     width = 4 if style == 'pie' else 1
@@ -108,7 +108,7 @@ def pie_ext(data_set, labels, style='pie', title='', symbol=True):
     data = np.array(list(data_set.values()))
 
     pies, species = data.shape
-    label_colors = getColor(kinds='3') if species == 6 else getColor(kinds='4')
+    label_colors = Color.colors3 if species == 6 else Color.getColor(num=species)
 
     radius = 4
     width = 4 if style == 'pie' else 1
@@ -158,7 +158,7 @@ def donuts_mass(data_set, labels, style='donut', title='', symbol=True):
     values2 = np.array(list(data_set.values()))[2]
     values3 = np.array(list(data_set.values()))[1]
 
-    colors1 = getColor(kinds='3-2')
+    colors1 = Color.colors3_2
     colors2 = Color.adjust_opacity(colors1, 0.8)
     colors3 = Color.adjust_opacity(colors1, 0.6)
 
@@ -214,9 +214,9 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
     values2 = np.array(list(data_set.values()))[1]
     values3 = np.array(list(data_set.values()))[0]
 
-    colors1 = getColor(kinds='3')
+    colors1 = Color.colors3
     if len(labels) == 9:
-        colors1 = getColor(kinds='4-1')
+        colors1 = Color.colors4
     colors2 = Color.adjust_opacity(colors1, 0.8)
     colors3 = Color.adjust_opacity(colors1, 0.6)
 

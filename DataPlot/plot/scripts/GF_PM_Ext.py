@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from DataPlot.plot import set_figure, unit, getColor
+from DataPlot.plot import set_figure, unit
 from DataPlot.process import DataBase
 
 

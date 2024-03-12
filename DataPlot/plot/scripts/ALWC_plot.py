@@ -2,13 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from DataPlot.process import DataBase, DataClassifier
-from DataPlot.plot import set_figure, unit, getColor, scatter, violin, pie_ext
+from DataPlot.plot import set_figure, unit, Color, scatter, violin, pie_ext
 
 
 prop_legend = {'size': 12, 'family': 'Times New Roman', 'weight': 'bold'}
 textprops = {'fontsize': 14, 'fontfamily': 'Times New Roman', 'fontweight': 'bold'}
-
-colors1 = getColor(kinds='3-3')
 
 
 def inner_pct(pct, symbol=True):
@@ -72,7 +70,7 @@ if __name__ == '__main__':
 
     @set_figure
     def dyr_ALWC_gRH(data_set, labels, gRH=1, title='', symbol=True):
-        label_colors = colors1
+        label_colors = Color.colors3_3
 
         radius = 4
         width = 4
