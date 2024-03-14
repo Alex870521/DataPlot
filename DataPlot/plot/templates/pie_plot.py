@@ -1,4 +1,3 @@
-from os.path import join as pth
 import matplotlib.pyplot as plt
 import numpy as np
 from DataPlot.plot import set_figure, Unit, Color
@@ -7,27 +6,30 @@ prop_text = {'fontsize': 12, 'fontweight': 'bold'}
 prop_legend = {'size': 12, 'weight': 'bold'}
 
 
-__all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext']
+__all__ = ['pie_mass', 'pie_ext', 'donuts_mass', 'donuts_ext', 'Pie']
 
 
-def inner_pct(pct, symbol=True):
-    if symbol:
-        if pct < 8:
-            return ''
+class Pie:
+
+    @staticmethod
+    def inner_pct(pct, symbol=True):
+        if symbol:
+            if pct < 8:
+                return ''
+            else:
+                return '{:.1f}%'.format(pct)
         else:
-            return '{:.1f}%'.format(pct)
-    else:
-        return ''
-
-
-def outer_pct(pct, symbol=True):
-    if symbol:
-        if pct > 8:
             return ''
+
+    @staticmethod
+    def outer_pct(pct, symbol=True):
+        if symbol:
+            if pct > 8:
+                return ''
+            else:
+                return '{:.1f}%'.format(pct)
         else:
-            return '{:.1f}%'.format(pct)
-    else:
-        return ''
+            return ''
 
 
 @set_figure
@@ -68,11 +70,11 @@ def pie_mass(data_set, labels, style='pie', title='', symbol=True):
 
     for i in range(pies):
         ax[i].pie(data[i], labels=None, colors=label_colors, textprops=prop_text,
-                  autopct=lambda pct: inner_pct(pct, symbol=symbol),
+                  autopct=lambda pct: Pie.inner_pct(pct, symbol=symbol),
                   pctdistance=pct_distance, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
 
         ax[i].pie(data[i], labels=None, colors=label_colors, textprops=prop_text,
-                  autopct=lambda pct: outer_pct(pct, symbol=symbol),
+                  autopct=lambda pct: Pie.outer_pct(pct, symbol=symbol),
                   pctdistance=1.2, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
 
         ax[i].axis('equal')
@@ -80,7 +82,7 @@ def pie_mass(data_set, labels, style='pie', title='', symbol=True):
         ax[i].set_title(rf'$\bf {category_names[i]}$')
 
     plt.show()
-    fig.savefig(pth(f"IMPROVE_mass_{style}_{title}"))
+    # fig.savefig(f"IMPROVE_mass_{style}_{title}")
     return fig, ax
 
 
@@ -119,18 +121,18 @@ def pie_ext(data_set, labels, style='pie', title='', symbol=True):
 
     for i in range(pies):
         ax[i].pie(data[i], labels=None, colors=label_colors, textprops=prop_text,
-                  autopct=lambda pct: inner_pct(pct, symbol=symbol),
+                  autopct=lambda pct: Pie.inner_pct(pct, symbol=symbol),
                   pctdistance=pct_distance, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
 
         ax[i].pie(data[i], labels=None, colors=label_colors, textprops=prop_text,
-                  autopct=lambda pct: outer_pct(pct, symbol=symbol),
+                  autopct=lambda pct: Pie.outer_pct(pct, symbol=symbol),
                   pctdistance=1.3, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
         ax[i].axis('equal')
         ax[i].text(0, 0, text[i], fontdict=prop_text, ha='center', va='center')
         ax[i].set_title(rf'$\bf {category_names[i]}$', pad=-10)
 
     plt.show()
-    fig.savefig(pth(f"IMPROVE_ext_{style}_{title}"), transparent=True)
+    # fig.savefig(f"IMPROVE_ext_{style}_{title}")
     return fig, ax
 
 
@@ -187,7 +189,7 @@ def donuts_mass(data_set, labels, style='donut', title='', symbol=True):
               title='Outer : Event' + '\n' + 'Middle : Transition' + '\n' + 'Inner : Clean',
               bbox_to_anchor=(0.66, 0, 0.5, 1), frameon=False)
     plt.show()
-    fig.savefig(pth(f"IMPROVE_mass_donuts_{title}"), transparent=True)
+    # fig.savefig(f"IMPROVE_mass_donuts_{title}")
 
 
 @set_figure(figsize=(8, 5))
@@ -245,5 +247,5 @@ def donuts_ext(data_set, labels, style='donut', title='', symbol=True):
               title='Outer : Event' + '\n' + 'Middle : Transition' + '\n' + 'Inner : Clean',
               bbox_to_anchor=(0.75, 0, 0.5, 1), frameon=False)
     plt.show()
-    # fig.savefig(pth(f"IMPROVE_ext_donuts_{title}"), transparent=True)
+    # fig.savefig(f"IMPROVE_ext_donuts_{title}")
 

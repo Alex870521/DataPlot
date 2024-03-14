@@ -67,5 +67,6 @@
     "WS": "WS (m/s)",
     "WD": "WD ({\\circ})",
     "y_actual":  "y_{actual}",
-    "y_predict":  "y_{predict}"
+    "y_predict":  "y_{predict}",
+    "PG": "Extinction (1/Mm)"
 }

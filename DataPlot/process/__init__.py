@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from pathlib import Path
 from typing import Literal
 from pandas import read_csv, concat, DataFrame
@@ -64,19 +65,41 @@ DataBase = MainProcessor(reset=False).process_data()
 class DataClassifier(Classifier):
 
     def __new__(cls, df: DataFrame,
-                by: Literal["Hour", "State", "Season", "Season_state"],
-                statistic: Literal["Table", "Array"] = 'Array'):
+                by: Literal["Hour", "State", "Season", "Season_state"] | str,
+                statistic: Literal["Table", "Array", "Dict"] = 'Array',
+                cut: bool = False,
+                qcut: bool = False,
+                bins=None,
+                q=None,
+                labels=None
+                ):
+        # first create group then return the selected statistic method
 
-        if f'{by}' not in df.columns:
+        if by not in df.columns:
             _df = cls.classify(DataBase)
             df = concat([df, _df[f'{by}']], axis=1)
 
-        group = df.groupby(f'{by}')
+        if cut:
+            df = df.copy()
+            df.loc[:, f'{by}_cut'] = pd.cut(df.loc[:, f'{by}'], bins, labels=labels)
+            df = df.drop(columns=[f'{by}'])
+            group = df.groupby(f'{by}_cut', observed=False)
+
+        elif qcut:
+            df = df.copy()
+            df.loc[:, f'{by}_qcut'] = pd.qcut(df.loc[:, f'{by}'], q=q)
+            df = df.drop(columns=[f'{by}'])
+            group = df.groupby(f'{by}_qcut', observed=False)
+
+        else:
+            group = df.groupby(f'{by}')
 
         if statistic == 'Array':
-            return cls.statistic_array(group)
+            return cls.returnArray(group)
+        elif statistic == 'Table':
+            return cls.returnTable(group)
         else:
-            return cls.statistic_table(group)
+            return cls.returnDict(df, group)
 
     @classmethod
     def classify(cls, df) -> DataFrame:
@@ -118,30 +141,23 @@ class DataClassifier(Classifier):
             return 'Clean'
 
     @staticmethod
-    def statistic_array(group):
+    def returnArray(group):
         _avg, _std = {}, {}
 
-        for name, subdf in group:
-            _avg[name] = np.array(subdf.mean(numeric_only=True))
-            _std[name] = np.array(subdf.std(numeric_only=True))
+        for _grp, _df in group:
+            _avg[_grp] = np.array(_df.mean(numeric_only=True))
+            _std[_grp] = np.array(_df.std(numeric_only=True))
 
-        return _avg, _std
+        return np.array(_avg), np.array(_std)
 
     @staticmethod
-    def statistic_table(group):
+    def returnTable(group):
         return group.mean(numeric_only=True), group.mean(numeric_only=True)
 
-    @staticmethod
-    def returnStateDict(group):
-        dic_grp_sea = {}
+    @classmethod
+    def returnDict(cls, df, group):
+        dic_grp = {'Total': df}
         for _grp, _df in group:
-            cond_event = _df.State == 'Event'
-            cond_transition = _df.State == 'Transition'
-            cond_clean = _df.State == 'Clean'
+            dic_grp[_grp] = _df.copy()
 
-            dic_grp_sea[_grp] = {'Total': _df.copy(),
-                                 'Clean': _df.loc[cond_clean].copy(),
-                                 'Transition': _df.loc[cond_transition].copy(),
-                                 'Event': _df.loc[cond_event].copy()}
-
-        return dic_grp_sea
+        return dic_grp

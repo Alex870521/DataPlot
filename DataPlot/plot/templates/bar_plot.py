@@ -1,30 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from DataPlot.plot import set_figure, Unit
 
 __all__ = ['barplot_extend',
            'barplot_concen',
            'barplot_combine',
            ]
-
-
-def autolabel(bars, x, y, val, threshold=3, symbol=True):
-    if symbol:
-        for j, bar in enumerate(bars):
-            position = x[j]
-            height = y[j]
-            if bar > threshold:  # 值太小不顯示
-                plt.text(position, height, '%s' % (val[j]), fontsize=10,
-                         fontname='Times New Roman', weight='bold', ha='center', va='center')
-    else:
-        return ''
-
-
-def fmt(_):
-    if _ > 3:
-        return '%.2f'
-    elif _ <= 3:
-        return ''
 
 
 @set_figure(figsize=(10, 6))
@@ -104,8 +86,11 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
     return fig, ax
 
 
-@set_figure(figsize=(8, 6), fs=16)
-def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None, **kwargs):
+@set_figure(figsize=(8, 6), fs=12)
+def barplot_concen(data_set: dict[str, pd.DataFrame],
+                   items: list[str],
+                   labels: list[str],
+                   symbol=True, orientation='va', **kwargs):
     """
 
     Parameters
@@ -127,7 +112,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
     """
     # data process
 
-    abs_data = np.array(list(data_set.values()))
+    abs_data = np.array([df[items].dropna().mean().values for df in data_set.values()])
 
     groups, species = abs_data.shape
     groups_arr = np.arange(groups)
@@ -144,7 +129,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
     title_format = fr'$\bf {title}$'
     colors = kwargs.get('colors') or plt.colormaps['Blues'](np.linspace(0.2, 0.8, species))
 
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    fig, ax = plt.subplots()
 
     for i in range(species):
         widths = data[:, i]
@@ -157,7 +142,7 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
             _ = plt.barh(groups_arr, widths, left=starts, height=0.7, color=colors[i], label=labels[i],
                          edgecolor=None, capsize=None)
         if symbol:
-            ax.bar_label(_, fmt='%.2f%%', label_type='center', padding=0, fontsize=12, weight='bold')
+            ax.bar_label(_, fmt='%.2f%%', label_type='center', padding=0, fontsize=10, weight='bold')
 
     if orientation == 'va':
         # ax.set_xticks(groups_arr, ['Total', '2020 \n Summer  ', '2020 \n Autumn  ', '2020 \n Winter  ', '2021 \n Spring  '], weight='bold', fontsize=12)
@@ -178,10 +163,10 @@ def barplot_concen(data_set, labels, symbol=True, orientation='va', figsize=None
         ax.set_xlim(0, np.sum(data, axis=1).max())
         # fig.savefig(f"IMPR_con_ha_{title}", transparent=True)
     # plt.axis('off')
-    return fig, ax
+    return ax
 
 
-@set_figure(figsize=(12, 12), fw=16, fs=16)
+@set_figure(figsize=(6, 6), fs=16)
 def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None', symbol=True, orientation='va',
                     **kwargs):
     """

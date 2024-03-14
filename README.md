@@ -16,7 +16,7 @@ To install the package, run
     $ git clone https://github.com/Alex870521/DataPlot.git
 
 
-## <div align="center">Some Related Dependencies</div>
+## <div align="center">Related Dependencies</div>
 * #### [matplotlib](https://matplotlib.org/)
 * #### [pandas](https://pandas.pydata.org/)
 * #### [PyMieScatt](https://github.com/bsumlin/PyMieScatt.git)
