@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from tabulate import tabulate
-from typing import Union
-from DataPlot.plot import set_figure, Unit, Color
+from typing import Optional
+from DataPlot.plot.core import *
 from sklearn.linear_model import LinearRegression
 
 # ref https://seaborn.pydata.org/generated/seaborn.scatterplot.html
@@ -33,12 +33,9 @@ def _linear_regression(x_array: np.ndarray,
         else:
             return 0
 
-    x_array = x_array.reshape(-1, 1)
-    y_array = y_array.reshape(-1, 1)
-
-    model = LinearRegression(positive=positive).fit(x_array, y_array)
-
     if check_second_dimension(x_array):
+        model = LinearRegression(positive=positive).fit(x_array, y_array)
+
         coefficients = model.coef_[0].round(3)
         intercept = model.intercept_[0].round(3)
         r_square = model.score(x_array, y_array).round(3)
@@ -54,6 +51,11 @@ def _linear_regression(x_array: np.ndarray,
         return text, y_predict, coefficients
 
     else:
+        x_array = x_array.reshape(-1, 1)
+        y_array = y_array.reshape(-1, 1)
+
+        model = LinearRegression(positive=positive).fit(x_array, y_array)
+
         slope = model.coef_[0][0].round(3)
         intercept = model.intercept_[0].round(3)
         r_square = model.score(x_array, y_array).round(3)
@@ -66,7 +68,7 @@ def _linear_regression(x_array: np.ndarray,
                        tablefmt="fancy_grid")
         print(tab)
 
-        return text, y_predict
+        return text, y_predict, slope
 
 
 @set_figure(figsize=(6, 5))
@@ -133,7 +135,7 @@ def scatter(_df, x, y, c=None, s=None, cmap='jet', regression=None, diagonal=Fal
         color_bar.set_label(label=Unit(c) or 'clabel', size=14)
 
     if regression:
-        text, y_predict = _linear_regression(x_data, y_data)
+        text, y_predict, slope = _linear_regression(x_data, y_data)
         plt.plot(x_data, y_predict, linewidth=3, color=sns.xkcd_rgb["denim blue"], alpha=1, zorder=3)
 
         plt.text(0.05, 0.95, f'{text}', fontdict={'weight': 'bold'}, color=sns.xkcd_rgb["denim blue"],
@@ -179,7 +181,7 @@ def linear_regression(df: pd.DataFrame,
                       x: str | list[str],
                       y: str | list[str],
                       labels: str | list[str] = None,
-                      ax: plt.Axes = None,
+                      ax: plt.Axes | None = None,
                       diagonal=False,
                       add_constant=True,
                       **kwargs):
@@ -252,7 +254,7 @@ def linear_regression(df: pd.DataFrame,
                              label=f'{labels[i]}')
         handles.append(scatter)
 
-        text, y_predict = _linear_regression(x_array, y_array)
+        text, y_predict, slope = _linear_regression(x_array, y_array)
         text_list.append(f'{labels[i]}: {text}')
         plt.plot(x_array, y_predict, linewidth=3, color=color['line'], alpha=1, zorder=3)
 
@@ -260,10 +262,9 @@ def linear_regression(df: pd.DataFrame,
     ylim = kwargs.get('ylim')
     xlabel = kwargs.get('xlabel') or Unit(x) or ''
     ylabel = kwargs.get('ylabel') or Unit(y[0]) or ''  # Assuming all y variables have the same unit
+    title = kwargs.get('title') or ''
 
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-
-    title = kwargs.get('title') or ''
     ax.set_title(title, fontdict={'fontweight': 'bold', 'fontsize': 20})
 
     # Add regression info to the legend
@@ -284,7 +285,7 @@ def multiple_linear_regression(df: pd.DataFrame,
                                x: str | list[str],
                                y: str | list[str],
                                labels: str | list[str] = None,
-                               ax: plt.Axes = None,
+                               ax: plt.Axes | None = None,
                                diagonal=False,
                                add_constant=True,
                                **kwargs):

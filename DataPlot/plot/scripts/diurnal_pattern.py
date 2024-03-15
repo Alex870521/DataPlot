@@ -1,14 +1,7 @@
-from matplotlib.ticker import (AutoMinorLocator)
 import matplotlib.pyplot as plt
-from DataPlot.plot import set_figure, Unit
+from matplotlib.ticker import (AutoMinorLocator)
 from DataPlot.process import *
 from DataPlot.plot import *
-
-# Read file
-df = DataBase
-
-# Define Event & Clean
-df_mean_all, df_std_all = DataClassifier(df, 'Hour', statistic='Table')
 
 
 @set_figure(figsize=(6, 6), fs=16)
@@ -47,4 +40,6 @@ def diurnal(data, data2, y, ax=None, std_area=0.5):
 
 
 if __name__ == '__main__':
+    df_mean_all, df_std_all = DataClassifier(DataBase, 'Hour', statistic='Table')
+
     diurnal(df_mean_all, df_std_all, y='SOC', std_area=0.5)

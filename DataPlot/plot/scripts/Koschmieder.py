@@ -6,7 +6,7 @@ from typing import Literal
 from DataPlot.plot import set_figure
 from DataPlot.process import DataReader, DataBase
 
-df = DataBase
+
 # x = Visibility, y = Extinction, log-log fit!!
 
 
@@ -150,5 +150,5 @@ def koschmieder(df: pd.DataFrame,
 
 
 if __name__ == '__main__':
-    koschmieder(df, 'Vis_LPV', 'log')
-    # koschmieder(df, 'Vis_Naked', 'reciprocal')
+    koschmieder(DataBase, 'Vis_LPV', 'log')
+    # koschmieder(DataBase, 'Vis_Naked', 'reciprocal')

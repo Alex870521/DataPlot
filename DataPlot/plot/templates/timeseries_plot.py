@@ -3,8 +3,8 @@ import pandas as pd
 from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
-from typing import Literal, Optional
-from DataPlot.plot.core import set_figure, Unit, Color
+from typing import Literal
+from DataPlot.plot.core import *
 
 
 __all__ = ['timeseries',

@@ -1,4 +1,3 @@
-
 from .core import *
 from .templates import *
 from .distribution import *
@@ -14,7 +13,10 @@ __all__ = ['set_figure',
            'fRH_plot',
            'wind_rose',
            'wind_heatmap',
-           'scatter',
            'time_series',
-           'rsm'
+           'rsm',
+           'Pie',
+           'scatter',
+           'linear_regression',
+           'multiple_linear_regression'
            ]

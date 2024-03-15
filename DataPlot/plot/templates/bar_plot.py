@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from DataPlot.plot import set_figure, Unit
+from typing import Literal, Optional
+from DataPlot.plot.core import *
 
 __all__ = ['barplot_extend',
            'barplot_concen',
@@ -10,7 +11,12 @@ __all__ = ['barplot_extend',
 
 
 @set_figure(figsize=(10, 6))
-def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='va', **kwargs):
+def barplot_extend(data_set: dict, data_std: dict,
+                   labels,
+                   unit: str = None,
+                   orientation: Literal["va", "ha"] = 'va',
+                   symbol=True,
+                   **kwargs):
     """
 
     Parameters
@@ -28,14 +34,13 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
 
     Returns
     -------
-    (object, object)
-        matplotlib.figure, matplotlib.axes
+    matplotlib.Axes
 
     """
     # data process
     data = np.array(list(data_set.values()))
 
-    if data_std == 'None':
+    if data_std is None:
         data_std = np.zeros(data.shape)
     else:
         data_std = np.array(list(data_std.values()))
@@ -47,9 +52,9 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
     # figure info
     category_names = ticks = kwargs.get('ticks') or list(data_set.keys())
     title = kwargs.get('title') or ''
-    colors = kwargs.get('colors') or plt.colormaps['jet_r'](np.linspace(0.1, 0.9, species))
+    colors = kwargs.get('colors') or Color.getColor(num=species)
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots()
 
     width = 0.1
     block = width / 4
@@ -68,29 +73,32 @@ def barplot_extend(data_set, labels, data_std='None', symbol=True, orientation='
 
     if orientation == 'va':
         plt.xticks(groups_arr + (species / 2 + 0.5) * (width + block), category_names, weight='bold')
-        plt.ylabel(Unit('Extinction'))
+        plt.ylabel(Unit(f'{unit}'))
         plt.title(fr'$\bf {title}$')
-        plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
+        plt.legend(labels, loc='best', prop={'size': 12})
         plt.show()
         # fig.savefig(f"IMPR_exd_va_{title}")
 
     if orientation == 'ha':
         ax.invert_yaxis()
         plt.yticks(groups_arr + 3.5 * (width + block), category_names, weight='bold')
-        plt.xlabel(Unit('Extinction'))
+        plt.xlabel(Unit(f'{unit}'))
         plt.title(fr'$\bf {title}$')
-        plt.legend(labels, loc='upper right', prop={'size': 12}, frameon=False)
+        plt.legend(labels, loc='best', prop={'size': 12})
         plt.show()
         # fig.savefig(f"IMPR_exd_ha_{title}")
 
-    return fig, ax
+    return ax
 
 
-@set_figure(figsize=(8, 6), fs=12)
+@set_figure(figsize=(10, 6), fs=12)
 def barplot_concen(data_set: dict[str, pd.DataFrame],
                    items: list[str],
                    labels: list[str],
-                   symbol=True, orientation='va', **kwargs):
+                   unit: str,
+                   orientation: Literal["va", "ha"] = 'va',
+                   symbol=True,
+                   **kwargs):
     """
 
     Parameters
@@ -106,8 +114,7 @@ def barplot_concen(data_set: dict[str, pd.DataFrame],
 
     Returns
     -------
-    (object, object)
-        matplotlib.figure, matplotlib.axes
+    matplotlib.Axes
 
     """
     # data process
@@ -127,7 +134,7 @@ def barplot_concen(data_set: dict[str, pd.DataFrame],
     category_names = kwargs.get('ticks') or list(data_set.keys())
     title = kwargs.get('title') or ''
     title_format = fr'$\bf {title}$'
-    colors = kwargs.get('colors') or plt.colormaps['Blues'](np.linspace(0.2, 0.8, species))
+    colors = kwargs.get('colors') or Color.getColor(num=species)
 
     fig, ax = plt.subplots()
 
@@ -145,10 +152,9 @@ def barplot_concen(data_set: dict[str, pd.DataFrame],
             ax.bar_label(_, fmt='%.2f%%', label_type='center', padding=0, fontsize=10, weight='bold')
 
     if orientation == 'va':
-        # ax.set_xticks(groups_arr, ['Total', '2020 \n Summer  ', '2020 \n Autumn  ', '2020 \n Winter  ', '2021 \n Spring  '], weight='bold', fontsize=12)
         ax.set_xticks(groups_arr, category_names, weight='normal')
         ax.legend(labels, ncol=species, bbox_to_anchor=(0, 1), loc='lower left', prop={'size': 12}, frameon=False)
-        ax.set_xlabel(r'$\bf Total\ Light\ Extinction\ (1/Mm)$')
+        ax.set_xlabel(Unit(unit))
         ax.set_ylabel(r'$\bf Contribution\ (\%)$')
         # ax.yaxis.set_visible(False)
         ax.set_ylim(0, np.sum(data, axis=1).max())
@@ -162,12 +168,14 @@ def barplot_concen(data_set: dict[str, pd.DataFrame],
         ax.xaxis.set_visible(False)
         ax.set_xlim(0, np.sum(data, axis=1).max())
         # fig.savefig(f"IMPR_con_ha_{title}", transparent=True)
-    # plt.axis('off')
+
     return ax
 
 
-@set_figure(figsize=(6, 6), fs=16)
-def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None', symbol=True, orientation='va',
+@set_figure(figsize=(10, 6), fs=16)
+def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std=None, unit: str = None,
+                    orientation: Literal["va", "ha"] = 'va',
+                    symbol=True,
                     **kwargs):
     """
 
@@ -182,15 +190,14 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
 
     Returns
     -------
-    (object, object)
-        matplotlib.figure, matplotlib.axes
+    matplotlib.Axes
 
     """
 
     # data process
     data = np.array(list(data_set.values()))
     data2 = np.array(list(data_ALWC.values()))
-    if data_std == 'None':
+    if data_std is None:
         data_std = np.zeros(data.shape)
     else:
         data_std = np.array(list(data_std.values()))
@@ -204,9 +211,9 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
     # figure info
     category_names = ticks = kwargs.get('ticks') or list(data_set.keys())
     title = kwargs.get('title') or ''
-    colors = kwargs.get('colors') or plt.colormaps['jet_r'](np.linspace(0.1, 0.9, species))
+    colors = kwargs.get('colors') or Color.getColor(num=species)
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots()
 
     width = 0.1
     block = width / 4
@@ -251,10 +258,10 @@ def barplot_combine(data_set, labels, data_ALWC, data_ALWC_std, data_std='None',
             axx.append(__)
 
     plt.xticks(groups_arr + (species / 2 + 0.5) * (width + block), category_names, weight='bold')
-    plt.ylabel(Unit('Extinction'))
+    plt.ylabel(Unit(f'{unit}'))
     plt.title(fr'$\bf {title}$')
-    plt.legend(axx, labels, loc='upper right', prop={'size': 12}, frameon=False)
+    plt.legend(axx, labels, loc='best', prop={'size': 12}, frameon=False)
     plt.show()
     # fig.savefig(f"IMPR_exd_va_{title}")
 
-    return fig, ax
+    return ax

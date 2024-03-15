@@ -9,20 +9,20 @@ class Color:
                  {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'},
                  {'line': '#c81e1e', 'edge': '#f05252', 'face': '#f98080'}]
 
-    colors1 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA']
-    colors2 = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA', '#748690']
-    colors3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB']
-    colors3_2 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#748690']
-    colors3_3 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-    colors3_4 = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
-    colors4 = ['#af6e68', '#c18e8a', '#b0c77d', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
-    colors4_2 = ['#af6e68', '#96c8e6', '#b0c77d', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']
+    # colors = ['#FF3333', '#33FF33', '#FFFF33', '#5555FF', '#B94FFF', '#AAAAAA', '#748690'] # the last one is "unknown"
+
+    colors1 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB']
+    colors2 = ['#A65E58', '#A5BF6B', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']
+    colors3 = ['#A65E58', '#A5BF6B', '#a6710d', '#F2BF5E', '#3F83BF', '#B777C2', '#D1CFCB', '#96c8e6']  # POC SOC
+
+    colors_mutiWater  = ['#A65E58', '#c18e8a', '#A5BF6B', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
+    colors_mutiWater2 = ['#A65E58', '#96c8e6', '#A5BF6B', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']  # water
 
     def __init__(self):
         pass
 
     @staticmethod
-    def getColor(num=6, cmap='jet_r', **kwargs):
+    def getColor(num: int = 6, cmap: str = 'jet_r'):
         category_colors = plt.colormaps[cmap](np.linspace(0.1, 0.9, num))
 
         return [plc.to_hex(category_colors[i]) for i in range(num)]
@@ -60,6 +60,4 @@ class Color:
 
 
 if __name__ == '__main__':
-    Color.palplot(Color.colors4)
-    Color.palplot(Color.colors4_2)
-
+    Color.palplot(Color.colors2)

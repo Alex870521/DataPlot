@@ -43,6 +43,7 @@ def set_figure(func=None,
             plt.rcParams['legend.fontsize'] = 'small'
             # plt.rcParams['legend.fontweight'] = 'bold'  #key error
             plt.rcParams['legend.handlelength'] = 1.5
+            plt.rcParams['legend.title_fontsize'] = 'medium'
 
             plt.rcParams['figure.figsize'] = figsize or (6, 6)
             plt.rcParams['figure.autolayout'] = False

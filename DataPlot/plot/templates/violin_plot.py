@@ -2,22 +2,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from typing import Optional
 from DataPlot.plot.core import *
 
 
-@set_figure(figsize=(6, 6), fs=10)
+@set_figure(figsize=(6, 6), fs=12)
 def violin(data_set: dict[str, pd.DataFrame],
-           items: str,
-           ax=None,
+           unit: str,
+           ax: Optional[plt.Axes] = None,
            **kwargs):
+
     grps = len(data_set)
 
-    fig, ax = plt.subplots()
+    if ax is None:
+        fig, ax = plt.subplots()
+
     width = 0.6
     block = width / 2
     x_position = np.arange(grps)
 
-    data = [df[items].dropna().values for df in data_set.values()]
+    data = [df[unit].dropna().values for df in data_set.values()]
 
     plt.boxplot(data, positions=x_position, widths=0.15,
                 showfliers=False, showmeans=True, meanline=False, patch_artist=True,
@@ -33,18 +37,18 @@ def violin(data_set: dict[str, pd.DataFrame],
         violin.set_alpha(alpha)
         violin.set_edgecolor(None)
 
-    plt.scatter(x_position, [df[items].dropna().values.mean() for df in data_set.values()], marker='o',
+    plt.scatter(x_position, [df[unit].dropna().values.mean() for df in data_set.values()], marker='o',
                 facecolor='white', edgecolor='k', s=10)
 
     xlim = kwargs.get('xlim') or (x_position[0] - (width / 2 + block), x_position[-1] + (width / 2 + block))
     ylim = kwargs.get('ylim') or (0, None)
     xlabel = kwargs.get('xlabel') or ''
-    ylabel = kwargs.get('ylabel') or Unit(items)
-    ticks = kwargs.get('ticks') or [x.replace('-', '\n') for x in list(data_set.keys())]
+    ylabel = kwargs.get('ylabel') or Unit(unit)
+    xticks = kwargs.get('xticks') or [x.replace('-', '\n') for x in list(data_set.keys())]
     title = kwargs.get('title') or ''
 
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
-    ax.set_xticks(x_position, ticks, fontweight='bold', fontsize=12)
+    ax.set_xticks(x_position, xticks, fontweight='bold', fontsize=12)
 
+    # fig.savefig(f'Violin_{unit}')
     plt.show()
-    # fig.savefig(f'Violin')
