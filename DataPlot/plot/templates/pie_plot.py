@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+
 from DataPlot.plot.core import *
-from typing import Literal
+from typing import Literal, Sequence
 
 
 class Pie:
@@ -37,21 +39,23 @@ class Pie:
 
     @staticmethod
     @set_figure(fs=8, fw='bold')
-    def pie(data_set: dict[str, list],
-            labels: list[str],
-            unit: str,
-            style: Literal["pie", 'donut'],
-            ax: plt.Axes | None = None,
-            symbol=True,
-            **kwargs):
+    def pieplot(data_set: pd.DataFrame | dict,
+                labels: list[str],
+                unit: str,
+                style: Literal["pie", 'donut'],
+                ax: plt.Axes | None = None,
+                symbol=True,
+                **kwargs) -> plt.Axes:
         """
         Create a pie or donut chart based on the provided data.
 
         Parameters
         ----------
-        data_set : dict[str, list]
-            A dictionary mapping category names to a list of species.
-            It is assumed that all lists contain the same number of entries as the *labels* list.
+        data_set : pd.DataFrame | dict
+            A pandas DataFrame or dictionary mapping category names to a list of species.
+            If a DataFrame is provided, the index represents the categories, and each column contains species data.
+            If a dictionary is provided, it maps category names to lists of species data.
+            It is assumed that all lists or DataFrame columns contain the same number of entries as the *labels* list.
         labels : list of str
             The labels for each category.
         unit : str
@@ -67,13 +71,13 @@ class Pie:
 
         Returns
         -------
-        None
-            The function plots the pie or donut chart but does not return any value.
+        matplotlib.axes.Axes
+            The Axes object containing the violin plot.
 
         Notes
         -----
-        - The *data_set* dictionary should contain lists of species that correspond to each category in *labels*.
-        - The length of each list in *data_set* should match the length of the *labels* list.
+        - If *data_set* is a dictionary, it should contain lists of species that correspond to each category in *labels*.
+        - The length of each list in *data_set* or the number of columns in the DataFrame should match the length of the *labels* list.
 
         Examples
         --------
@@ -81,8 +85,8 @@ class Pie:
         >>> labels = ['Species 1', 'Species 2', 'Species 3']
         >>> pie(data_set, labels, unit='kg', style='pie', symbol=True)
         """
-        category_names = list(data_set.keys())
-        data = np.array(list(data_set.values()))
+        category_names = list(data_set.index)
+        data = data_set.values
 
         pies, species = data.shape
 
@@ -118,20 +122,22 @@ class Pie:
 
     @staticmethod
     @set_figure(figsize=(7, 5), fs=8, fw='bold')
-    def donuts(data_set: dict[str, list],
+    def donuts(data_set: pd.DataFrame | dict,
                labels: list[str],
                unit: str,
                ax: plt.Axes | None = None,
                symbol=True,
-               **kwargs):
+               **kwargs) -> plt.Axes:
         """
         Plot a donut chart based on the data set.
 
         Parameters
         ----------
-        data_set : dict
-            A mapping from category_names to a list of species. It is assumed all lists
-            contain the same number of entries and that it matches the length of *labels*.
+        data_set : pd.DataFrame | dict
+            A pandas DataFrame or a dictionary mapping category names to a list of species.
+            If a DataFrame is provided, the index represents the categories, and each column contains species data.
+            If a dictionary is provided, it maps category names to lists of species data.
+            It is assumed that all lists or DataFrame columns contain the same number of entries as the *labels* list.
         labels : list of str
             The category labels.
         unit : str
@@ -148,8 +154,9 @@ class Pie:
         matplotlib.axes.Axes
             The axes containing the donut chart.
         """
-        category_names = list(data_set.keys())
-        data = np.array(list(data_set.values()))
+
+        category_names = list(data_set.index)
+        data = data_set.values
 
         pies, species = data.shape
 
@@ -180,7 +187,7 @@ class Pie:
         ax.text(0, 0, text, ha='center', va='center')
         ax.axis('equal')
 
-        ax.set_title(kwargs.get('title') or '')
+        ax.set_title(kwargs.get('title', ''))
 
         ax.legend(labels, loc='center', prop={'weight': 'bold'}, title_fontproperties={'weight': 'bold'},
                   title=f'Outer : {category_names[2]}' + '\n' + f'Middle : {category_names[1]}' + '\n' + f'Inner : {category_names[0]}',

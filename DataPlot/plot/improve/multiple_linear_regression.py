@@ -29,7 +29,7 @@ def MLR_IMPROVE():
     # plot
     linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
                       regression=True, diagonal=True)
-    Pie.donuts(ext_dry_dict, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', color=Color.colors3)
+    Pie.donuts(ext_dry_dict, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
 
 
 if __name__ == '__main__':

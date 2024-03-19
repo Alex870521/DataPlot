@@ -40,6 +40,6 @@ def diurnal(data, data2, y, ax=None, std_area=0.5):
 
 
 if __name__ == '__main__':
-    df_mean_all, df_std_all = DataClassifier(DataBase, 'Hour', statistic='Table')
+    df_mean_all, df_std_all = DataClassifier(DataBase, by='Hour', statistic='Table')
 
     diurnal(df_mean_all, df_std_all, y='SOC', std_area=0.5)

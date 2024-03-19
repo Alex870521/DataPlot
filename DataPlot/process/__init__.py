@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Sequence
 from pandas import read_csv, concat, DataFrame
 from tqdm import tqdm
+from collections import OrderedDict
 from .core import DataReader, DataProcessor, Classifier
 from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist, OthersProcessor
 
@@ -63,96 +64,79 @@ DataBase = MainProcessor(reset=False).process_data()
 
 
 class DataClassifier(Classifier):
+    """
+    Notes
+    -----
+    First, create group then return the selected statistic method.
+    If the 'by' does not exist in DataFrame, import the default DataFrame to help to sign the different group.
 
+    """
     def __new__(cls, df: DataFrame,
                 by: Literal["Hour", "State", "Season", "Season_state"] | str,
-                statistic: Literal["Table", "Array", "Dict"] = 'Array',
-                cut: bool = False,
-                qcut: bool = False,
-                bins=None,
-                q=None,
-                labels=None
+                statistic: Literal["Table", "Array", "Series", "Dict"] = 'Array',
+                cut_bins: Sequence = None,
+                qcut: int = None,
+                labels: list[str] = None
                 ):
-        # first create group then return the selected statistic method
-
+        # group data
         if by not in df.columns:
-            _df = cls.classify(DataBase)
-            df = concat([df, _df[f'{by}']], axis=1)
+            default = cls.classify(DataBase)
+            df = concat([df, default[f'{by}']], axis=1)
 
-        if cut:
+        if cut_bins is not None:
             df = df.copy()
-            df.loc[:, f'{by}_cut'] = pd.cut(df.loc[:, f'{by}'], bins, labels=labels)
+            midpoint = (cut_bins + (cut_bins[1] - cut_bins[0]) / 2)[:-1]
+            df.loc[:, f'{by}_cut'] = pd.cut(df.loc[:, f'{by}'], cut_bins, labels=labels or midpoint)
             df = df.drop(columns=[f'{by}'])
             group = df.groupby(f'{by}_cut', observed=False)
 
-        elif qcut:
+        elif qcut is not None:
             df = df.copy()
-            df.loc[:, f'{by}_qcut'] = pd.qcut(df.loc[:, f'{by}'], q=q)
+            df.loc[:, f'{by}_qcut'] = pd.qcut(df.loc[:, f'{by}'], q=qcut, labels=labels)
             df = df.drop(columns=[f'{by}'])
             group = df.groupby(f'{by}_qcut', observed=False)
 
         else:
-            group = df.groupby(f'{by}')
+            if by == 'State':
+                group = df.groupby(pd.Categorical(df['State'], categories=['Clean', 'Transition', 'Event']), observed=False)
+            elif by == 'Season':
+                group = df.groupby(pd.Categorical(df['Season'], categories=['2020-Summer', '2020-Autumn', '2020-Winter', '2021-Spring']), observed=False)
+            else:
+                group = df.groupby(f'{by}', observed=False)
 
+        # return data
         if statistic == 'Array':
             return cls.returnArray(group)
         elif statistic == 'Table':
             return cls.returnTable(group)
+        elif statistic == 'Series':
+            return cls.returnSeries(group)
         else:
             return cls.returnDict(df, group)
 
-    @classmethod
-    def classify(cls, df) -> DataFrame:
-        df = df.copy()
-        df['Month'] = df.index.strftime('%Y-%m')
-        df['Hour'] = df.index.hour
-        df['Diurnal'] = df['Hour'].apply(cls.map_diurnal)
-
-        clean_upp_boud, event_low_boud = df.Extinction.quantile([0.2, 0.8])
-
-        df['State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud, event_low_boud=event_low_boud)
-
-        for season, (season_start, season_end) in cls.Seasons.items():
-            df.loc[season_start:season_end, 'Season'] = season
-
-        for _grp, _df in df.groupby('Season'):
-            clean_upp_boud, event_low_boud = _df.Extinction.quantile([0.2, 0.8])
-            df['Season_State'] = df.apply(cls.map_state, axis=1, clean_upp_boud=clean_upp_boud,
-                                          event_low_boud=event_low_boud)
-
-        return df
-
     @staticmethod
-    def map_diurnal(hour):
-        if 7 <= hour <= 18:
-            return 'Day'
-        elif 19 <= hour <= 23:
-            return 'Night'
-        elif 0 <= hour <= 6:
-            return 'Night'
-
-    @staticmethod
-    def map_state(row, clean_upp_boud, event_low_boud):
-        if row['Extinction'] >= event_low_boud:
-            return 'Event'
-        elif clean_upp_boud < row['Extinction'] < event_low_boud:
-            return 'Transition'
-        else:
-            return 'Clean'
-
-    @staticmethod
-    def returnArray(group):
+    def returnArray(group):  # distribution ues
         _avg, _std = {}, {}
 
         for _grp, _df in group:
             _avg[_grp] = np.array(_df.mean(numeric_only=True))
             _std[_grp] = np.array(_df.std(numeric_only=True))
 
-        return np.array(_avg), np.array(_std)
+        return _avg, _std
 
     @staticmethod
-    def returnTable(group):
-        return group.mean(numeric_only=True), group.mean(numeric_only=True)
+    def returnSeries(group):
+        _avg, _std = {}, {}
+
+        for _grp, _df in group:
+            _avg[_grp] = _df.mean(numeric_only=True)
+            _std[_grp] = _df.std(numeric_only=True)
+
+        return _avg, _std
+
+    @staticmethod
+    def returnTable(group) -> tuple[pd.DataFrame, pd.DataFrame]:
+        return group.mean(numeric_only=True), group.std(numeric_only=True)
 
     @classmethod
     def returnDict(cls, df, group):

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from numpy import log, exp, pi, sqrt
@@ -7,7 +8,10 @@ from tabulate import tabulate
 from DataPlot.plot import set_figure
 
 
-def curve_fitting(dp, dist, mode=None, **kwargs):
+def curve_fitting(dp: np.ndarray | pd.Series | pd.DataFrame,
+                  dist: np.ndarray | pd.Series | pd.DataFrame,
+                  mode: int,
+                  **kwargs):
     """
     Fit a log-normal distribution to the given data and plot the result.
 
@@ -80,7 +84,7 @@ def curve_fitting(dp, dist, mode=None, **kwargs):
     for i in range(mode):
         offset = i * 3
         num, mu, sigma = params[offset:offset + 3]
-        table.append([f'log-{i + 1}', num * num, mu, sigma])
+        table.append([f'log-{i + 1}', num * total_num, mu, sigma])
 
     formatted_data = [[item if not isinstance(item, float) else f"{item:.3f}" for item in row] for row in table]
 

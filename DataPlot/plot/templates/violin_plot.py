@@ -2,16 +2,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from typing import Optional
 from DataPlot.plot.core import *
 
 
 @set_figure(figsize=(6, 6), fs=12)
-def violin(data_set: dict[str, pd.DataFrame],
+def violin(data_set: pd.DataFrame | dict,
            unit: str,
-           ax: Optional[plt.Axes] = None,
-           **kwargs):
+           ax: plt.Axes | None = None,
+           **kwargs) -> plt.Axes:
+    """
+    Generate a violin plot for multiple data sets.
 
+    Parameters
+    ----------
+    data_set : pd.DataFrame or dict
+        A mapping from category names to pandas DataFrames containing the data.
+    unit : str
+        The unit for the data being plotted.
+    ax : matplotlib.axes.Axes, optional
+        The Axes object to draw the plot onto. If not provided, a new figure will be created.
+    **kwargs : dict
+        Additional keyword arguments to be passed to the violinplot function.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The Axes object containing the violin plot.
+
+    """
     grps = len(data_set)
 
     if ax is None:
@@ -52,3 +70,5 @@ def violin(data_set: dict[str, pd.DataFrame],
 
     # fig.savefig(f'Violin_{unit}')
     plt.show()
+
+    return ax

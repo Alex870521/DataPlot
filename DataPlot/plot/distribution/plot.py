@@ -2,27 +2,23 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from typing import Optional, Literal
+from typing import Literal
 from scipy.stats import norm, lognorm
 from matplotlib.ticker import ScalarFormatter, FuncFormatter
 from matplotlib.collections import PolyCollection
-from DataPlot.plot.core import set_figure
-
-color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
-                'Transition': ['#4a9f1d', '#a7e984'],
-                'Event': ['#9f1d4a', '#e984a7']}
+from DataPlot.plot.core import set_figure, Unit, Color
 
 
 @set_figure(fs=12)
 def heatmap(df: pd.DataFrame,
-            ax: Optional[plt.Axes] = None,
+            ax: plt.Axes | None = None,
             logy: bool = True,
             cbar: bool = True,
             hide_low: bool = True,
             cmap: str = 'jet',
-            fig_kws: Optional[dict] = {},
-            cbar_kws: Optional[dict] = {},
-            plot_kws: Optional[dict] = {},
+            fig_kws: dict | None = {},
+            cbar_kws: dict | None = {},
+            plot_kws: dict | None = {},
             **kwargs):
     """ Plot the size distribution over time.
 
@@ -56,8 +52,6 @@ def heatmap(df: pd.DataFrame,
     Plot a SPMS + APS data:
     >>> ax = heatmap(DataFrame, cmap='jet')
     """
-    print('Plot: heatmap')
-
     # Copy to avoid modifying original data
     time = df.index
     dp = np.array(df.columns, dtype=float)
@@ -108,8 +102,12 @@ def heatmap(df: pd.DataFrame,
 
 
 @set_figure
-def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None, enhancement=False, fig_kws={},
-                 plot_kws={}, **kwargs):
+def overlay_dist(data: pd.DataFrame | np.ndarray,
+                 ax: plt.Axes | None = None,
+                 diff: Literal["Enhancement", "Error"] = "Enhancement",
+                 fig_kws={},
+                 plot_kws={},
+                 **kwargs) -> plt.Axes:
     """
     Plot particle size distribution curves and optionally show enhancements.
 
@@ -117,12 +115,12 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
     ----------
     dp : array_like
         Particle diameters.
-    dist : dict or list
+    data : dict or list
         If dict, keys are labels and values are arrays of distribution values.
         If listed, it should contain three arrays for different curves.
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot. If not provided, a new subplot will be created.
-    enhancement : bool, optional
+    diff : bool, optional
         Whether to show enhancement curves.
     fig_kws : dict, optional
         Keyword arguments for creating the figure.
@@ -138,14 +136,11 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
 
     Examples
     --------
-    Example 1: Plot a dictionary of distributions
-    >>> overlay_dist(dp_values, {'Clean': clean_data, 'Transition': transition_data, 'Event': event_data})
+    >>> data={'Clena': np.array([1, 2, 3, 4]), 'Transition': np.array([1, 2, 3, 4]), 'Event': np.array([1, 2, 3, 4])}
+    >>> overlay_dist(pd.DataFrame.from_dict(data, orient='index', columns=['11.8', '12.18', '12.58', '12.99']),
+    >>> labels=['Curve 1', 'Curve 2', 'Curve 3'], diff=True)
 
-    Example 2: Plot a list of distributions with custom labels
-    >>> overlay_dist(dp_values, [curve1_data, curve2_data, curve3_data], labels=['Curve 1', 'Curve 2', 'Curve 3'], enhancement=True)
     """
-    print('Plot: overlay_dist')
-
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
 
@@ -153,23 +148,24 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
     plot_kws = dict(ls='solid', lw=2, alpha=0.8, **plot_kws)
 
     # Receive input data
-    if isinstance(dist, (dict, list)) and len(dist) == 3:
-        if isinstance(dist, dict):
-            dist = [dist['Clean'], dist['Transition'], dist['Event']]
+    dp = np.array(data.columns, dtype=float)
 
-        labels = kwargs.get('labels', ['Clean', 'Transition', 'Event'])
-        colors = [color_choose[label][0] for label in labels]
+    labels = kwargs.get('labels', ['Clean', 'Transition', 'Event'])
+    colors = [Color.color_choose[label][0] for label in labels]
 
-        for values, label, color in zip(dist, labels, colors):
-            ax.plot(dp, values, label=label, color=color, **plot_kws)
+    for label, color in zip(labels, colors):
+        ax.plot(dp, data.loc[label].values, label=label, color=color, **plot_kws)
 
-        # Area
-        ax.fill_between(dp, y1=0, y2=dist[0], alpha=0.5, color=color_choose['Clean'][1])
-        ax.fill_between(dp, y1=dist[0], y2=dist[1], alpha=0.5, color=color_choose['Transition'][1])
-        ax.fill_between(dp, y1=dist[1], y2=dist[2], alpha=0.5, color=color_choose['Event'][1])
+    Clean = data.loc['Clean'].values
+    Transition = data.loc['Transition'].values
+    Event = data.loc['Event'].values
 
-    else:
-        raise ValueError("Invalid 'dist' format. It should be a dictionary or a list of three arrays.")
+    # Area
+    ax.fill_between(dp, y1=0, y2=data.loc['Clean'].values, alpha=0.5, color=Color.color_choose['Clean'][1])
+    ax.fill_between(dp, y1=data.loc['Clean'].values, y2=data.loc['Transition'].values, alpha=0.5,
+                    color=Color.color_choose['Transition'][1])
+    ax.fill_between(dp, y1=data.loc['Transition'].values, y2=data.loc['Event'].values, alpha=0.5,
+                    color=Color.color_choose['Event'][1])
 
     # figure_set
     xlim = kwargs.get('xlim', (11.8, 2500))
@@ -182,35 +178,53 @@ def overlay_dist(dp: np.ndarray, dist: np.ndarray, ax: Optional[plt.Axes] = None
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
     ax.semilogx()
 
-    if enhancement:
+    if diff == "Enhancement":
         ax2 = ax.twinx()
-        enhance_1 = (dist[1] / dist[0])
-        enhance_2 = (dist[2] / dist[1])
-        ax2.plot(dp, (dist[1] / dist[0]), ls='dashed', color='k', lw=2, label='Enhancement ratio 1')
-        ax2.plot(dp, (dist[2] / dist[1]), ls='dashed', color='gray', lw=2, label='Enhancement ratio 2')
+        ax2.plot(dp, Transition / Clean, ls='dashed', color='k', lw=2, label='Enhancement ratio 1')
+        ax2.plot(dp, Event / Transition, ls='dashed', color='gray', lw=2, label='Enhancement ratio 2')
         ax2.set(xlim=xlim, ylim=(0.5, None), xlabel=xlabel, ylabel='Enhancement ratio')
-
-        # Combine legends from ax and ax2
-        legends_combined, labels_combined = [], []
-        axes_list = fig.get_axes()
-        for axes in axes_list:
-            legends, labels = axes.get_legend_handles_labels()
-            legends_combined += legends
-            labels_combined += labels
-
-        ax.legend(legends_combined, labels_combined, loc='upper left', prop={'weight': 'bold'})
-
     else:
-        ax.legend(loc='upper left', prop={'weight': 'bold'})
+        ax2 = ax.twinx()
+
+        appro = Clean
+        exact = Transition
+
+        abs_diff = np.absolute(np.subtract(appro, exact))
+        percentage_error1 = np.divide(abs_diff, exact) * 100
+
+        appro = Transition
+        exact = Event
+
+        abs_diff = np.absolute(np.subtract(appro, exact))
+        percentage_error2 = np.divide(abs_diff, exact) * 100
+
+        ax2.plot(dp, percentage_error1, ls='--', color='k', lw=2, label='Error 1 ')
+        ax2.plot(dp, percentage_error2, ls='--', color='gray', lw=2, label='Error 2')
+        ax2.set(xlim=xlim, ylim=(None, None), xlabel=xlabel, ylabel='Error (%)')
+
+    # Combine legends from ax and ax2
+    legends_combined, labels_combined = [], []
+    axes_list = fig.get_axes()
+    for axes in axes_list:
+        legends, labels = axes.get_legend_handles_labels()
+        legends_combined += legends
+        labels_combined += labels
+
+    ax.legend(legends_combined, labels_combined, prop={'weight': 'bold'})
 
     # fig.savefig(f'multi_dist_{figname}')
 
     return ax
 
 
-@set_figure(figsize=(10, 4))
-def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np.ndarray, ax: Optional[plt.Axes] = None,
-                  fig_kws={}, plot_kws={}, **kwargs):
+@set_figure(figsize=(10, 4), fs=12)
+def separate_dist(data: pd.DataFrame | np.ndarray,
+                  data2: pd.DataFrame | np.ndarray,
+                  data3: pd.DataFrame | np.ndarray,
+                  ax: plt.Axes | None = None,
+                  fig_kws={},
+                  plot_kws={},
+                  **kwargs) -> plt.Axes:
     """
     Plot particle size distribution curves on three separate subplots.
 
@@ -218,11 +232,11 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
     ----------
     dp : array_like
         Particle diameters.
-    dist : dict
+    data : dict
         Dictionary containing distribution data for the first subplot.
-    dist2 : dict
+    data2 : dict
         Dictionary containing distribution data for the second subplot.
-    dist3 : dict
+    data3 : dict
         Dictionary containing distribution data for the third subplot.
     ax : array_like of AxesSubplot, optional
         Matplotlib AxesSubplot array with three subplots. If not provided, a new subplot will be created.
@@ -241,21 +255,16 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
     Examples
     --------
     Example 1: Plot three distributions on separate subplots
-    >>> separatedist(dp_values, {'State1': data1, 'State2': data2}, {'State1': data3, 'State2': data4}, {'State1': data5, 'State2': data6})
-
-    Example 2: Plot with custom labels and titles
-    >>> separatedist(dp_values, {'Clean': clean_data, 'Transition': transition_data}, {'Clean': clean_data2, 'Transition': transition_data2}, {'Clean': clean_data3, 'Transition': transition_data3}, labels=['Number', 'Surface', 'Volume'], title='Particle Size Distributions')
+    >>> separatedist({'Clean': clean_data, 'Transition': transition_data}, {'Clean': clean_data2, 'Transition': transition_data2}, {'Clean': clean_data3, 'Transition': transition_data3}, labels=['Number', 'Surface', 'Volume'], title='Particle Size Distributions')
     """
-    print('Plot: separatedist')
-
     plot_kws = dict(ls='solid', lw=2, alpha=0.8, **plot_kws)
-
+    dp = np.array(data.columns, dtype=float)
     if ax is None:
         fig, ax = plt.subplots(1, 3, **fig_kws)
         ax1, ax2, ax3 = ax
     # ax1
-    for i, state in enumerate(dist.keys()):
-        ax1.plot(dp, dist[state], color=color_choose[state][0], label='__nolegend__', **plot_kws)
+    for i, state in enumerate(data.index):
+        ax1.plot(dp, data.loc[state], color=Color.color_choose[state][0], label='__nolegend__', **plot_kws)
 
     # Set ax1
     xlim = kwargs.get('xlim', (11.8, 2500))
@@ -269,8 +278,8 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
     ax1.semilogx()
 
     # ax2
-    for i, state in enumerate(dist2.keys()):
-        ax2.plot(dp, dist2[state], color=color_choose[state][0], label=f'{state}', **plot_kws)
+    for i, state in enumerate(data2.index):
+        ax2.plot(dp, data2.loc[state], color=Color.color_choose[state][0], label=f'{state}', **plot_kws)
 
     # Set ax2
     ylim = kwargs.get('ylim', (0, 1.5e9))
@@ -283,8 +292,8 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
     ax2.legend(loc='upper left', prop={'weight': 'bold'})
 
     # ax3
-    for i, state in enumerate(dist3.keys()):
-        ax3.plot(dp, dist3[state], color=color_choose[state][0], label='__nolegend__', **plot_kws)
+    for i, state in enumerate(data3.index):
+        ax3.plot(dp, data3.loc[state], color=Color.color_choose[state][0], label='__nolegend__', **plot_kws)
 
     # Set ax3
     ylim = kwargs.get('ylim', (0, 1e11))
@@ -299,22 +308,22 @@ def separate_dist(dp: np.ndarray, dist: np.ndarray, dist2: np.ndarray, dist3: np
 
 
 @set_figure
-def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std, ax=None, fig_kws={}, **kwargs):
+def dist_with_std(data: pd.DataFrame,
+                  data_std: pd.DataFrame,
+                  ax: plt.Axes | None = None,
+                  std_scale: float | None = 1,
+                  fig_kws={},
+                  plot_kws={},
+                  **kwargs) -> plt.Axes:
     """
     Plot extinction distribution with standard deviation for ambient and dry conditions.
 
     Parameters
     ----------
-    dp : array_like
-        Particle diameters.
-    Ext_amb_dis : dict
+    data : dict
         Dictionary containing extinction distribution data for ambient conditions.
-    Ext_amb_dis_std : dict
+    data_std : dict
         Dictionary containing standard deviation data for ambient extinction distribution.
-    Ext_dry_dis : dict
-        Dictionary containing extinction distribution data for dry conditions.
-    Ext_dry_dis_std : dict
-        Dictionary containing standard deviation data for dry extinction distribution.
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot. If not provided, a new subplot will be created.
     fig_kws : dict, optional
@@ -327,31 +336,24 @@ def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std
     ax : AxesSubplot
         Matplotlib AxesSubplot.
     """
-    print('Plot: dist_with_std')
-
     if ax is None:
         fig, ax = plt.subplots(**fig_kws)
 
-    for state in Ext_amb_dis.keys():
-        PESD, PESD_std = Ext_amb_dis[state], Ext_amb_dis_std[state]
-        PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(167, )
-        PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
+    dp = np.array(data.columns, dtype=float)
 
-        PESD_dry, PESD_std_dry = Ext_dry_dis[state], Ext_dry_dis_std[state]
-        PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(167, )
-        PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
+    for state in data.index:
+        mean, std = data.loc[state].values, data_std.loc[state].values * std_scale
+        # std = np.array(pd.DataFrame(std).ewm(span=5).mean()).reshape(len(dp), )
 
-        ax.plot(dp, PESD, ls='solid', color=color_choose[state][0], lw=2, label=f'Amb {state}')
-        ax.plot(dp, PESD_dry, ls='dashed', color=color_choose[state][1], lw=2, label=f'Dry {state}')
-        ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.4, color=color_choose[state][1], edgecolor=None,
-                        label='__nolegend__')
-        ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.5, color='#ece8e7',
-                        edgecolor=color_choose[state][1], label='__nolegend__')
+        ax.plot(dp, mean, ls='solid', color=Color.color_choose[state][0], lw=2, label=state)
+        ax.fill_between(dp, y1=mean - std, y2=mean + std, alpha=0.4, color=Color.color_choose[state][1],
+                        edgecolor=None, label='__nolegend__')
+
         plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
     # figure_set
-    xlim = kwargs.get('xlim') or (11.8, 2500)
-    ylim = kwargs.get('ylim') or (0, 850)
+    xlim = kwargs.get('xlim', (11.8, 2500))
+    ylim = kwargs.get('ylim', (0, 850))
     xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
     ylabel = kwargs.get('ylabel') or r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'
     title = kwargs.get('title', r'$\bf Extinction\ Distribution$')
@@ -363,93 +365,7 @@ def dist_with_std(dp, Ext_amb_dis, Ext_amb_dis_std, Ext_dry_dis, Ext_dry_dis_std
 
 
 @set_figure
-def compare(dp, dist, std1, dist2, std2, ax=None, std_scale=0.2, fig_kws={}, **kwargs):
-    """
-    Compare two extinction distributions and plot the percentage error.
-
-    Parameters
-    ----------
-    dp : array_like
-        Particle diameters.
-    dist : array_like
-        Extinction distribution data for the first condition.
-    std1 : array_like
-        Standard deviation data for the first condition.
-    dist2 : array_like
-        Extinction distribution data for the second condition.
-    std2 : array_like
-        Standard deviation data for the second condition.
-    ax : AxesSubplot, optional
-        Matplotlib AxesSubplot. If not provided, a new subplot will be created.
-    std_scale : float, optional
-        Scaling factor for reducing the standard deviation.
-    fig_kws : dict, optional
-        Keyword arguments for creating the figure.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    ax : AxesSubplot
-        Matplotlib AxesSubplot.
-    """
-    print('Plot: compare')
-
-    PESD, PESD_std = dist, std1
-    PESD_std = np.array(pd.DataFrame(PESD_std).ewm(span=5).mean()).reshape(len(dist), ) * std_scale
-    PESD_low, PESD_up = PESD - PESD_std, PESD + PESD_std
-
-    PESD_dry, PESD_std_dry = dist2, std2
-    PESD_std_dry = np.array(pd.DataFrame(PESD_std_dry).ewm(span=5).mean()).reshape(len(dist), ) * std_scale
-    PESD_low_dry, PESD_up_dry = PESD_dry - PESD_std_dry, PESD_dry + PESD_std_dry
-
-    # 创建两个数组
-    appro = np.array(dist)
-    exact = np.array(dist2)
-
-    abs_diff = np.absolute(np.subtract(appro, exact))
-    percentage_error = np.divide(abs_diff, exact) * 100
-    percentage_error = np.array(pd.DataFrame(percentage_error).ewm(span=5).mean()).reshape(len(dist), )
-
-    if ax is None:
-        fig, ax = plt.subplots(**fig_kws)
-
-    ax.plot(dp, PESD, ls='solid', color=color_choose['Clean'][0], lw=2, label='Internal')
-    ax.plot(dp, PESD_dry, ls='solid', color=color_choose['Transition'][0], lw=2, label='External')
-    ax.fill_between(dp, y1=PESD_low, y2=PESD_up, alpha=0.3, color=color_choose['Clean'][0], edgecolor=None,
-                    label='__nolegend__')
-    ax.fill_between(dp, y1=PESD_low_dry, y2=PESD_up_dry, alpha=0.3, color=color_choose['Transition'][0],
-                    edgecolor=None, label='__nolegend__')
-    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-
-    # figure_set
-    xlim = kwargs.get('xlim', (11.8, 2500))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$ Diameter\ (nm)$')
-    ylabel = kwargs.get('ylabel', r'$ d{\sigma}/dlogdp\ (1/Mm)$')
-    title = kwargs.get('title', r'$\bf Extinction\ Distribution$')
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
-    ax.semilogx()
-
-    ax2 = ax.twinx()
-    ax2.plot(dp, percentage_error, ls='--', color='r', label='Error')
-    ax2.set_ylabel('Error (%)')
-
-    # Combine legends from ax and ax2
-    legends_combined, labels_combined = [], []
-    axes_list = fig.get_axes()
-    for axes in axes_list:
-        legends, labels = axes.get_legend_handles_labels()
-        legends_combined += legends
-        labels_combined += labels
-
-    ax.legend(legends_combined, labels_combined, loc='upper left', prop={'weight': 'bold'})
-
-    return ax
-
-
-@set_figure
-def ls_mode(ax=None, **kwargs):
+def ls_mode(ax=None, **kwargs) -> plt.Axes:
     """
     Plot log-normal mass size distribution for small mode, large mode, and sea salt particles.
 
@@ -469,13 +385,7 @@ def ls_mode(ax=None, **kwargs):
     --------
     Example 1: Plot log-normal mass size distribution with default settings
     >>> ls_mode()
-
-    Example 2: Plot log-normal mass size distribution with custom settings
-    >>> ls_mode(ax=my_axes, xlim=(0.01, 30), ylim=(0, 0.5), xlabel='Particle Diameter (μm)',
-    ...         ylabel='Probability (dM/dlogdp)', title='Custom Log-normal Mass Size Distribution')
     """
-    print('Plot: ls_mode')
-
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -531,8 +441,6 @@ def psd_example(ax=None, **kwargs):
     Example 1: Plot default particle size distributions
     >>> psd_example()
     """
-    print('Plot: pse_example')
-
     if ax is None:
         fig, axes = plt.subplots(3, 2, figsize=(12, 12))
         axes = axes.flatten()
@@ -628,27 +536,27 @@ def psd_example(ax=None, **kwargs):
 
 
 @set_figure
-def three_dimension(dp: np.ndarray, data: np.ndarray, weighting: Literal["PNSD", "PSSD", "PVSD", "PESD"]):
-    print('Plot: three_dimension_distribution')
+def three_dimension(data: pd.DataFrame | np.ndarray,
+                    unit: Literal["Number", "Surface", "Volume", "Extinction"]) -> plt.Axes:
 
-    mapping = {'PNSD': {'zlim': (0, 1.5e5),
-                        'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
-               'PSSD': {'zlim': (0, 1.5e9),
-                        'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
-               'PESD': {'zlim': (0, 700),
-                        'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
-               'PVSD': {'zlim': (0, 1e11),
-                        'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'}
+    mapping = {'Number': {'zlim': (0, 1.5e5),
+                          'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
+               'Surface': {'zlim': (0, 1.5e9),
+                           'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
+               'Volume': {'zlim': (0, 1e11),
+                          'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'},
+               'Extinction': {'zlim': (0, 800),
+                              'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
                }
 
     def log_tick_formatter(val, pos=None):
         return "{:.0f}".format(np.exp(val))
 
     lines = data.shape[0]
-    dp_ = np.insert(dp, 0, 11.7)
-    dp_extend = np.append(dp_, 2437.4)
 
-    _X, _Y = np.meshgrid(np.log(dp_extend), np.arange(lines))
+    dp = np.array(['11.7', *data.columns, '2437.4'], dtype=float)
+
+    _X, _Y = np.meshgrid(np.log(dp), np.arange(lines))
     _Z = np.pad(data, ((0, 0), (1, 1)), 'constant')
 
     verts = []
@@ -656,15 +564,14 @@ def three_dimension(dp: np.ndarray, data: np.ndarray, weighting: Literal["PNSD",
         verts.append(list(zip(_X[i, :], _Z[i, :])))
 
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "3d"})
-    facecolors = plt.colormaps['viridis_r'](np.linspace(0, 1, len(verts)))
+    facecolors = plt.colormaps['Blues'](np.linspace(0, 1, len(verts)))
     poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
     ax.add_collection3d(poly, zs=range(1, lines + 1), zdir='y')
     # ax.set_xscale('log') <- dont work
-    ax.set(xlim=(np.log(50), np.log(2437.4)), ylim=(1, lines), zlim=mapping[weighting]['zlim'],
-           xlabel=r'$\bf D_{p}\ (nm)$', ylabel=r'$\bf $', zlabel=mapping[weighting]['label'])
+    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=mapping[unit]['zlim'])
     ax.set_xlabel(r'$\bf D_{p}\ (nm)$', labelpad=10)
     ax.set_ylabel(r'$\bf Class$', labelpad=10)
-    ax.set_zlabel(mapping[weighting]['label'], labelpad=15)
+    ax.set_zlabel(mapping[unit]['label'], labelpad=15)
 
     major_ticks = np.log([10, 100, 1000])
     minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
@@ -677,3 +584,5 @@ def three_dimension(dp: np.ndarray, data: np.ndarray, weighting: Literal["PNSD",
             '$\\times\\mathdefault{10^{%d}}$' % exponent)
     ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
     plt.show()
+
+    return ax

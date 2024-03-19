@@ -18,6 +18,10 @@ class Color:
     colors_mutiWater  = ['#A65E58', '#c18e8a', '#A5BF6B', '#c5d6a0', '#F2BF5E', '#3F83BF', '#c089ca', '#d3acda', '#D1CFCB']
     colors_mutiWater2 = ['#A65E58', '#96c8e6', '#A5BF6B', '#96c8e6', '#F2BF5E', '#3F83BF', '#c089ca', '#96c8e6', '#D1CFCB']  # water
 
+    color_choose = {'Clean': ['#1d4a9f', '#84a7e9'],
+                    'Transition': ['#4a9f1d', '#a7e984'],
+                    'Event': ['#9f1d4a', '#e984a7']}
+
     def __init__(self):
         pass
 
