@@ -37,19 +37,13 @@
 > visualization built on the Python programming language. 
 
 
-## <div align="center">Particle Size Distribution</div>
+## <div align="center">Visual Example</div>
 
-|                     PSD                      |                    Heatmap                    |                Three_dimension                |
-|:--------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
-|       ![PSD 1](assets/figure/psd.png)        | ![PSD Heatmap](assets/figure/psd_heatmap.png) |      ![PSD 3D](assets/figure/psd_3D.png)      |
-<br>
-
-
-## <div align="center">IMPROVE</div>
-
-|                    Donuts                    |                    BarPlot                    |           Mutiply Linear Regression           |
-|:--------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
-| ![IMPROVE donuts](assets/figure/IMPROVE.png) | ![IMPROVE bar](assets/figure/IMPROVE_bar.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
+|                      PSD                       |                     Heatmap                     |                 Three_dimension                 |
+|:----------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|
+|        ![PSD 1](assets/figure/psd.png)         |  ![PSD Heatmap](assets/figure/psd_heatmap.png)  |       ![PSD 3D](assets/figure/psd_3D.png)       |
+|                     Donuts                     |                     BarPlot                     |            Mutiply Linear Regression            |
+|  ![IMPROVE donuts](assets/figure/IMPROVE.png)  |  ![IMPROVE bar](assets/figure/IMPROVE_bar.png)  |  ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png)  |
 
 
 ## <div align="center">Usage</div>
