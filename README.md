@@ -1,12 +1,14 @@
 ## <div align="center">DataPlot for Aerosol Science</div>
 
 <div style="text-align:center;">
-    <img src="https://img.shields.io/badge/python-3.12-blue">
-    <img src="https://img.shields.io/badge/testing-green?logo=Pytest&logoColor=blue">
-    <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-blue">
-    <img alt="Static Badge" src="https://img.shields.io/badge/github-updating-blue?logo=github">
+<img src="https://img.shields.io/badge/python-3.12-blue">
+<img src="https://img.shields.io/badge/testing-green?logo=Pytest&logoColor=blue">
+<img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-blue">
+<img alt="Static Badge" src="https://img.shields.io/badge/github-updating-blue?logo=github">
+<img alt="NPM Version" src="https://img.shields.io/npm/v/pandas">
 
 </div>
+
 
 > [!IMPORTANT]\
 > Important
