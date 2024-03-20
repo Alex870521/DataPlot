@@ -15,14 +15,14 @@ mass_1 = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC']
 mass_2 = ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'ALWC']
 mass_3 = ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC']
 
-
 dic_grp_sea = DataClassifier(DataBase, by='Season', statistic='Dict')
 dic_grp_sta = DataClassifier(DataBase, by='State', statistic='Dict')
 dic_grp_Ext = DataClassifier(DataBase, by='Extinction', statistic='Dict', cut_bins=np.linspace(0, 400, 11))
 dic_grp_RH = DataClassifier(DataBase, by='RH', statistic='Dict', cut_bins=np.array([20, 40, 60, 80, 100]))
 
 ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase, by='State', statistic='Table')
-ser_grp_Ext, ser_grp_Ext_sed = DataClassifier(DataBase, by='Extinction', statistic='Table', cut_bins=np.linspace(0, 400, 11))
+ser_grp_Ext, ser_grp_Ext_sed = DataClassifier(DataBase, by='Extinction', statistic='Table',
+                                              cut_bins=np.linspace(0, 400, 11))
 
 mass_comp1_dict, _ = ser_grp_sta.loc[:, mass_1], ser_grp_sta_std.loc[:, mass_1]
 mass_comp3_dict, mass_comp3_dict_std = ser_grp_sta.loc[:, mass_3], ser_grp_sta_std.loc[:, mass_3]
@@ -37,17 +37,17 @@ ext_particle_gas = ser_grp_Ext.loc[:, ['Scattering', 'Absorption', 'ScatteringBy
 
 def extinction_by_particle_gas():  # PG : sum of ext by particle and gas
     Violin.violin(data_set=dic_grp_sea,
-           unit='PG')
+                  unit='PG')
 
     Bar.barplot(data_set=ext_particle_gas, data_std=None,
-            labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
-            display="stacked",
-            unit='Extinction')
+                labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
+                display="stacked",
+                unit='Extinction')
 
     Bar.barplot(data_set=ext_dry_dict, data_std=ext_dry_std,
-            labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC'],
-            display="dispersed",
-            unit='PM25')
+                labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC'],
+                display="dispersed",
+                unit='Extinction')
 
 
 @set_figure(figsize=(10, 6))
@@ -124,6 +124,6 @@ def pie_plot():
 
 
 if __name__ == '__main__':
-    pie_plot()
-    chemical_enhancement()
-    # extinction_by_particle_gas()
+    # pie_plot()
+    # chemical_enhancement()
+    extinction_by_particle_gas()

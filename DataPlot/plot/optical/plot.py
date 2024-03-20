@@ -64,7 +64,7 @@ def Q_plot(
             mapping_dic[specie]['Q'] = Mie_Q(mapping_dic[specie]['m'], 550, dp)
             mapping_dic[specie]['MEE'] = Mie_MEE(mapping_dic[specie]['m'], 550, dp, mapping_dic[specie]['density'])
 
-            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2.5, zorder=3)
+            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2, zorder=3)
 
     else:
         legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
@@ -79,9 +79,9 @@ def Q_plot(
         mapping_dic[species]['Q'] = Mie_Q(mapping_dic[species]['m'], 550, dp)
         mapping_dic[species]['MEE'] = Mie_MEE(mapping_dic[species]['m'], 550, dp, mapping_dic[species]['density'])
 
-        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2.5, zorder=3)
-        plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1], linestyle='-', alpha=1, lw=2.5)
-        plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2], linestyle='-', alpha=1, lw=2.5)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2, zorder=3)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1], linestyle='-', alpha=1, lw=2)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2], linestyle='-', alpha=1, lw=2)
         plt.text(0.04, 0.92, mapping_dic[species]['label'], transform=ax.transAxes, weight='bold')
 
     plt.legend(loc='best', prop={'weight': 'bold', 'size': 14}, handlelength=1.5, frameon=False)
