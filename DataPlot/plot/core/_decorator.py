@@ -1,19 +1,18 @@
 import matplotlib.pyplot as plt
 from functools import wraps
-from typing import Optional
 from tqdm import tqdm
 
-# For more details please seehttps://matplotlib.org/stable/users/explain/customizing.html
+
+# For more details please see https://matplotlib.org/stable/users/explain/customizing.html
 
 
 def set_figure(func=None,
                *,
-               figsize: Optional[tuple] = None,
-               titlesize: Optional[int] = None,
-               fs: Optional[int] = None,
-               fw: Optional[str] = None,
+               figsize: tuple | None = None,
+               titlesize: int | None = None,
+               fs: int | None = None,
+               fw: str = None,
                ):
-
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):
@@ -46,15 +45,16 @@ def set_figure(func=None,
             plt.rcParams['legend.title_fontsize'] = 'medium'
 
             plt.rcParams['figure.figsize'] = figsize or (6, 6)
-            plt.rcParams['figure.autolayout'] = False
-            plt.rcParams['figure.subplot.right'] = 0.8
-            plt.rcParams['figure.constrained_layout.use'] = True
+            # plt.rcParams['figure.autolayout'] = True
+            # plt.rcParams['figure.constrained_layout.use'] = True
             plt.rcParams['figure.dpi'] = 150
 
             plt.rcParams['savefig.transparent'] = True
 
-            with tqdm(total=1, desc=f"Plot: {_func.__name__}", bar_format="{l_bar}{bar}|", unit="it", colour='green') as progress_bar:
-                result = _func(*args, **kwargs)
+            result = _func(*args, **kwargs)
+
+            with tqdm(total=1, desc=f"Plot: {_func.__name__}", bar_format="{l_bar}{bar}|", unit="it",
+                      colour='green') as progress_bar:
                 progress_bar.update()
 
             return result

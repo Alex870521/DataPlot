@@ -24,14 +24,15 @@
 > The provided code comprises a versatile toolkit for data 
 > visualization built on the Python programming language. 
 
-
+***
 ## <div align="center">Particle Size Distribution</div>
 
 |               PSD               |                    Heatmap                    |           Three_dimension           |
 |:-------------------------------:|:---------------------------------------------:|:-----------------------------------:|
 | ![PSD 1](assets/figure/psd.png) | ![PSD Heatmap](assets/figure/psd_heatmap.png) | ![PSD 3D](assets/figure/psd_3D.png) |
+<br>
 
-
+***
 ## <div align="center">IMPROVE</div>
 
 |                    Donuts                    |                    BarPlot                    |           Mutiply Linear Regression           |

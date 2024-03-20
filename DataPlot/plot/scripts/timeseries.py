@@ -7,6 +7,7 @@ from DataPlot.process import *
 from DataPlot.plot import set_figure, Unit, timeseries
 
 
+@set_figure(fs=10)
 def time_series(df):
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
 
@@ -37,7 +38,7 @@ def time_series(df):
                      ylim=[0., df.Extinction.max() * 1.1]
                      )
 
-    ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, frameon=False, labelspacing=0.5, handlelength=1)
+    ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, labelspacing=0.5, handlelength=1)
 
     # Temp, RH
     ax2 = timeseries(df,

@@ -2,6 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
+import matplotlib as mpl
 
 
 class Color:
@@ -57,7 +58,7 @@ class Color:
     def color_maker(obj, cmap='Blues'):
         colors = np.nan_to_num(obj, nan=0)
         colors_alpha = np.where(colors == 0, 0, 1)
-        cmap = plt.cm.get_cmap(cmap)  # choose a colormap
+        cmap = mpl.colormaps[cmap]  # choose a colormap
         scalar_map = plt.cm.ScalarMappable(cmap=cmap)  # create a scalar map for the colorbar
         scalar_map.set_array(colors)
         return scalar_map, colors
