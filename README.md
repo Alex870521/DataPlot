@@ -21,23 +21,18 @@
 
 </div>
 
-
-### Provide tools for visualizing research data for newcomers to the *aerosol field*.
-
 > The provided code comprises a versatile toolkit for data 
 > visualization built on the Python programming language. 
-> Leveraging popular libraries such as Matplotlib, Seaborn, 
-> and Pandas, this toolkit simplifies the process of creating 
-> insightful visualizations for various datasets.
 
-### <div align="center">Particle Size Distribution</div>
+
+## <div align="center">Particle Size Distribution</div>
 
 |               PSD               |                    Heatmap                    |           Three_dimension           |
 |:-------------------------------:|:---------------------------------------------:|:-----------------------------------:|
 | ![PSD 1](assets/figure/psd.png) | ![PSD Heatmap](assets/figure/psd_heatmap.png) | ![PSD 3D](assets/figure/psd_3D.png) |
 
 
-### <div align="center">IMPROVE</div>
+## <div align="center">IMPROVE</div>
 
 |                    Donuts                    |                    BarPlot                    |           Mutiply Linear Regression           |
 |:--------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
@@ -52,12 +47,12 @@ To install the package, run
 
 
 ## <div align="center">Related Dependencies</div>
-* #### [PyMieScatt](https://github.com/bsumlin/PyMieScatt.git)
-* #### [py-smps](https://github.com/quant-aq/py-smps.git)
+* [PyMieScatt](https://github.com/bsumlin/PyMieScatt.git)
+* [py-smps](https://github.com/quant-aq/py-smps.git)
 
 
 ## <div align="center">Contact</div>
-#### <div align="center">For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).</div>
+For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).
 
 <div align="center">
 

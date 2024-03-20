@@ -7,7 +7,6 @@ from DataPlot.process import *
 from DataPlot.plot import set_figure, Unit, timeseries
 
 
-@set_figure(fs=10)
 def time_series(df):
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
 
