@@ -17,16 +17,13 @@ To install the package, run
 
 
 ## <div align="center">Related Dependencies</div>
-* #### [matplotlib](https://matplotlib.org/)
-* #### [pandas](https://pandas.pydata.org/)
 * #### [PyMieScatt](https://github.com/bsumlin/PyMieScatt.git)
 * #### [py-smps](https://github.com/quant-aq/py-smps.git)
 
 
 ## <div align="center">Contact</div>
+#### <div align="center">For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).</div>
 
-For bug reports and feature requests please visit [GitHub Issues](https://github.com/Alex870521/DataPlot/issues).
-<br>
 <div align="center">
 
   <a href="https://github.com/Alex870521/DataPlot"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>

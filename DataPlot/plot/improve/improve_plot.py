@@ -36,15 +36,15 @@ ext_particle_gas = ser_grp_Ext.loc[:, ['Scattering', 'Absorption', 'ScatteringBy
 
 
 def extinction_by_particle_gas():  # PG : sum of ext by particle and gas
-    violin(data_set=dic_grp_sea,
+    Violin.violin(data_set=dic_grp_sea,
            unit='PG')
 
-    barplot(data_set=ext_particle_gas, data_std=None,
+    Bar.barplot(data_set=ext_particle_gas, data_std=None,
             labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
             display="stacked",
             unit='Extinction')
 
-    barplot(data_set=ext_dry_dict, data_std=ext_dry_std,
+    Bar.barplot(data_set=ext_dry_dict, data_std=ext_dry_std,
             labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'EC'],
             display="dispersed",
             unit='PM25')
@@ -124,6 +124,6 @@ def pie_plot():
 
 
 if __name__ == '__main__':
-    # pie_plot()
+    pie_plot()
     chemical_enhancement()
     # extinction_by_particle_gas()
