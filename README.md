@@ -1,22 +1,13 @@
 ## <div align="center">DataPlot for Aerosol Science</div>
 
 <p align="center">
+
   <img src="https://img.shields.io/badge/python-3.12-blue">
   <img src="https://img.shields.io/badge/testing-green?logo=Pytest&logoColor=blue">
   <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-blue">
   <img alt="Static Badge" src="https://img.shields.io/badge/github-updating-blue?logo=github">
 
 </p>
-
-
-> [!IMPORTANT]\
-> Important
-
-> [!NOTE]\
-> The provided code comprises a versatile toolkit for data 
-> visualization built on the Python programming language. 
-
-
 
 <div align="center">
 
@@ -38,7 +29,12 @@
 
 </div>
 
+> [!IMPORTANT]\
+> Important
 
+> [!NOTE]\
+> The provided code comprises a versatile toolkit for data 
+> visualization built on the Python programming language. 
 
 
 ## <div align="center">Particle Size Distribution</div>
