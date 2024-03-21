@@ -2,10 +2,10 @@
 
 <p align="center">
 
-  <img src="https://img.shields.io/badge/python-3.12-blue">
+  <img alt="Static Badge" src="https://img.shields.io/badge/python-3.12-blue?logo=python">
+  <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-yellow">
+  <img alt="Static Badge" src="https://img.shields.io/badge/github-updating-red?logo=github">
   <img src="https://img.shields.io/badge/testing-green?logo=Pytest&logoColor=blue">
-  <img alt="Static Badge" src="https://img.shields.io/badge/License-MIT-blue">
-  <img alt="Static Badge" src="https://img.shields.io/badge/github-updating-blue?logo=github">
 
 </p>
 
@@ -33,19 +33,20 @@
 > Important
 
 > [!NOTE]\
-> The provided code comprises a versatile toolkit for data 
-> visualization built on the Python programming language. 
+> * The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. 
+> * It can be converted into surface area and volume distribution. At the same time, 
+> chemical composition data can also be used to calculate particle extinction through Mie theory.
 
 
 ## <div align="center">Visual Example</div>
 
-|                      PSD                       |                     Heatmap                     |                 Three_dimension                 |
-|:----------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|
-|        ![PSD 1](assets/figure/psd.png)         |  ![PSD Heatmap](assets/figure/psd_heatmap.png)  |       ![PSD 3D](assets/figure/psd_3D.png)       |
-|                     Donuts                     |                     BarPlot                     |            Mutiply Linear Regression            |
-|  ![IMPROVE donuts](assets/figure/IMPROVE.png)  |  ![IMPROVE bar](assets/figure/IMPROVE_bar.png)  |  ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png)  |
-
-
+|                       **PSD**                        |                  **Heatmap**                  |              **Three_dimension**              |
+|:----------------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
+|           ![PSD 1](assets/figure/psd.png)            | ![PSD Heatmap](assets/figure/psd_heatmap.png) |      ![PSD 3D](assets/figure/psd_3D.png)      |
+|                      **Donuts**                      |                  **BarPlot**                  |         **Mutiply Linear Regression**         |
+|     ![IMPROVE donuts](assets/figure/IMPROVE.png)     | ![IMPROVE bar](assets/figure/IMPROVE_bar.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
+|                **Correlation Matrix**                |                                               |                                               |
+| ![Correlation Matrix](assets/figure/corr_matrix.png) |                                               |                                               |
 ## <div align="center">Usage</div>
 
 To install the package, run

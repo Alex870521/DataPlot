@@ -26,7 +26,7 @@ class MainProcessor(DataProcessor):
             if self.file_path.exists() and not self.reset:
                 with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
                     progress_bar.update(20)
-                    return read_csv(f, parse_dates=['Time'], low_memory=False).set_index('Time')
+                    return read_csv(f, parse_dates=['Time'], na_values=('-', 'E', 'F'), low_memory=False).set_index('Time')
             else:
                 # 1. EPB
                 minion = DataReader('EPB.csv')

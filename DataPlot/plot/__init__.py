@@ -15,8 +15,12 @@ __all__ = ['set_figure',
            'wind_heatmap',
            'time_series',
            'rsm',
-           'Pie',
+
            'scatter',
            'linear_regression',
-           'multiple_linear_regression'
+           'multiple_linear_regression',
+
+           'Pie',
+           'Violin',
+           'Bar',
            ]
