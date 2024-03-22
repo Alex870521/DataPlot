@@ -33,8 +33,8 @@
 > Important
 
 > [!NOTE]\
-> * The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. 
-> * It can be converted into surface area and volume distribution. At the same time, 
+> The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. 
+> It can be converted into surface area and volume distribution. At the same time, 
 > chemical composition data can also be used to calculate particle extinction through Mie theory.
 
 
@@ -47,6 +47,10 @@
 |     ![IMPROVE donuts](assets/figure/IMPROVE.png)     | ![IMPROVE bar](assets/figure/IMPROVE_bar.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
 |                **Correlation Matrix**                |                                               |                                               |
 | ![Correlation Matrix](assets/figure/corr_matrix.png) |                                               |                                               |
+
+
+
+
 ## <div align="center">Usage</div>
 
 To install the package, run

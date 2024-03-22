@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,17 +10,33 @@ from matplotlib.collections import PolyCollection
 from DataPlot.plot.core import set_figure, Unit, Color
 
 
+mapping = {'Number': {'zlim': (0, 1.5e5),
+                      'vmin': 1,
+                      'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
+           'Surface': {'zlim': (0, 1.5e9),
+                       'vmin': 1e7,
+                       'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
+           'Volume': {'zlim': (0, 1e11),
+                      'vmin': 1e8,
+                      'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'},
+           'Extinction': {'zlim': (0, 800),
+                          'vmin': 1,
+                          'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
+           }
+
+
 @set_figure(fs=12)
 def heatmap(df: pd.DataFrame,
             ax: plt.Axes | None = None,
             logy: bool = True,
             cbar: bool = True,
+            unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
             hide_low: bool = True,
             cmap: str = 'jet',
             fig_kws: dict | None = {},
             cbar_kws: dict | None = {},
             plot_kws: dict | None = {},
-            **kwargs):
+            **kwargs) -> plt.Axes:
     """ Plot the size distribution over time.
 
     Parameters
@@ -32,6 +49,8 @@ def heatmap(df: pd.DataFrame,
         If true, the y-axis will be semilogy.
     cbar : bool, default=True
         If true, a colorbar will be added.
+    unit : Literal["Number", "Surface", "Volume", "Extinction"]
+        default='Number'
     hide_low : bool, default=True
         If true, low values will be masked.
     cmap : matplotlib.colormap, default='viridis'
@@ -59,13 +78,12 @@ def heatmap(df: pd.DataFrame,
     data = np.nan_to_num(data)
 
     # Set the colorbar min and max based on the min and max of the values
-    cbar_min = cbar_kws.pop('cbar_min', data.min() if data.min() > 0.0 else 1.)
+    cbar_min = cbar_kws.pop('cbar_min', mapping[unit]['vmin'] if data.min() >= 0 else 1.)
     cbar_max = cbar_kws.pop('cbar_max', data.max())
-
     # Increase values below cbar_min to cbar_min
     if hide_low:
-        below_min = data < cbar_min
-        data[below_min] = cbar_min
+        below_min = data == np.NaN
+        data[below_min] = np.NaN
 
     # Set the plot_kws
     plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **plot_kws)
@@ -93,7 +111,7 @@ def heatmap(df: pd.DataFrame,
 
     # Set the figure keywords
     if cbar:
-        cbar_kws = dict(label=r'$dN/dlogD_p\ (\# / cm^{-3})$', **cbar_kws)
+        cbar_kws = dict(label=mapping[unit]['label'], **cbar_kws)
         clb = plt.colorbar(pco1, pad=0.01, **cbar_kws)
 
     # fig.savefig(f'heatmap_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
@@ -120,7 +138,7 @@ def overlay_dist(data: pd.DataFrame | np.ndarray,
         If listed, it should contain three arrays for different curves.
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot. If not provided, a new subplot will be created.
-    diff : bool, optional
+    diff : Literal["Enhancement", "Error"]
         Whether to show enhancement curves.
     fig_kws : dict, optional
         Keyword arguments for creating the figure.
@@ -137,8 +155,7 @@ def overlay_dist(data: pd.DataFrame | np.ndarray,
     Examples
     --------
     >>> data={'Clena': np.array([1, 2, 3, 4]), 'Transition': np.array([1, 2, 3, 4]), 'Event': np.array([1, 2, 3, 4])}
-    >>> overlay_dist(pd.DataFrame.from_dict(data, orient='index', columns=['11.8', '12.18', '12.58', '12.99']),
-    >>> labels=['Curve 1', 'Curve 2', 'Curve 3'], diff=True)
+    >>> overlay_dist(pd.DataFrame.from_dict(data, orient='index', columns=['11.8', '12.18', '12.58', '12.99']), diff="Enhancement")
 
     """
     if ax is None:
@@ -539,16 +556,6 @@ def psd_example(ax=None, **kwargs):
 def three_dimension(data: pd.DataFrame | np.ndarray,
                     unit: Literal["Number", "Surface", "Volume", "Extinction"]) -> plt.Axes:
 
-    mapping = {'Number': {'zlim': (0, 1.5e5),
-                          'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
-               'Surface': {'zlim': (0, 1.5e9),
-                           'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
-               'Volume': {'zlim': (0, 1e11),
-                          'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'},
-               'Extinction': {'zlim': (0, 800),
-                              'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
-               }
-
     def log_tick_formatter(val, pos=None):
         return "{:.0f}".format(np.exp(val))
 
@@ -579,10 +586,10 @@ def three_dimension(data: pd.DataFrame | np.ndarray,
     ax.set_xticks(minor_ticks, minor=True)
     ax.xaxis.set_major_formatter(FuncFormatter(log_tick_formatter))
     ax.zaxis.get_offset_text().set_visible(False)
-    exponent = int('{:.2e}'.format(np.max(data)).split('e')[1])
-    ax.text(ax.get_xlim()[1] * 1.05, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1,
-            '$\\times\\mathdefault{10^{%d}}$' % exponent)
+    exponent = math.floor(math.log10(np.max(data)))
+    ax.text(ax.get_xlim()[1] * 1.05, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1, fr'${{\times}}\ 10^{exponent}$')
     ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
+    plt.subplots_adjust(right=0.8)
     plt.show()
 
     return ax

@@ -67,8 +67,8 @@ class SizeDist(DataProcessor):
         super().__init__(reset)
         self.file_path = self.default_path / 'Level2' / 'distribution'
 
-        self.data: pd.DataFrame = DataReader(filename).dropna()
-        self.index = self.data.index.copy()
+        self.data = DataReader(filename).dropna()
+        self.index = DataReader(filename).index.copy()
         self.dp = np.array(self.data.columns, dtype='float')
         self.dlogdp = np.full_like(self.dp, 0.014)
 
