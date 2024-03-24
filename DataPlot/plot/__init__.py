@@ -4,7 +4,6 @@ from .distribution import *
 from .improve import *
 from .optical import *
 from .meteorology import *
-from .scripts import time_series, rsm
 
 __all__ = ['set_figure',
            'Unit',
@@ -13,8 +12,10 @@ __all__ = ['set_figure',
            'fRH_plot',
            'wind_rose',
            'wind_heatmap',
-           'time_series',
-           'rsm',
+
+           'corr_matrix',
+           'diurnal_pattern',
+           'timeseries',
 
            'scatter',
            'linear_regression',

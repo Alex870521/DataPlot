@@ -2,22 +2,26 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import pandas as pd
-from matplotlib import colormaps
+from matplotlib.patches import Circle, RegularPolygon
+from matplotlib.path import Path
+from matplotlib.projections import register_projection
+from matplotlib.projections.polar import PolarAxes
+from matplotlib.spines import Spine
+from matplotlib.transforms import Affine2D
 from typing import Literal
 from DataPlot.plot.core import *
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from scipy.stats import pearsonr
 
 
-def _auto_label(pct, symbol=True, ignore: Literal["inner", "outer"] = 'inner', value: float = 5):
-    if symbol:
-        cond = pct <= value if ignore == 'inner' else pct > value
-        if cond:
-            return ''
-        else:
-            return '{:.1f}%'.format(pct)
-    else:
+def _auto_label_pct(pct,
+                    symbol: bool = True,
+                    include_pct: bool = False,
+                    ignore: Literal["inner", "outer"] = 'inner',
+                    value: float = 5):
+    if not symbol:
         return ''
+    cond = pct <= value if ignore == 'inner' else pct > value
+    label = '' if cond else '{:.1f}'.format(pct)
+    return label + '%' if include_pct else label
 
 
 class Pie:
@@ -87,11 +91,11 @@ class Pie:
 
         for i in range(pies):
             ax[i].pie(data[i], labels=None, colors=colors, textprops=None,
-                      autopct=lambda pct: _auto_label(pct, symbol=symbol),
+                      autopct=lambda pct: _auto_label_pct(pct, symbol=symbol, include_pct=True),
                       pctdistance=pct_distance, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
 
             ax[i].pie(data[i], labels=None, colors=colors, textprops=None,
-                      autopct=lambda pct: _auto_label(pct, symbol=symbol, ignore='outer'),
+                      autopct=lambda pct: _auto_label_pct(pct, symbol=symbol, ignore='outer', include_pct=True),
                       pctdistance=1.3, radius=radius, wedgeprops=dict(width=width, edgecolor='w'))
             ax[i].axis('equal')
             ax[i].text(0, 0, text[i], ha='center', va='center')
@@ -152,15 +156,15 @@ class Pie:
             fig, ax = plt.subplots()
 
         ax.pie(data[2], labels=None, colors=colors1, textprops=None,
-               autopct=lambda pct: _auto_label(pct, symbol=symbol),
+               autopct=lambda pct: _auto_label_pct(pct, symbol=symbol, include_pct=True),
                pctdistance=0.9, radius=14, wedgeprops=dict(width=3, edgecolor='w'))
 
         ax.pie(data[1], labels=None, colors=colors2, textprops=None,
-               autopct=lambda pct: _auto_label(pct, symbol=symbol),
+               autopct=lambda pct: _auto_label_pct(pct, symbol=symbol, include_pct=True),
                pctdistance=0.85, radius=11, wedgeprops=dict(width=3, edgecolor='w'))
 
         ax.pie(data[0], labels=None, colors=colors3, textprops=None,
-               autopct=lambda pct: _auto_label(pct, symbol=symbol),
+               autopct=lambda pct: _auto_label_pct(pct, symbol=symbol, include_pct=True),
                pctdistance=0.80, radius=8, wedgeprops=dict(width=3, edgecolor='w'))
 
         text = (Unit(f'{unit}') + '\n\n' +
@@ -261,7 +265,7 @@ class Bar:
                     _ = plt.barh(groups_arr, widths, left=starts, height=0.7, color=colors[i], label=labels[i],
                                  edgecolor=None, capsize=None)
                 if symbol:
-                    ax.bar_label(_, fmt=_auto_label, label_type='center', padding=0, fontsize=10, weight='bold')
+                    ax.bar_label(_, fmt=_auto_label_pct, label_type='center', padding=0, fontsize=10, weight='bold')
 
         if display == "dispersed":
             width = 0.1
@@ -277,7 +281,7 @@ class Bar:
                     _ = plt.barh(groups_arr + (i + 1) * (width + block), val, xerr=std, height=width, color=colors[i],
                                  edgecolor=None, capsize=None)
                 if symbol:
-                    ax.bar_label(_, fmt=_auto_label, label_type='center', padding=0, fontsize=8, weight='bold')
+                    ax.bar_label(_, fmt=_auto_label_pct, label_type='center', padding=0, fontsize=8, weight='bold')
 
         if orientation == 'va':
             xticks = groups_arr + (species / 2 + 0.5) * (width + block) if display == "dispersed" else groups_arr
@@ -370,95 +374,175 @@ class Violin:
         return ax
 
 
-@set_figure(figsize=(6, 6), fs=8)
-def corr_matrix(data: pd.DataFrame,
-                cmap: str = "RdBu"
-                ) -> plt.Axes:
-    columns = ['Extinction', 'Scattering', 'Absorption', 'PM1', 'PM25', 'PM10', 'PBLH', 'VC',
-               'AT', 'RH', 'WS', 'NO', 'NO2', 'NOx', 'O3', 'Benzene', 'Toluene',
-               'SO2', 'CO', 'THC', 'CH4', 'NMHC', 'NH3', 'HCl', 'HNO2', 'HNO3',
-               'Na+', 'NH4+', 'K+', 'Mg2+', 'Ca2+', 'Cl-', 'NO2-', 'NO3-', 'SO42-', ]
+def radar_factory(num_vars, frame='circle'):
+    """
+    Create a radar chart with `num_vars` axes.
 
-    df = data[columns]
+    This function creates a RadarAxes projection and registers it.
 
-    _corr = df.corr()
-    corr = pd.melt(_corr.reset_index(),
-                   id_vars='index')  # Unpivot the dataframe, so we can get pair of arrays for x and y
-    corr.columns = ['x', 'y', 'value']
+    Parameters
+    ----------
+    num_vars : int
+        Number of variables for radar chart.
+    frame : {'circle', 'polygon'}
+        Shape of frame surrounding axes.
 
-    p_values = _corr.apply(lambda col1: _corr.apply(lambda col2: pearsonr(col1, col2)[1]))
-    p_values = p_values.mask(p_values > 0.05)
-    p_values = pd.melt(p_values.reset_index(), id_vars='index').dropna()
-    p_values.columns = ['x', 'y', 'value']
+    """
+    # calculate evenly-spaced axis angles
+    theta = np.linspace(0, 2*np.pi, num_vars, endpoint=False)
 
-    fig, ax = plt.subplots()
+    class RadarTransform(PolarAxes.PolarTransform):
 
-    # Mapping from column names to integer coordinates
-    x_labels = [v for v in sorted(corr['x'].unique())]
-    y_labels = [v for v in sorted(corr['y'].unique())]
-    x_to_num = {p[1]: p[0] for p in enumerate(x_labels)}
-    y_to_num = {p[1]: p[0] for p in enumerate(y_labels)}
+        def transform_path_non_affine(self, path):
+            # Paths with non-unit interpolation steps correspond to gridlines,
+            # in which case we force interpolation (to defeat PolarTransform's
+            # autoconversion to circular arcs).
+            if path._interpolation_steps > 1:
+                path = path.interpolated(num_vars)
+            return Path(self.transform(path.vertices), path.codes)
 
-    # Show column labels on the axes
-    ax.set_xticks([x_to_num[v] for v in x_labels])
-    ax.set_xticklabels(x_labels, rotation=90, horizontalalignment='center')
-    ax.set_yticks([y_to_num[v] for v in y_labels])
-    ax.set_yticklabels(y_labels)
+    class RadarAxes(PolarAxes):
 
-    # ax.tick_params(axis='both', which='major', direction='out', top=True, left=True)
+        name = 'radar'
+        PolarTransform = RadarTransform
 
-    ax.grid(False, 'major')
-    ax.grid(True, 'minor')
-    ax.set_xticks([t + 0.5 for t in ax.get_xticks()], minor=True)
-    ax.set_yticks([t + 0.5 for t in ax.get_yticks()], minor=True)
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # rotate plot such that the first axis is at the top
+            self.set_theta_zero_location('N')
 
-    ax.set_xlim([-0.5, max([v for v in x_to_num.values()]) + 0.5])
-    ax.set_ylim([-0.5, max([v for v in y_to_num.values()]) + 0.5])
+        def fill(self, *args, closed=True, **kwargs):
+            """Override fill so that line is closed by default"""
+            return super().fill(closed=closed, *args, **kwargs)
 
-    n_colors = 256  # Use 256 colors for the diverging color palette
-    palette = sns.color_palette(cmap, n_colors=n_colors)  # Create the palette
+        def plot(self, *args, **kwargs):
+            """Override plot so that line is closed by default"""
+            lines = super().plot(*args, **kwargs)
+            for line in lines:
+                self._close_line(line)
 
-    # Range of values that will be mapped to the palette, i.e. min and max possible correlation
-    color_min, color_max = [-1, 1]
+        def _close_line(self, line):
+            x, y = line.get_data()
+            # FIXME: markers at x[0], y[0] get doubled-up
+            if x[0] != x[-1]:
+                x = np.append(x, x[0])
+                y = np.append(y, y[0])
+                line.set_data(x, y)
 
-    def value_to_color(val):
-        val_position = float((val - color_min)) / (color_max - color_min)
-        ind = int(val_position * (n_colors - 1))  # target index in the color palette
-        return palette[ind]
+        def set_varlabels(self, labels):
+            self.set_thetagrids(np.degrees(theta), labels)
 
-    point = ax.scatter(
-        x=corr['x'].map(x_to_num),
-        y=corr['y'].map(y_to_num),
-        s=corr['value'].abs() * 70,
-        c=corr['value'].apply(value_to_color),  # Vector of square color values, mapped to color palette
-        marker='s',
-        label='$R^{2}$'
-    )
+        def _gen_axes_patch(self):
+            # The Axes patch must be centered at (0.5, 0.5) and of radius 0.5
+            # in axes coordinates.
+            if frame == 'circle':
+                return Circle((0.5, 0.5), 0.5)
+            elif frame == 'polygon':
+                return RegularPolygon((0.5, 0.5), num_vars,
+                                      radius=.5, edgecolor="k")
+            else:
+                raise ValueError("Unknown value for 'frame': %s" % frame)
 
-    axes_image = plt.cm.ScalarMappable(cmap=colormaps[cmap])
+        def _gen_axes_spines(self):
+            if frame == 'circle':
+                return super()._gen_axes_spines()
+            elif frame == 'polygon':
+                # spine_type must be 'left'/'right'/'top'/'bottom'/'circle'.
+                spine = Spine(axes=self,
+                              spine_type='circle',
+                              path=Path.unit_regular_polygon(num_vars))
+                # unit_regular_polygon gives a polygon of radius 1 centered at
+                # (0, 0) but we want a polygon of radius 0.5 centered at (0.5,
+                # 0.5) in axes coordinates.
+                spine.set_transform(Affine2D().scale(.5).translate(.5, .5)
+                                    + self.transAxes)
+                return {'polar': spine}
+            else:
+                raise ValueError("Unknown value for 'frame': %s" % frame)
 
-    cax = inset_axes(ax, width="5%",
-                     height="100%",
-                     loc='lower left',
-                     bbox_to_anchor=(1.02, 0., 1, 1),
-                     bbox_transform=ax.transAxes,
-                     borderpad=0)
-    plt.subplots_adjust(bottom=0.15, right=0.8)
-    cbar = plt.colorbar(mappable=axes_image, cax=cax, label=r'$R^{2}$', )
+    register_projection(RadarAxes)
+    return theta
 
-    cbar.set_ticks([0, 0.25, 0.5, 0.75, 1])
-    cbar.set_ticklabels(np.linspace(-1, 1, 5))
 
-    point2 = ax.scatter(
-        x=p_values['x'].map(x_to_num),
-        y=p_values['y'].map(y_to_num),
-        s=10,
-        marker='*',
-        color='k',
-        label='p < 0.05'
-    )
+def example_data():
+    # The following data is from the Denver Aerosol Sources and Health study.
+    # See doi:10.1016/j.atmosenv.2008.12.017
+    #
+    # The data are pollution source profile estimates for five modeled
+    # pollution sources (e.g., cars, wood-burning, etc) that emit 7-9 chemical
+    # species. The radar charts are experimented with here to see if we can
+    # nicely visualize how the modeled source profiles change across four
+    # scenarios:
+    #  1) No gas-phase species present, just seven particulate counts on
+    #     Sulfate
+    #     Nitrate
+    #     Elemental Carbon (EC)
+    #     Organic Carbon fraction 1 (OC)
+    #     Organic Carbon fraction 2 (OC2)
+    #     Organic Carbon fraction 3 (OC3)
+    #     Pyrolyzed Organic Carbon (OP)
+    #  2)Inclusion of gas-phase specie carbon monoxide (CO)
+    #  3)Inclusion of gas-phase specie ozone (O3).
+    #  4)Inclusion of both gas-phase species is present...
+    data = [
+        ['Sulfate', 'Nitrate', 'EC', 'OC1', 'OC2', 'OC3', 'OP', 'CO', 'O3'],
+        ('Basecase', [
+            [0.88, 0.01, 0.03, 0.03, 0.00, 0.06, 0.01, 0.00, 0.00],
+            [0.07, 0.95, 0.04, 0.05, 0.00, 0.02, 0.01, 0.00, 0.00],
+            [0.01, 0.02, 0.85, 0.19, 0.05, 0.10, 0.00, 0.00, 0.00],
+            [0.02, 0.01, 0.07, 0.01, 0.21, 0.12, 0.98, 0.00, 0.00],
+            [0.01, 0.01, 0.02, 0.71, 0.74, 0.70, 0.00, 0.00, 0.00]]),
+        ('With CO', [
+            [0.88, 0.02, 0.02, 0.02, 0.00, 0.05, 0.00, 0.05, 0.00],
+            [0.08, 0.94, 0.04, 0.02, 0.00, 0.01, 0.12, 0.04, 0.00],
+            [0.01, 0.01, 0.79, 0.10, 0.00, 0.05, 0.00, 0.31, 0.00],
+            [0.00, 0.02, 0.03, 0.38, 0.31, 0.31, 0.00, 0.59, 0.00],
+            [0.02, 0.02, 0.11, 0.47, 0.69, 0.58, 0.88, 0.00, 0.00]]),
+        ('With O3', [
+            [0.89, 0.01, 0.07, 0.00, 0.00, 0.05, 0.00, 0.00, 0.03],
+            [0.07, 0.95, 0.05, 0.04, 0.00, 0.02, 0.12, 0.00, 0.00],
+            [0.01, 0.02, 0.86, 0.27, 0.16, 0.19, 0.00, 0.00, 0.00],
+            [0.01, 0.03, 0.00, 0.32, 0.29, 0.27, 0.00, 0.00, 0.95],
+            [0.02, 0.00, 0.03, 0.37, 0.56, 0.47, 0.87, 0.00, 0.00]]),
+        ('CO & O3', [
+            [0.87, 0.01, 0.08, 0.00, 0.00, 0.04, 0.00, 0.00, 0.01],
+            [0.09, 0.95, 0.02, 0.03, 0.00, 0.01, 0.13, 0.06, 0.00],
+            [0.01, 0.02, 0.71, 0.24, 0.13, 0.16, 0.00, 0.50, 0.00],
+            [0.01, 0.03, 0.00, 0.28, 0.24, 0.23, 0.00, 0.44, 0.88],
+            [0.02, 0.00, 0.18, 0.45, 0.64, 0.55, 0.86, 0.00, 0.16]])
+    ]
+    return data
 
-    ax.legend(handles=[point2], labels=['p < 0.05'], bbox_to_anchor=(0.05, 1, 0.1, 0.05))
+
+if __name__ == '__main__':
+    N = 9
+    theta = radar_factory(N, frame='polygon')
+
+    data = example_data()
+    spoke_labels = data.pop(0)
+
+    fig, axs = plt.subplots(figsize=(9, 9), nrows=2, ncols=2,
+                            subplot_kw=dict(projection='radar'))
+    fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
+
+    colors = ['b', 'r', 'g', 'm', 'y']
+    # Plot the four cases from the example data on separate axes
+    for ax, (title, case_data) in zip(axs.flat, data):
+        ax.set_rgrids([0.2, 0.4, 0.6, 0.8])
+        ax.set_title(title, weight='bold', size='medium', position=(0.5, 1.1),
+                     horizontalalignment='center', verticalalignment='center')
+        for d, color in zip(case_data, colors):
+            ax.plot(theta, d, color=color)
+            ax.fill(theta, d, facecolor=color, alpha=0.25, label='_nolegend_')
+        ax.set_varlabels(spoke_labels)
+
+    # add legend relative to top-left plot
+    labels = ('Factor 1', 'Factor 2', 'Factor 3', 'Factor 4', 'Factor 5')
+    legend = axs[0, 0].legend(labels, loc=(0.9, .95),
+                              labelspacing=0.1, fontsize='small')
+
+    fig.text(0.5, 0.965, '5-Factor Solution Profiles Across Four Scenarios',
+             horizontalalignment='center', color='black', weight='bold',
+             size='large')
+
     plt.show()
-
-    return ax

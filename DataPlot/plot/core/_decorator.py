@@ -16,6 +16,8 @@ def set_figure(func=None,
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):
+            plt.rcParams['lines.linewidth'] = 2
+
             plt.rcParams['mathtext.fontset'] = 'custom'
             plt.rcParams['mathtext.rm'] = 'Times New Roman'
             plt.rcParams['mathtext.it'] = 'Times New Roman: italic'
@@ -26,7 +28,7 @@ def set_figure(func=None,
             # The text, annotate, label, title, ticks, are used to create text
             plt.rcParams['font.family'] = 'Times New Roman'
             plt.rcParams['font.weight'] = fw or 'normal'
-            plt.rcParams['font.size'] = fs or 14
+            plt.rcParams['font.size'] = fs or 12
 
             plt.rcParams['axes.titlelocation'] = 'center'
             plt.rcParams['axes.titleweight'] = 'bold'

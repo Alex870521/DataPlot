@@ -3,40 +3,101 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from numpy import log, exp, sqrt, pi
+from pandas import DataFrame, date_range
 from typing import Literal
 from scipy.stats import norm, lognorm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.ticker import ScalarFormatter, FuncFormatter
 from matplotlib.collections import PolyCollection
 from DataPlot.plot.core import set_figure, Unit, Color
 
+mapping = {'Number': {'vmin': 1, },
+           'Surface': {'vmin': 1e7, },
+           'Volume': {'vmin': 1e8},
+           'Extinction': {'vmin': 1}, }
 
-mapping = {'Number': {'zlim': (0, 1.5e5),
-                      'vmin': 1,
-                      'label': r'$\bf dN/dlogdp\ ({\mu}m^{-1}/cm^3)$'},
-           'Surface': {'zlim': (0, 1.5e9),
-                       'vmin': 1e7,
-                       'label': r'$\bf dS/dlogdp\ ({\mu}m/cm^3)$'},
-           'Volume': {'zlim': (0, 1e11),
-                      'vmin': 1e8,
-                      'label': r'$\bf dV/dlogdp\ ({\mu}m^2/cm^3)$'},
-           'Extinction': {'zlim': (0, 800),
-                          'vmin': 1,
-                          'label': r'$\bf d{\sigma}/dlogdp\ (1/Mm)$'},
-           }
+
+def _log_tick_formatter(val, pos=None):
+    return "{:.0f}".format(np.exp(val))
 
 
 @set_figure(fs=12)
-def heatmap(df: pd.DataFrame,
-            ax: plt.Axes | None = None,
-            logy: bool = True,
-            cbar: bool = True,
+def heatmap(data: DataFrame,
             unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
-            hide_low: bool = True,
-            cmap: str = 'jet',
+            ax: plt.Axes | None = None,
+            cmap: str = 'Blues',
             fig_kws: dict | None = {},
-            cbar_kws: dict | None = {},
             plot_kws: dict | None = {},
             **kwargs) -> plt.Axes:
+    if ax is None:
+        fig, ax = plt.subplots(**fig_kws)
+
+    dp = np.array(data.columns, dtype=float)
+    x = np.append(np.tile(dp, data.values.shape[0]), 2750)
+    y = np.append(data.values.flatten(), 0.000001)
+
+    nan_indices = np.isnan(y)
+
+    limit = np.percentile(y, [90])
+
+    valid_indices = (y < limit) | (~nan_indices)
+
+    x = x[valid_indices]
+    y = y[valid_indices]
+
+    # using log(x)
+    heatmap, xedges, yedges = np.histogram2d(np.log(x), y, bins=50)
+    heatmap = np.where(heatmap == 0, 0.000001, heatmap)
+
+    plot_kws = dict(norm=colors.LogNorm(vmin=1, vmax=heatmap.max()), cmap=cmap, **plot_kws)
+
+    surf = ax.pcolormesh(xedges[:-1], yedges[:-1], heatmap.T, shading='gouraud', antialiased=True, **plot_kws)
+    ax.plot(np.log(dp), data.mean(), ls='solid', color='k', lw=2, label='mean')
+    # ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='k', lw=2, label='mean')
+    # ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='k', lw=2, label='mean')
+
+    xlim = kwargs.get('xlim') or np.log(dp).min(), np.log(dp).max()
+    ylim = kwargs.get('ylim') or (0, None)
+    xlabel = kwargs.get('xlabel') or r'$\bf D_p\ (nm)$'
+    ylabel = kwargs.get('ylabel') or Unit(f'{unit}_dist')
+    title = kwargs.get('title', unit)
+
+    major_ticks = np.log([10, 100, 1000])
+    minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
+    ax.set_xticks(major_ticks)
+    ax.set_xticks(minor_ticks, minor=True)
+    ax.xaxis.set_major_formatter(FuncFormatter(_log_tick_formatter))
+    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(-1, 4), useMathText=True, useLocale=True)
+    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+
+    # cbar
+    cax = inset_axes(ax, width="5%", height="100%", loc='lower left',
+                     bbox_to_anchor=(1.02, 0., 1, 1), bbox_transform=ax.transAxes, borderpad=0)
+
+    plt.subplots_adjust(bottom=0.15, right=0.8)
+    plt.colorbar(surf, cax=cax, label='Counts')
+
+    # legend
+    ax.legend(prop=dict(weight='bold'))
+    plt.show()
+
+    return ax
+
+
+@set_figure(fs=12)
+def heatmap_tms(df: pd.DataFrame,
+                ax: plt.Axes | None = None,
+                logy: bool = True,
+                cbar: bool = True,
+                unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
+                hide_low: bool = True,
+                cmap: str = 'jet',
+                fig_kws: dict | None = {},
+                cbar_kws: dict | None = {},
+                plot_kws: dict | None = {},
+                **kwargs) -> plt.Axes:
     """ Plot the size distribution over time.
 
     Parameters
@@ -69,40 +130,47 @@ def heatmap(df: pd.DataFrame,
     Examples
     --------
     Plot a SPMS + APS data:
-    >>> ax = heatmap(DataFrame, cmap='jet')
+    >>> ax = heatmap_tms(DataFrame, cmap='jet')
     """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(len(df.index) * 0.02, 3), **fig_kws)
+
     # Copy to avoid modifying original data
     time = df.index
     dp = np.array(df.columns, dtype=float)
     data = df.copy().to_numpy()
     data = np.nan_to_num(data)
 
-    # Set the colorbar min and max based on the min and max of the values
-    cbar_min = cbar_kws.pop('cbar_min', mapping[unit]['vmin'] if data.min() >= 0 else 1.)
-    cbar_max = cbar_kws.pop('cbar_max', data.max())
     # Increase values below cbar_min to cbar_min
     if hide_low:
         below_min = data == np.NaN
         data[below_min] = np.NaN
 
+    vmin_mapping = {'Number': 1e4, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
+
+    # Set the colorbar min and max based on the min and max of the values
+    cbar_min = cbar_kws.pop('cbar_min', vmin_mapping[unit])
+    cbar_max = cbar_kws.pop('cbar_max', data.max())
+
     # Set the plot_kws
     plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **plot_kws)
-
-    # Set the figure keywords
-    fig_kws = dict(figsize=(10, 4), **fig_kws)
-
-    if ax is None:
-        fig, ax = plt.subplots(**fig_kws)
 
     # main plot
     pco1 = ax.pcolormesh(time, dp, data.T, shading='auto', **plot_kws)
 
-    # Set the ylabel and ylim
-    ax.set(ylabel=r'$\bf D_p\ (nm)$', ylim=(dp.min(), dp.max()))
-
-    # Set title
+    # Set ax
     st_tm, fn_tm = time[0], time[-1]
-    ax.set_title(kwargs.get('title', f'{st_tm.strftime("%Y/%m/%d")} - {fn_tm.strftime("%Y/%m/%d")}'))
+    freq = kwargs.get('freq', '10d')
+    tick_time = date_range(st_tm, fn_tm, freq=freq)
+
+    ax.set(xlabel=kwargs.get('xlabel', ''),
+           ylabel=kwargs.get('ylim', r'$\bf D_p\ (nm)$'),
+           xticks=kwargs.get('xticks', tick_time),
+           xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
+           xlim=kwargs.get('xlim', (st_tm, fn_tm)),
+           ylim=kwargs.get('ylim', (dp.min(), dp.max())),
+           title=kwargs.get(kwargs.get('title', f'{st_tm.strftime("%F")} - {fn_tm.strftime("%F")}'))
+           )
 
     # Set the axis to be log in the y-axis
     if logy:
@@ -111,10 +179,10 @@ def heatmap(df: pd.DataFrame,
 
     # Set the figure keywords
     if cbar:
-        cbar_kws = dict(label=mapping[unit]['label'], **cbar_kws)
-        clb = plt.colorbar(pco1, pad=0.01, **cbar_kws)
+        cbar_kws = dict(label=Unit(f'{unit}_dist'), **cbar_kws)
+        plt.colorbar(pco1, pad=0.01, **cbar_kws)
 
-    # fig.savefig(f'heatmap_{st_tm.strftime("%Y%m%d")}_{fn_tm.strftime("%Y%m%d")}.png')
+    # fig.savefig(f'heatmap_tm_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
 
     return ax
 
@@ -382,183 +450,8 @@ def dist_with_std(data: pd.DataFrame,
 
 
 @set_figure
-def ls_mode(ax=None, **kwargs) -> plt.Axes:
-    """
-    Plot log-normal mass size distribution for small mode, large mode, and sea salt particles.
-
-    Parameters
-    ----------
-    ax : AxesSubplot, optional
-        Matplotlib AxesSubplot. If not provided, a new subplot will be created.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    ax : AxesSubplot
-        Matplotlib AxesSubplot.
-
-    Examples
-    --------
-    Example 1: Plot log-normal mass size distribution with default settings
-    >>> ls_mode()
-    """
-    if ax is None:
-        fig, ax = plt.subplots()
-
-    geoMean = [0.2, 0.5, 2.5]
-    geoStdv = [2.2, 1.5, 2.0]
-    color = ['g', 'r', 'b']
-    label = [r'$\bf Small\ mode\ :D_{g}\ =\ 0.2\ \mu m,\ \sigma_{{g}}\ =\ 2.2$',
-             r'$\bf Large\ mode\ :D_{g}\ =\ 0.5\ \mu m,\ \sigma_{{g}}\ =\ 1.5$',
-             r'$\bf Sea\ salt\ :D_{g}\ =\ 2.5\ \mu m,\ \sigma_{{g}}\ =\ 2.0$',
-             ]
-    for _geoMean, _geoStdv, _color, _label in zip(geoMean, geoStdv, color, label):
-        x = np.geomspace(0.001, 20, 10000)
-        # 用logdp畫 才會讓最大值落在geoMean上
-        pdf = (np.exp(-(np.log(x) - np.log(_geoMean)) ** 2 / (2 * np.log(_geoStdv) ** 2))
-               / (np.log(_geoStdv) * np.sqrt(2 * np.pi)))
-
-        ax.semilogx(x, pdf, linewidth=2, color=_color, label=_label)
-        ax.fill_between(x, pdf, 0, where=(pdf > 0), interpolate=False, color=_color, alpha=0.3, label='__nolegend__')
-
-    xlim = kwargs.get('xlim', (0.001, 20))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$ Diameter\ (\mu m)$')
-    ylabel = kwargs.get('ylabel', r'$\bf Probability\ (dM/dlogdp)$')
-    title = kwargs.get('title', r'Log-normal Mass Size Distribution')
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
-    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
-    ax.legend(loc='upper left', handlelength=1, frameon=False)
-    ax.semilogx()
-
-    return ax
-
-
-@set_figure(fs=10, titlesize=12)
-def psd_example(ax=None, **kwargs):
-    """
-    Plot various particle size distributions to illustrate log-normal distributions and transformations.
-
-    Parameters
-    ----------
-    ax : AxesSubplot, optional
-        Matplotlib AxesSubplot. If not provided, a new subplot will be created.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    ax : AxesSubplot
-        Matplotlib AxesSubplot.
-
-    Examples
-    --------
-    Example 1: Plot default particle size distributions
-    >>> psd_example()
-    """
-    if ax is None:
-        fig, axes = plt.subplots(3, 2, figsize=(12, 12))
-        axes = axes.flatten()
-    else:
-        fig = ax.figure
-        axes = [ax, None, None, None, None, None]
-
-    # 给定的幾何平均粒徑和幾何平均標準差
-    gmean = 1
-    gstd = 1
-
-    mu = np.log(gmean)
-    sigma = np.log(gstd)
-
-    normpdf = lambda x, mu, sigma: (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
-    lognormpdf = lambda x, gmean, gstd: (1 / (np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(
-        -(np.log(x) - np.log(gmean)) ** 2 / (2 * np.log(gstd) ** 2))
-    lognormpdf2 = lambda x, gmean, gstd: (1 / (x * np.log(gstd) * np.sqrt(2 * np.pi))) * np.exp(
-        -(np.log(x) - np.log(gmean)) ** 2 / (2 * np.log(gstd) ** 2))
-
-    # 生成常態分布
-    x = np.linspace(-10, 10, 1000)
-    pdf = normpdf(x, mu=0, sigma=2)
-
-    x2 = np.geomspace(0.01, 50, 1000)
-    pdf2_1 = lognormpdf(x2, gmean=0.8, gstd=1.5)
-    pdf2_2 = lognormpdf2(x2, gmean=0.8, gstd=1.5)
-
-    # pdf2_2 = lognormpdf2(x2, gmean=np.exp(0.8), gstd=np.exp(1.5))
-    # 這兩個相等
-    ln2_1 = lognorm(s=1.5, scale=np.exp(0.8))
-    ttt = lambda x, mu, std: (1 / (x * std * np.sqrt(2 * np.pi))) * np.exp(
-        -(np.log(x) - np.log(mu)) ** 2 / (2 * std ** 2))
-
-    # 若對數常態分布x有mu=3, sigma=1，ln(x)則為一常態分佈，試問其分布的平均值與標準差
-    pdf3 = lognormpdf(x2, gmean=3, gstd=1.5)
-    ln1 = lognorm(s=1, scale=np.exp(3))
-    data3 = ln1.rvs(size=1000)
-
-    Y = np.log(data3)  # Y.mean()=3, Y.std()=1
-    nor2 = norm(loc=3, scale=1)
-    data4 = nor2.rvs(size=1000)
-
-    # 若常態分布x有平均值0.8 標準差1.5，exp(x)則為一對數常態分佈? 由對數常態分佈的定義 若隨機變數ln(Y)是常態分布 則Y為對數常態分布
-    # 因此已知Y = exp(x) ln(Y)=x ~ 常態分布，Y ~ 對數常態分佈，試問其分布的平均值與標準差是?? Y ~ LN(geoMean=0.8, geoStd=1.5)
-    nor3 = norm(loc=0.8, scale=1.5)
-    data5 = nor3.rvs(size=1000)
-
-    Z = np.exp(data5)
-    ln3 = lognorm(s=1.5, scale=np.exp(0.8))
-
-    data6 = ln3.rvs(size=1000)
-
-    def plot_distribution(ax, x, pdf, color='k-', **kwargs):
-        ax.plot(x, pdf, color, **kwargs)
-        ax.set_title('Particle Size Distribution')
-        ax.set_xlabel('Particle Size (micron)')
-        ax.set_ylabel('Probability Density')
-
-    # 繪製粒徑分布
-    fig, ([ax1, ax2], [ax3, ax4], [ax5, ax6]) = plt.subplots(3, 2)
-    # ax1
-    plot_distribution(ax1, x, pdf, linewidth=2)
-
-    # ax2
-    plot_distribution(ax2, x2, ln2_1.pdf(x2), 'b-', linewidth=2)
-    plot_distribution(ax2, x2, pdf2_1, 'g-', linewidth=2)
-    plot_distribution(ax2, x2, pdf2_2, 'r-', linewidth=2)
-    ax2.set_xlim(0.01, 50)
-    ax2.semilogx()
-
-    # ax3
-    plot_distribution(ax3, x2, pdf3, 'k-', linewidth=2)
-    ax3.set_xlim(x2.min(), x2.max())
-    ax3.semilogx()
-
-    # ax4
-    x = np.linspace(min(Y), max(Y), 1000)
-    pdf = nor2.pdf(x)
-    plot_distribution(ax4, x, pdf, 'k-', linewidth=2)
-
-    # ax5
-    x = np.linspace(min(data5), max(data5), 1000)
-    plot_distribution(ax5, x, nor3.pdf(x), 'k-', linewidth=2)
-
-    # ax6
-    ax6.hist(Z, bins=5000, density=True, alpha=0.6, color='g')
-    x = np.geomspace(min(Z), max(Z), 1000)
-    plot_distribution(ax6, x, ln3.pdf(x), 'k-', linewidth=2)
-    plot_distribution(ax6, x, lognormpdf(x, gmean=0.8, gstd=1.5), 'r-', linewidth=2)
-    ax6.set_xlim(0.01, 20)
-    ax6.semilogx()
-
-
-@set_figure
 def three_dimension(data: pd.DataFrame | np.ndarray,
                     unit: Literal["Number", "Surface", "Volume", "Extinction"]) -> plt.Axes:
-
-    def log_tick_formatter(val, pos=None):
-        return "{:.0f}".format(np.exp(val))
-
     lines = data.shape[0]
 
     dp = np.array(['11.7', *data.columns, '2437.4'], dtype=float)
@@ -575,16 +468,16 @@ def three_dimension(data: pd.DataFrame | np.ndarray,
     poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
     ax.add_collection3d(poly, zs=range(1, lines + 1), zdir='y')
     # ax.set_xscale('log') <- dont work
-    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=mapping[unit]['zlim'])
+    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=(0, _Z.max()))
     ax.set_xlabel(r'$\bf D_{p}\ (nm)$', labelpad=10)
     ax.set_ylabel(r'$\bf Class$', labelpad=10)
-    ax.set_zlabel(mapping[unit]['label'], labelpad=15)
+    ax.set_zlabel(Unit(f'{unit}_dist'), labelpad=15)
 
     major_ticks = np.log([10, 100, 1000])
     minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
     ax.set_xticks(major_ticks)
     ax.set_xticks(minor_ticks, minor=True)
-    ax.xaxis.set_major_formatter(FuncFormatter(log_tick_formatter))
+    ax.xaxis.set_major_formatter(FuncFormatter(_log_tick_formatter))
     ax.zaxis.get_offset_text().set_visible(False)
     exponent = math.floor(math.log10(np.max(data)))
     ax.text(ax.get_xlim()[1] * 1.05, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1, fr'${{\times}}\ 10^{exponent}$')
@@ -593,3 +486,120 @@ def three_dimension(data: pd.DataFrame | np.ndarray,
     plt.show()
 
     return ax
+
+
+@set_figure
+def ls_mode(**kwargs):
+    """
+    Plot log-normal mass size distribution for small mode, large mode, and sea salt particles.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Examples
+    --------
+    Example : Plot log-normal mass size distribution with default settings
+    >>> ls_mode()
+    """
+
+    fig, ax = plt.subplots()
+
+    geoMean = [0.2, 0.5, 2.5]
+    geoStdv = [2.2, 1.5, 2.0]
+    color = ['g', 'r', 'b']
+    label = [r'$\bf Small\ mode\ :D_{g}\ =\ 0.2\ \mu m,\ \sigma_{{g}}\ =\ 2.2$',
+             r'$\bf Large\ mode\ :D_{g}\ =\ 0.5\ \mu m,\ \sigma_{{g}}\ =\ 1.5$',
+             r'$\bf Sea\ salt\ :D_{g}\ =\ 2.5\ \mu m,\ \sigma_{{g}}\ =\ 2.0$']
+
+    x = np.geomspace(0.001, 20, 10000)
+    for _geoMean, _geoStdv, _color, _label in zip(geoMean, geoStdv, color, label):
+        # 用logdp畫 才會讓最大值落在geoMean上
+        pdf = 1 / (log(_geoStdv) * sqrt(2 * pi)) * (exp(-(log(x) - log(_geoMean)) ** 2 / (2 * log(_geoStdv) ** 2)))
+
+        ax.semilogx(x, pdf, color=_color, label=_label)
+        ax.fill_between(x, pdf, 0, where=(pdf > 0), color=_color, alpha=0.3, label='__nolegend__')
+
+    xlim = kwargs.get('xlim', (0.001, 20))
+    ylim = kwargs.get('ylim', (0, None))
+    xlabel = kwargs.get('xlabel', r'$ Diameter\ (\mu m)$')
+    ylabel = kwargs.get('ylabel', r'$\bf Probability\ (dM/dlogdp)$')
+    title = kwargs.get('title', r'Log-normal Mass Size Distribution')
+    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
+    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    ax.legend(loc='upper left', handlelength=1, frameon=False)
+    ax.semilogx()
+
+
+@set_figure
+def lognorm_dist(**kwargs):
+    """
+    Plot various particle size distributions to illustrate log-normal distributions and transformations.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Examples
+    --------
+    Example : Plot default particle size distributions
+    >>> lognorm_dist()
+    """
+
+    fig, ([ax1, ax2], [ax3, ax4]) = plt.subplots(2, 2)
+    fig.suptitle('Particle Size Distribution', fontweight='bold')
+    plt.subplots_adjust(left=0.125, right=0.925, bottom=0.1, top=0.93, wspace=0.4, hspace=0.4)
+
+    # pdf
+    normpdf = lambda x, mu, sigma: (1 / (sigma * sqrt(2 * pi))) * exp(-(x - mu) ** 2 / (2 * sigma ** 2))
+    lognormpdf = lambda x, gmean, gstd: (1 / (log(gstd) * sqrt(2 * pi))) * exp(
+        -(log(x) - log(gmean)) ** 2 / (2 * log(gstd) ** 2))
+    lognormpdf2 = lambda x, gmean, gstd: (1 / (x * log(gstd) * sqrt(2 * pi))) * exp(
+        -(log(x) - log(gmean)) ** 2 / (2 * log(gstd) ** 2))
+
+    # 生成x
+    x = np.linspace(-10, 10, 1000)
+    x2 = np.geomspace(0.01, 100, 1000)
+
+    # 生成常態分布
+    pdf = normpdf(x, mu=0, sigma=2)
+
+    pdf2_1 = lognormpdf(x2, gmean=0.8, gstd=1.5)
+    pdf2_2 = lognormpdf2(x2, gmean=0.8, gstd=1.5)
+    ln2_1 = lognorm(scale=0.8, s=np.log(1.5))  # == lognormpdf2(x2, gmean=0.8, gstd=1.5)
+
+    # Question 1
+    # 若對數常態分布x有gmd=3, gstd=2，ln(x) ~ 常態分佈，試問其分布的平均值與標準差??
+    data3 = lognorm(scale=3, s=np.log(2)).rvs(size=5000)
+    Y = np.log(data3)  # Y ~ N(mu=log(gmean), sigma=log(gstd))
+
+    # Question 2
+    # 若常態分布x有平均值3 標準差1，exp(x)則為一對數常態分佈? 由對數常態分佈的定義 若隨機變數ln(Z)是常態分布 則Z為對數常態分布
+    # 因此已知Z = exp(x), so ln(Z)=x，Z ~ 對數常態分佈，試問其分布的幾何平均值與幾何標準差是??
+    data5 = norm(loc=3, scale=1).rvs(size=5000)
+    Z = np.exp(data5)  # Z ~ LN(geoMean=exp(mu), geoStd=exp(sigma))
+
+    def plot_distribution(ax, x, pdf, color='k-', **kwargs):
+        ax.plot(x, pdf, color, **kwargs)
+        ax.set_xlabel('Particle Size (micron)')
+        ax.set_ylabel('Probability Density')
+        ax.set_xlim(x.min(), x.max())
+
+    # 繪製粒徑分布
+    plot_distribution(ax1, x, pdf)
+
+    plot_distribution(ax2, x2, ln2_1.pdf(x2), 'b-*')
+    plot_distribution(ax2, x2, pdf2_1, 'g-')
+    plot_distribution(ax2, x2, pdf2_2, 'r--')
+    ax2.semilogx()
+
+    plot_distribution(ax3, x, normpdf(x, mu=log(3), sigma=log(2)), 'k-')
+    ax3.hist(Y, bins=100, density=True, alpha=0.6, color='g')
+
+    plot_distribution(ax4, x2, lognormpdf2(x2, gmean=exp(3), gstd=exp(1)), 'r-')
+    ax4.hist(Z, bins=100, density=True, alpha=0.6, color='g')
+    ax4.semilogx()
+
+    plt.show()

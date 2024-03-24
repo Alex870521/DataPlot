@@ -5,11 +5,10 @@ import numpy as np
 from PyMieScatt import ScatteringFunction
 from typing import Literal
 from pathlib import Path
-from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE
+from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
 from DataPlot.plot import set_figure, scatter, linear_regression
 from DataPlot.process import DataBase
 
-PATH_MAIN = Path(__file__).parent / 'Figure'
 
 mapping_dic = {'AS':    {'m': 1.53 + 0j,    'density': 1.73, 'label': fr'$NH_{4}NO_{3}$',       'color': '#A65E58'},
                'AN':    {'m': 1.55 + 0j,    'density': 1.77, 'label': fr'$(NH_{4})_{2}SO_{4}$', 'color': '#A5BF6B'},
@@ -204,3 +203,44 @@ def extinction_sensitivity():
     scatter(DataBase, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD', regression=True, diagonal=True)
     scatter(DataBase, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI', regression=True, diagonal=True)
 
+
+@set_figure
+def response_surface(**kwargs):
+    def function(RI, GMD):
+        Z = np.zeros_like(RI)  # 使用 np.zeros_like 可以確保 Z 和 RI 具有相同的形狀
+
+        for i in range(RI.shape[0]):
+            for j in range(RI.shape[1]):
+                _RI, _GMD = RI[i, j], GMD[i, j]
+
+                Bext, Bsca, Babs = Mie_Lognormal(m=_RI, wavelength=550, geoMean=_GMD, geoStdDev=2,
+                                                 numberOfParticles=5e6)
+                Z[i, j] = np.sum(Bext)
+
+        return Z
+
+    # 假設 RI、GSD、GMD
+    RI = np.linspace(1.33, 1.6, 50)
+    GMD = np.linspace(60, 400, 50)
+
+    # 建立三維 meshgrid
+    real, gmd = np.meshgrid(RI, GMD, indexing='xy')
+
+    # Result
+    ext = function(real, gmd)
+
+    # plot
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    ax.plot_surface(real, gmd, ext, rstride=1, cstride=1, cmap=plt.get_cmap('jet'), edgecolor='none')
+
+    xlabel = kwargs.get('xlabel', r'$\bf Real\ part\ (n)$')
+    ylabel = kwargs.get('ylabel', r'$\bf GMD\ (nm)$')
+    zlabel = kwargs.get('zlabel', r'$\bf Extinction\ (1/Mm)$')
+    title = kwargs.get('title', r'$\bf Sensitive\ test\ of\ Extinction$')
+    ax.set(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, title=title)
+
+    ax.zaxis.get_offset_text().set_visible(False)
+    exponent = int('{:.2e}'.format(np.max(ext)).split('e')[1])
+    ax.text(ax.get_xlim()[1] * 1.01, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1,
+            '$\\times\\mathdefault{10^{%d}}$' % exponent)
+    ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)

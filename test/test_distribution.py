@@ -18,15 +18,20 @@ PVSD_amb_dis, PVSD_amb_dis_std = DataClassifier(PVSD, by='State', statistic='Tab
 
 ext_grp, _ = DataClassifier(PESD_inter, by='Extinction', statistic='Table', qcut=10)
 
+df_mean_all, df_std_all = DataClassifier(DataBase, by='Hour', statistic='Table')
+
 
 if __name__ == '__main__':
-    # plot.heatmap(PNSD)
-    # plot.heatmap(PSSD, unit='Surface')
-    # plot.heatmap(PVSD, unit='Volume')
-    # plot.heatmap(PESD_inter, unit='Extinction')
-
+    # plot.heatmap_tm(PNSD)
+    # plot.heatmap_tm(PSSD, unit='Surface')
+    # plot.heatmap_tm(PVSD, unit='Volume')
+    # plot.heatmap_tm(PESD_inter, unit='Extinction')
+    # plot.heatmap(PSSD, unit='Extinction')
     # plot.overlay_dist(Ext_amb_dis_internal, diff="Error")
     # plot.separate_dist(PNSD_amb_dis, PSSD_amb_dis, PVSD_amb_dis)
     # plot.dist_with_std(Ext_amb_dis_internal, Ext_amb_dis_std_internal, std_scale=0.5)
     # plot.curve_fitting(np.array(Ext_amb_dis_internal.columns, dtype=float), Ext_amb_dis_internal.loc['Transition'], mode=4)
-    plot.three_dimension(ext_grp, unit='Extinction')
+    # plot.three_dimension(ext_grp, unit='Extinction')
+    # plot.ls_mode()
+    # plot.lognorm_dist()
+    plot.diurnal_pattern(df_mean_all, df_std_all, y='Extinction')

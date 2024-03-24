@@ -7,14 +7,25 @@ from typing import Literal
 from DataPlot.plot.core import *
 
 
-__all__ = ['timeseries',
-           ]
+def _inset_colorbar(axes_image: ScalarMappable,
+                    ax: plt.Axes,
+                    orientation: Literal['vertical', 'horizontal'] = 'vertical',
+                    inset_kws={},
+                    cbar_kws={}):
+    """
 
+    Parameters
+    ----------
+    axes_image
+    ax
+    orientation
+    inset_kws
+    cbar_kws
 
-def _inset_axes(ax: plt.Axes,
-                orientation: Literal['vertical', 'horizontal'] = 'vertical',
-                inset_kws={}):
+    Returns
+    -------
 
+    """
     default_inset_kws = {}
     if orientation == 'vertical':
         default_inset_kws = dict(
@@ -38,17 +49,8 @@ def _inset_axes(ax: plt.Axes,
 
     default_inset_kws.update(inset_kws)
 
-    return inset_axes(ax, **default_inset_kws)
-
-
-def inset_colorbar(axes_image: ScalarMappable,
-                   ax: plt.Axes,
-                   orientation: Literal['vertical', 'horizontal'] = 'vertical',
-                   inset_kws={},
-                   cbar_kws={}):
-
     # create cax for colorbar
-    cax = _inset_axes(ax, orientation=orientation, inset_kws=inset_kws)
+    cax = inset_axes(ax, **default_inset_kws)
 
     default_cbar_kws = dict(
         label='cbar_label',
@@ -61,17 +63,16 @@ def inset_colorbar(axes_image: ScalarMappable,
     plt.colorbar(mappable=axes_image, cax=cax, **default_cbar_kws)
 
 
-@set_figure(fs=10)
-def timeseries(df: pd.DataFrame,
-               y: str,
-               c: str = None,
-               style: Literal['scatter', 'bar'] = 'scatter',
-               ax: plt.Axes = None,
-               set_visible=True,
-               fig_kws={},
-               plot_kws={},
-               cbar_kws={},
-               **kwargs):
+def _timeseries(df: pd.DataFrame,
+                y: str,
+                c: str = None,
+                style: Literal['scatter', 'bar'] = 'scatter',
+                ax: plt.Axes = None,
+                set_visible=True,
+                fig_kws={},
+                plot_kws={},
+                cbar_kws={},
+                **kwargs):
 
     time = df.index.copy()
 
@@ -97,7 +98,7 @@ def timeseries(df: pd.DataFrame,
 
         ax.scatter(time, df[y], **default_plot_kws)
 
-        inset_colorbar(ax.get_children()[0], ax, cbar_kws=cbar_kws)
+        _inset_colorbar(ax.get_children()[0], ax, cbar_kws=cbar_kws)
 
     elif c is not None and style == 'bar':  # bar
         default_plot_kws = dict(
@@ -113,7 +114,7 @@ def timeseries(df: pd.DataFrame,
 
         ax.bar(time, df[f'{y}'], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
 
-        inset_colorbar(scalar_map, ax, cbar_kws=cbar_kws)
+        _inset_colorbar(scalar_map, ax, cbar_kws=cbar_kws)
 
     else:  # line plot
         default_plot_kws.update(plot_kws)
@@ -133,10 +134,91 @@ def timeseries(df: pd.DataFrame,
             ylabel=kwargs.get('ylabel', Unit(f'{y}')),
             xticks=kwargs.get('xticks', tick_time),
             xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
-            # yticks=kwargs.get('yticks', ''),
-            # yticklabels=kwargs.get('yticklabels', ''),
             xlim=kwargs.get('xlim', [st_tm, fn_tm]),
             ylim=kwargs.get('ylim', [None, None]),
         )
 
     return ax
+
+
+@set_figure(fs=10)
+def timeseries(df):
+    fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
+
+    ax1 = _timeseries(df,
+                      y='Extinction',
+                      ax=ax1,
+                      set_visible=False,
+                      plot_kws=dict(color="b", label='Extinction'),
+                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                      ylim=[0., df.Extinction.max() * 1.1]
+                      )
+
+    ax1 = _timeseries(df,
+                      y='Scattering',
+                      ax=ax1,
+                      set_visible=False,
+                      plot_kws=dict(color="g", label='Scattering'),
+                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                      ylim=[0., df.Extinction.max() * 1.1]
+                      )
+
+    ax1 = _timeseries(df,
+                      y='Absorption',
+                      ax=ax1,
+                      set_visible=False,
+                      plot_kws=dict(color="r", label='Absorption'),
+                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                      ylim=[0., df.Extinction.max() * 1.1]
+                      )
+
+    ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, labelspacing=0.5, handlelength=1)
+
+    # Temp, RH
+    ax2 = _timeseries(df,
+                      y='AT',
+                      ax=ax2,
+                      set_visible=False,
+                      plot_kws=dict(color='r', label=Unit('AT')),
+                      ylabel=Unit('AT'),
+                      ylim=[df.AT.min() - 2, df.AT.max() + 2])
+
+    _timeseries(df,
+                y='RH',
+                ax=ax2.twinx(),
+                set_visible=False,
+                plot_kws=dict(color='b', label=Unit('RH')),
+                ylabel=Unit('RH'),
+                ylim=[20, 100])
+
+    _timeseries(df,
+                y='VC',
+                c='PBLH',
+                style='bar',
+                ax=ax3,
+                set_visible=False,
+                plot_kws=dict(label=Unit('VC')),
+                cbar_kws=dict(label=Unit('PBLH'))
+                )
+
+    _timeseries(df,
+                y='WS',
+                c='WD',
+                ax=ax4,
+                set_visible=False,
+                plot_kws=dict(cmap='hsv', label=Unit('WS')),
+                cbar_kws=dict(label=Unit('WD')),
+                ylim=[0, df.WS.max() * 1.1]
+                )
+
+    _timeseries(df,
+                y='PM25',
+                c='PM1/PM25',
+                ax=ax5,
+                plot_kws=dict(label=Unit('PM1/PM25')),
+                cbar_kws=dict(label=Unit('PM1/PM25')),
+                ylim=[0, df.PM25.max() * 1.1]
+                )
+
+    # fig.savefig(f'tms_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
+    plt.show()

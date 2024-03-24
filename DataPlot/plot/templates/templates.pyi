@@ -38,7 +38,3 @@ class Violin:
                unit: str,
                ax: Axes | None = None,
                **kwargs) -> Axes: ...
-
-def corr_matrix(data: DataFrame,
-                cmap: str = "RdBu"
-                ) -> Axes: ...

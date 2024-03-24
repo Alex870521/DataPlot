@@ -68,5 +68,9 @@
     "WD": "WD ({\\circ})",
     "y_actual":  "y_{actual}",
     "y_predict":  "y_{predict}",
-    "PG": "Extinction (1/Mm)"
+    "PG": "Extinction (1/Mm)",
+    "Number_dist": "dN/dlogdp ({\\mu}m^{-1}/cm^3)",
+    "Surface_dist": "dS/dlogdp ({\\mu}m/cm^3)",
+    "Volume_dist": "dV/dlogdp ({\\mu}m^2/cm^3)",
+    "Extinction_dist": "d{\\sigma}/dlogdp (1/Mm)"
 }
