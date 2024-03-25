@@ -21,7 +21,7 @@ def _auto_label_pct(pct,
         return ''
     cond = pct <= value if ignore == 'inner' else pct > value
     label = '' if cond else '{:.1f}'.format(pct)
-    return label + '%' if include_pct else label
+    return '' if label == '' else label + '%' if include_pct else label
 
 
 class Pie:
@@ -101,7 +101,7 @@ class Pie:
             ax[i].text(0, 0, text[i], ha='center', va='center')
             ax[i].set_title(category_names[i])
 
-        ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.2, 0, 0.5, 1))
+        ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.0, 0, 0.5, 1))
 
         # fig.savefig(f"pie_{style}_{title}")
         plt.show()
@@ -538,7 +538,7 @@ if __name__ == '__main__':
 
     # add legend relative to top-left plot
     labels = ('Factor 1', 'Factor 2', 'Factor 3', 'Factor 4', 'Factor 5')
-    legend = axs[0, 0].legend(labels, loc=(0.9, .95),
+    legend = axs[0, 0].legend(labels, loc=(0.95, 0.95),
                               labelspacing=0.1, fontsize='small')
 
     fig.text(0.5, 0.965, '5-Factor Solution Profiles Across Four Scenarios',

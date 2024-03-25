@@ -339,7 +339,7 @@ def four_quar():
 
     item = 'RH'
     fig, ax = plt.subplots()
-    plt.subplots_adjust(right=0.8)
+    plt.subplots_adjust(right=0.8, bottom=0.125)
     sc = ax.scatter(subdf['PM25'], subdf['Vis_LPV'], s=50 * (subdf[item] / subdf[item].max()) ** 4, c=subdf['VC'],
                     norm=plt.Normalize(vmin=0, vmax=2000), cmap='YlGnBu')
 

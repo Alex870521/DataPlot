@@ -67,13 +67,12 @@ def _timeseries(df: pd.DataFrame,
                 y: str,
                 c: str = None,
                 style: Literal['scatter', 'bar'] = 'scatter',
-                ax: plt.Axes = None,
+                ax: plt.Axes | None = None,
                 set_visible=True,
                 fig_kws={},
                 plot_kws={},
                 cbar_kws={},
                 **kwargs):
-
     time = df.index.copy()
 
     if ax is None:
@@ -110,9 +109,9 @@ def _timeseries(df: pd.DataFrame,
 
         default_plot_kws.update(plot_kws)
 
-        scalar_map, colors = Color.color_maker(df[f'{c}'].values, cmap=default_plot_kws.pop('cmap'))
+        scalar_map, colors = Color.color_maker(df[c].values, cmap=default_plot_kws.pop('cmap'))
 
-        ax.bar(time, df[f'{y}'], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
+        ax.bar(time, df[y], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
 
         _inset_colorbar(scalar_map, ax, cbar_kws=cbar_kws)
 
@@ -131,11 +130,11 @@ def _timeseries(df: pd.DataFrame,
 
         ax.set(
             xlabel=kwargs.get('xlabel', ''),
-            ylabel=kwargs.get('ylabel', Unit(f'{y}')),
+            ylabel=kwargs.get('ylabel', Unit(y)),
             xticks=kwargs.get('xticks', tick_time),
             xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
-            xlim=kwargs.get('xlim', [st_tm, fn_tm]),
-            ylim=kwargs.get('ylim', [None, None]),
+            xlim=kwargs.get('xlim', (st_tm, fn_tm)),
+            ylim=kwargs.get('ylim', (None, None)),
         )
 
     return ax
@@ -145,43 +144,43 @@ def _timeseries(df: pd.DataFrame,
 def timeseries(df):
     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
 
-    ax1 = _timeseries(df,
-                      y='Extinction',
-                      ax=ax1,
-                      set_visible=False,
-                      plot_kws=dict(color="b", label='Extinction'),
-                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                      ylim=[0., df.Extinction.max() * 1.1]
-                      )
+    _timeseries(df,
+                y='Extinction',
+                ax=ax1,
+                set_visible=False,
+                plot_kws=dict(color="b", label='Extinction'),
+                ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                ylim=[0., df.Extinction.max() * 1.1]
+                )
 
-    ax1 = _timeseries(df,
-                      y='Scattering',
-                      ax=ax1,
-                      set_visible=False,
-                      plot_kws=dict(color="g", label='Scattering'),
-                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                      ylim=[0., df.Extinction.max() * 1.1]
-                      )
+    _timeseries(df,
+                y='Scattering',
+                ax=ax1,
+                set_visible=False,
+                plot_kws=dict(color="g", label='Scattering'),
+                ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                ylim=[0., df.Extinction.max() * 1.1]
+                )
 
-    ax1 = _timeseries(df,
-                      y='Absorption',
-                      ax=ax1,
-                      set_visible=False,
-                      plot_kws=dict(color="r", label='Absorption'),
-                      ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                      ylim=[0., df.Extinction.max() * 1.1]
-                      )
+    _timeseries(df,
+                y='Absorption',
+                ax=ax1,
+                set_visible=False,
+                plot_kws=dict(color="r", label='Absorption'),
+                ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
+                ylim=[0., df.Extinction.max() * 1.1]
+                )
 
     ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, labelspacing=0.5, handlelength=1)
 
     # Temp, RH
-    ax2 = _timeseries(df,
-                      y='AT',
-                      ax=ax2,
-                      set_visible=False,
-                      plot_kws=dict(color='r', label=Unit('AT')),
-                      ylabel=Unit('AT'),
-                      ylim=[df.AT.min() - 2, df.AT.max() + 2])
+    _timeseries(df,
+                y='AT',
+                ax=ax2,
+                set_visible=False,
+                plot_kws=dict(color='r', label=Unit('AT')),
+                ylabel=Unit('AT'),
+                ylim=[df.AT.min() - 2, df.AT.max() + 2])
 
     _timeseries(df,
                 y='RH',

@@ -40,13 +40,13 @@
 
 ## <div align="center">Visual Example</div>
 
-|                       **PSD**                        |                  **Heatmap**                  |              **Three_dimension**              |
-|:----------------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
-|           ![PSD 1](assets/figure/psd.png)            | ![PSD Heatmap](assets/figure/psd_heatmap.png) |      ![PSD 3D](assets/figure/psd_3D.png)      |
-|                      **Donuts**                      |                  **BarPlot**                  |         **Mutiply Linear Regression**         |
-|     ![IMPROVE donuts](assets/figure/IMPROVE.png)     | ![IMPROVE bar](assets/figure/IMPROVE_bar.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
-|                **Correlation Matrix**                |                                               |                                               |
-| ![Correlation Matrix](assets/figure/corr_matrix.png) |                                               |                                               |
+|                       **PSD**                        |                   **Heatmap**                    |                **Heatmap_tms**                |              **Three_dimension**              |
+|:----------------------------------------------------:|:------------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
+|           ![PSD 1](assets/figure/psd.png)            |    ![PSD Heatmap](assets/figure/heatmap.png)     | ![PSD Heatmap](assets/figure/psd_heatmap.png) |      ![PSD 3D](assets/figure/psd_3D.png)      |
+|                      **Donut**                       |                    **Dounts**                    |                  **BarPlot**                  |         **Mutiply Linear Regression**         |
+|  ![IMPROVE donuts](assets/figure/IMPROVE_donut.png)  | ![IMPROVE bar](assets/figure/IMPROVE_donuts.png) | ![IMPROVE bar](assets/figure/IMPROVE_bar.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
+|                **Correlation Matrix**                |                    **Mie_Q**                     |                  **Scatter**                  |                                               |
+| ![Correlation Matrix](assets/figure/corr_matrix.png) |        ![Mie Q](assets/figure/Mie_Q.png)         |     ![scatter](assets/figure/scatter.png)     |                                               |
 
 
 
