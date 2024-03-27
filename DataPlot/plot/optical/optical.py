@@ -1,32 +1,30 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-
+from matplotlib.pyplot import Axes
 from PyMieScatt import ScatteringFunction
 from typing import Literal
-from pathlib import Path
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
-from DataPlot.plot import set_figure, scatter, linear_regression
+from DataPlot.plot.core import set_figure
+from DataPlot.plot.templates import scatter, linear_regression
 from DataPlot.process import DataBase
 
 
-mapping_dic = {'AS':    {'m': 1.53 + 0j,    'density': 1.73, 'label': fr'$NH_{4}NO_{3}$',       'color': '#A65E58'},
-               'AN':    {'m': 1.55 + 0j,    'density': 1.77, 'label': fr'$(NH_{4})_{2}SO_{4}$', 'color': '#A5BF6B'},
-               'OM':    {'m': 1.54 + 0j,    'density': 1.40, 'label': 'OM',                     'color': '#F2BF5E'},
-               'Soil':  {'m': 1.56 + 0.01j, 'density': 2.60, 'label': 'Soil',                   'color': '#3F83BF'},
-               'SS':    {'m': 1.54 + 0j,    'density': 1.90, 'label': 'SS',                     'color': '#B777C2'},
-               'BC':    {'m': 1.80 + 0.54j, 'density': 1.50, 'label': 'BC',                     'color': '#D1CFCB'},
-               'Water': {'m': 1.333 + 0j,   'density': 1.00, 'label': 'Water',                  'color': '#96c8e6'}}
+mapping_dic = {'AS': {'m': 1.53 + 0j, 'density': 1.73, 'label': fr'$NH_{4}NO_{3}$', 'color': '#A65E58'},
+               'AN': {'m': 1.55 + 0j, 'density': 1.77, 'label': fr'$(NH_{4})_{2}SO_{4}$', 'color': '#A5BF6B'},
+               'OM': {'m': 1.54 + 0j, 'density': 1.40, 'label': 'OM', 'color': '#F2BF5E'},
+               'Soil': {'m': 1.56 + 0.01j, 'density': 2.60, 'label': 'Soil', 'color': '#3F83BF'},
+               'SS': {'m': 1.54 + 0j, 'density': 1.90, 'label': 'SS', 'color': '#B777C2'},
+               'BC': {'m': 1.80 + 0.54j, 'density': 1.50, 'label': 'BC', 'color': '#D1CFCB'},
+               'Water': {'m': 1.333 + 0j, 'density': 1.00, 'label': 'Water', 'color': '#96c8e6'}}
 
 
 @set_figure(figsize=(6, 6))
-def Q_plot(
-        species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
-        x: Literal["dp", "sp"] = 'dp',
-        y: Literal["Q", "MEE"] = "Q",
-        mode: Literal["ext", "sca", "abs"] = 'ext',
-        **kwargs):
-
+def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
+           x: Literal["dp", "sp"] = 'dp',
+           y: Literal["Q", "MEE"] = "Q",
+           mode: Literal["ext", "sca", "abs"] = 'ext',
+           **kwargs) -> Axes:
     dp = np.geomspace(10, 10000, 5000)
 
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
@@ -63,7 +61,8 @@ def Q_plot(
             mapping_dic[specie]['Q'] = Mie_Q(mapping_dic[specie]['m'], 550, dp)
             mapping_dic[specie]['MEE'] = Mie_MEE(mapping_dic[specie]['m'], 550, dp, mapping_dic[specie]['density'])
 
-            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2, zorder=3)
+            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2,
+                     zorder=3)
 
     else:
         legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
@@ -78,7 +77,8 @@ def Q_plot(
         mapping_dic[species]['Q'] = Mie_Q(mapping_dic[species]['m'], 550, dp)
         mapping_dic[species]['MEE'] = Mie_MEE(mapping_dic[species]['m'], 550, dp, mapping_dic[species]['density'])
 
-        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2, zorder=3)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2,
+                 zorder=3)
         plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1], linestyle='-', alpha=1, lw=2)
         plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2], linestyle='-', alpha=1, lw=2)
         plt.text(0.04, 0.92, mapping_dic[species]['label'], transform=ax.transAxes, weight='bold')
@@ -92,12 +92,13 @@ def Q_plot(
     ylabel = kwargs.get('ylabel') or ylabel
     ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
 
-    plt.show()
     # fig.savefig(PATH_MAIN/f'Q_{species}')
+
+    return ax
 
 
 @set_figure(figsize=(12, 5))
-def IJ_couple():
+def IJ_couple() -> Axes:
     """ 測試實虛部是否互相影響
 
     :return:
@@ -107,7 +108,8 @@ def IJ_couple():
     a = Mie_Q(1.50 + 0.01j, 550, dp)
     b = Mie_Q(1.50 + 0.1j, 550, dp)
     c = Mie_Q(1.50 + 0.5j, 550, dp)
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 2)
+    (ax1, ax2) = ax
     size_para = math.pi * dp / 550
 
     ax1.plot(size_para, a[1], 'k-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.01$')
@@ -131,12 +133,14 @@ def IJ_couple():
     ax2.set_ylabel(r'$\bf Absorption\ efficiency\ (Q_{{abs}})$')
 
     fig.suptitle(r'$\bf n\ =\ 1.50 $')
-    plt.show()
     # fig.savefig(PATH_MAIN/f'IJ_couple')
+
+    return ax
 
 
 @set_figure(figsize=(6, 5))
-def RRI_2D(mode: Literal["ext", "sca", "abs"] = 'ext', **kwargs):
+def RRI_2D(mode: Literal["ext", "sca", "abs"] = 'ext',
+           **kwargs) -> Axes:
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
     typ = mode_mapping.get(mode, None)
@@ -158,14 +162,16 @@ def RRI_2D(mode: Literal["ext", "sca", "abs"] = 'ext', **kwargs):
         im = plt.imshow(arr, extent=(1.3, 2, 0, 0.7), cmap='jet', origin='lower')
         color_bar = plt.colorbar(im, extend='both')
         color_bar.set_label(label=fr'$\bf Scattering\ efficiency\ (Q_{{{mode}}})$')
-        plt.show()
+
         # fig.savefig(PATH_MAIN/f'RRI_{mode}_{dp}')
+
+    return ax
 
 
 @set_figure(figsize=(5, 5), fs=10)
 def scattering_phase(m: complex = 1.55 + 0.01j,
                      wave: float = 600,
-                     dp: float = 200):
+                     dp: float = 200) -> Axes:
     theta, _SL, _SR, _SU = ScatteringFunction(m, wave, dp)
 
     SL = np.append(_SL, _SL[::-1])
@@ -174,8 +180,7 @@ def scattering_phase(m: complex = 1.55 + 0.01j,
 
     angles = ['0', '60', '120', '180', '240', '300']
 
-    plt.figure()
-    plt.subplot(polar=True)
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
 
     theta = np.linspace(0, 2 * np.pi, len(SL))
 
@@ -188,9 +193,10 @@ def scattering_phase(m: complex = 1.55 + 0.01j,
     plt.plot(theta, SU, '-', linewidth=2, color='#621129', label='SU')
     plt.fill(theta, SU, '#f5afbd', alpha=0.5)
 
-    plt.legend(prop={'weight': 'bold'}, loc='best', bbox_to_anchor=(1, 0, 0.2, 1), frameon=False)
+    plt.legend(loc='best', bbox_to_anchor=(1, 0, 0.2, 1), prop={'weight': 'bold'})
     plt.title(r'$\bf Scattering\ phase\ function$')
-    plt.show()
+
+    return ax
 
 
 def verify_scat_plot():
@@ -200,8 +206,10 @@ def verify_scat_plot():
 
 
 def extinction_sensitivity():
-    scatter(DataBase, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD', regression=True, diagonal=True)
-    scatter(DataBase, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI', regression=True, diagonal=True)
+    scatter(DataBase, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD',
+            regression=True, diagonal=True)
+    scatter(DataBase, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI',
+            regression=True, diagonal=True)
 
 
 @set_figure
@@ -236,11 +244,18 @@ def response_surface(**kwargs):
     xlabel = kwargs.get('xlabel', r'$\bf Real\ part\ (n)$')
     ylabel = kwargs.get('ylabel', r'$\bf GMD\ (nm)$')
     zlabel = kwargs.get('zlabel', r'$\bf Extinction\ (1/Mm)$')
-    title = kwargs.get('title', r'$\bf Sensitive\ test\ of\ Extinction$')
+    title = kwargs.get('title', r'$\bf Sensitive\ tests\ of\ Extinction$')
     ax.set(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, title=title)
 
     ax.zaxis.get_offset_text().set_visible(False)
-    exponent = int('{:.2e}'.format(np.max(ext)).split('e')[1])
+    exponent = math.floor(math.log10(np.max(ext)))
     ax.text(ax.get_xlim()[1] * 1.01, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1,
-            '$\\times\\mathdefault{10^{%d}}$' % exponent)
+            s=fr'${{\times}}\ 10^{exponent}$')
     ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
+
+    return ax
+
+
+
+if __name__ == '__main__':
+    response_surface()

@@ -1,17 +1,15 @@
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.colors as mcolors
-import numpy as np
+import matplotlib.colors as plc
+import matplotlib.pyplot as plt
 from windrose import WindroseAxes
 from DataPlot.process import *
-from DataPlot.plot import set_figure
+from DataPlot.plot.core import *
 
 
 @set_figure(fs=6)
-def wind_heatmap(ws: pd.Series, wd: pd.Series, xticklabels):
-    print('Plot: wind_heatmap')
-
+def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
     def drawArrow(A, B, ax: plt.Axes):  # 畫箭頭
         _ax = ax.twinx()
         if A[0] == B[0] and A[1] == B[1]:  # 靜風畫點
@@ -32,10 +30,10 @@ def wind_heatmap(ws: pd.Series, wd: pd.Series, xticklabels):
         ax.tick_params(axis='x', rotation=90)
         plt.tight_layout()
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(8, 2))
     uniform_data = [ws]
     colors = ['lightskyblue', 'darkturquoise', 'lime', 'greenyellow', 'orangered', 'red']
-    clrmap = mcolors.LinearSegmentedColormap.from_list("mycmap", colors)  # 自定义色标
+    clrmap = plc.LinearSegmentedColormap.from_list("mycmap", colors)  # 自定义色标
     sns.heatmap(uniform_data, square=True, annot=True, fmt=".2f", linewidths=.5, cmap=clrmap,
                 yticklabels=['Wind speed (m/s)'], xticklabels=xticklabels, cbar=False, vmin=0, vmax=5, ax=ax)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
@@ -56,7 +54,6 @@ def wind_heatmap(ws: pd.Series, wd: pd.Series, xticklabels):
 
 @set_figure(fs=15)
 def wind_rose(ws: pd.Series, wd: pd.Series):
-    print('Plot: wind_rose')
     color_lst = ['#8ecae6', '#f1dca7', '#f4a261', '#bc3908']
 
     fig, ax = plt.subplots(figsize=(4, 4))
@@ -72,7 +69,35 @@ def wind_rose(ws: pd.Series, wd: pd.Series):
     # fig.savefig(f'windrose/windrose_{state}.png')
 
 
+def wind_heatmap(ws, wd, values):  # CBPF
+    # TODO:
+    ws = ws.to_numpy()
+    wd = wd.to_numpy()
+    values = values.to_numpy()
+
+    x = []
+    y = []
+    val = []
+    theta = []
+    for _ws, _wd, _values in zip(ws, wd, values):
+        if not pd.isna(_values):
+            x.append(_ws*np.sin(_wd/180 * np.pi))
+            y.append(_ws*np.cos(_wd/180 * np.pi))
+            val.append(_ws)
+            theta.append(_wd/180 * np.pi)
+        else:
+            pass
+
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+    # plt.scatter(theta, val)
+
+    surf, _ = ax.pcolormesh(x, y, val, shading='auto', antialiased=True)
+    pass
+
+
 if __name__ == "__main__":
-    df = DataBase.copy()[:20]
-    wind_heatmap(df['WS'], df['WD'], df.index.strftime('%F'))
-    wind_rose(df['WS'], df['WD'])
+    df = DataBase.copy()
+    # wind_heatmap(df, df['WS'], df['WD'], df.index.strftime('%F'))
+    # wind_rose(df['WS'], df['WD'])
+    df = df[['WS', 'WD', 'Extinction']].dropna()
+    wind_heatmap(df['WS'], df['WD'], df['Extinction'])

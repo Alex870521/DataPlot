@@ -32,7 +32,7 @@ class Pie:
                 unit: str,
                 style: Literal["pie", 'donut'],
                 ax: plt.Axes | None = None,
-                symbol=True,
+                symbol: bool = True,
                 **kwargs) -> plt.Axes:
         """
         Create a pie or donut chart based on the provided data.

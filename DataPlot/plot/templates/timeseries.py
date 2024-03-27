@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.pyplot import Axes
 from matplotlib.cm import ScalarMappable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
@@ -8,10 +9,9 @@ from DataPlot.plot.core import *
 
 
 def _inset_colorbar(axes_image: ScalarMappable,
-                    ax: plt.Axes,
+                    ax: Axes,
                     orientation: Literal['vertical', 'horizontal'] = 'vertical',
-                    inset_kws={},
-                    cbar_kws={}):
+                    **kwargs):
     """
 
     Parameters
@@ -26,7 +26,6 @@ def _inset_colorbar(axes_image: ScalarMappable,
     -------
 
     """
-    default_inset_kws = {}
     if orientation == 'vertical':
         default_inset_kws = dict(
             width="1%",
@@ -37,7 +36,7 @@ def _inset_colorbar(axes_image: ScalarMappable,
             borderpad=0
         )
 
-    if orientation == 'horizontal':
+    else:
         default_inset_kws = dict(
             width="35%",
             height="7%",
@@ -47,7 +46,7 @@ def _inset_colorbar(axes_image: ScalarMappable,
             borderpad=0
         )
 
-    default_inset_kws.update(inset_kws)
+    default_inset_kws.update(kwargs.get('inset_kws', {}))
 
     # create cax for colorbar
     cax = inset_axes(ax, **default_inset_kws)
@@ -57,7 +56,7 @@ def _inset_colorbar(axes_image: ScalarMappable,
         cmap='jet',
     )
 
-    default_cbar_kws.update(cbar_kws)
+    default_cbar_kws.update(kwargs)
 
     # Set clb_kws
     plt.colorbar(mappable=axes_image, cax=cax, **default_cbar_kws)
@@ -67,19 +66,16 @@ def _timeseries(df: pd.DataFrame,
                 y: str,
                 c: str = None,
                 style: Literal['scatter', 'bar'] = 'scatter',
-                ax: plt.Axes | None = None,
+                ax: Axes | None = None,
                 set_visible=True,
-                fig_kws={},
-                plot_kws={},
-                cbar_kws={},
                 **kwargs):
+
     time = df.index.copy()
 
     if ax is None:
-        fig, ax = plt.subplots(**fig_kws)
+        fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
 
     # Set the plot_kws
-    default_plot_kws = {}
     if c is not None and style == 'scatter':  # scatterplot
         default_plot_kws = dict(
             marker='o',
@@ -93,11 +89,11 @@ def _timeseries(df: pd.DataFrame,
             c=df[c],
         )
 
-        default_plot_kws.update(plot_kws)
+        default_plot_kws.update(kwargs.get('plot_kws', {}))
 
         ax.scatter(time, df[y], **default_plot_kws)
 
-        _inset_colorbar(ax.get_children()[0], ax, cbar_kws=cbar_kws)
+        _inset_colorbar(ax.get_children()[0], ax, **kwargs.get('cbar_kws', {}))
 
     elif c is not None and style == 'bar':  # bar
         default_plot_kws = dict(
@@ -107,18 +103,16 @@ def _timeseries(df: pd.DataFrame,
             cmap='jet',
         )
 
-        default_plot_kws.update(plot_kws)
+        default_plot_kws.update(kwargs.get('plot_kws', {}))
 
         scalar_map, colors = Color.color_maker(df[c].values, cmap=default_plot_kws.pop('cmap'))
 
-        ax.bar(time, df[y], color=scalar_map.to_rgba(colors), width=0.0417, edgecolor='None', linewidth=0)
+        ax.bar(time, df[y], color=scalar_map.to_rgba(colors), **default_plot_kws)
 
-        _inset_colorbar(scalar_map, ax, cbar_kws=cbar_kws)
+        _inset_colorbar(scalar_map, ax, **kwargs.get('cbar_kws', {}))
 
     else:  # line plot
-        default_plot_kws.update(plot_kws)
-
-        ax.plot(time, df[y], **default_plot_kws)
+        ax.plot(time, df[y], **kwargs.get('plot_kws', {}))
 
     if not set_visible:
         ax.axes.xaxis.set_visible(False)
@@ -141,9 +135,13 @@ def _timeseries(df: pd.DataFrame,
 
 
 @set_figure(fs=10)
-def timeseries(df):
-    fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
+def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
 
+    if rolling is not None:
+        df = df.rolling(rolling).mean(numeric_only=True)
+
+    fig, ax = plt.subplots(5, 1, figsize=(len(df.index) * 0.02, 6))
+    (ax1, ax2, ax3, ax4, ax5) = ax
     _timeseries(df,
                 y='Extinction',
                 ax=ax1,
@@ -220,4 +218,5 @@ def timeseries(df):
                 )
 
     # fig.savefig(f'tms_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
-    plt.show()
+
+    return ax

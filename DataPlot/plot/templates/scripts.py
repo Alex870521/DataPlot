@@ -1,22 +1,23 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from matplotlib import colormaps
+from matplotlib.pyplot import Axes
 from matplotlib.ticker import AutoMinorLocator
 from typing import Literal
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from scipy.stats import pearsonr
 from scipy.optimize import curve_fit
-from DataPlot.plot.core import *
+from DataPlot.plot.core import set_figure
 from DataPlot.process import *
 
 
-@set_figure(figsize=(6, 6), fs=8)
+@set_figure(fs=8)
 def corr_matrix(data: pd.DataFrame,
                 cmap: str = "RdBu",
-                ax: plt.Axes | None = None,
-                ) -> plt.Axes:
+                ax: Axes | None = None,
+                ) -> Axes:
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -87,7 +88,7 @@ def corr_matrix(data: pd.DataFrame,
                      bbox_to_anchor=(1.02, 0., 1, 1),
                      bbox_transform=ax.transAxes,
                      borderpad=0)
-    plt.subplots_adjust(bottom=0.15, right=0.8)
+
     cbar = plt.colorbar(mappable=axes_image, cax=cax, label=r'$R^{2}$')
 
     cbar.set_ticks([0, 0.25, 0.5, 0.75, 1])
@@ -103,7 +104,6 @@ def corr_matrix(data: pd.DataFrame,
     )
 
     ax.legend(handles=[point2], labels=['p < 0.05'], bbox_to_anchor=(0.05, 1, 0.1, 0.05))
-    plt.show()
 
     return ax
 
@@ -113,12 +113,10 @@ def diurnal_pattern(data_set: pd.DataFrame,
                     data_std: pd.DataFrame,
                     y: str | list[str],
                     std_area=0.5,
-                    ax: plt.Axes | None = None,
-                    **kwargs) -> plt.Axes:
+                    ax: Axes | None = None,
+                    **kwargs) -> Axes:
     if ax is None:
         fig, ax = plt.subplots()
-
-    linecolors = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange', 'tab:brown', 'tab:grey', 'tab:pink', 'tab:olive']
 
     Hour = range(0, 24)
 
@@ -126,8 +124,8 @@ def diurnal_pattern(data_set: pd.DataFrame,
     std = data_std[y] * std_area
 
     # Plot Diurnal pattern
-    ax.plot(Hour, mean, 'r')
-    ax.fill_between(Hour, y1=mean + std, y2=mean - std, alpha=0.5, color=linecolors[0], linewidth=2, edgecolor=None)
+    ax.plot(Hour, mean, 'blue')
+    ax.fill_between(Hour, y1=mean + std, y2=mean - std, alpha=0.5, color='blue', edgecolor=None)
 
     ax.set(xlabel=kwargs.get('xlabel', 'Hours'),
            ylabel=kwargs.get('ylabel', Unit(y)),
@@ -139,7 +137,6 @@ def diurnal_pattern(data_set: pd.DataFrame,
     ax.tick_params(axis='x', which='minor')
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-2, 3), useMathText=True)
-    plt.show()
 
     return ax
 
@@ -148,7 +145,7 @@ def diurnal_pattern(data_set: pd.DataFrame,
 def koschmieder(df: pd.DataFrame,
                 y: Literal['Vis_Naked', 'Vis_LPV'],
                 function: Literal['log', 'reciprocal'] = 'log',
-                ax: plt.Axes | None = None,
+                ax: Axes | None = None,
                 **kwargs):  # x = Visibility, y = Extinction, log-log fit!!
     def _log_fit(x, y, func=lambda x, a: -x + a):
         x_log = np.log(x)
@@ -177,7 +174,7 @@ def koschmieder(df: pd.DataFrame,
         return popt, pcov
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=(5, 6))
+        fig, ax = plt.subplots()
 
     _df1 = df[['Extinction', 'ExtinctionByGas', y]].dropna().copy()
     _df2 = df[['total_ext_dry', 'ExtinctionByGas', y]].dropna().copy()
@@ -276,15 +273,14 @@ def koschmieder(df: pd.DataFrame,
     plt.title(r'$\bf Koschmieder\ relationship$')
     plt.xlabel(f'{y} (km)')
     plt.ylabel(r'$\bf Extinction\ coefficient\ (1/Mm)$')
-    plt.show()
 
     return ax
 
 
-@set_figure(figsize=(6, 5))
-def gf_pm_ext():
+@set_figure
+def gf_pm_ext() -> Axes:
     fig, ax = plt.subplots()
-    plt.subplots_adjust(right=0.8)
+
     npoints = 1000
     xreg = np.linspace(DataBase.PM25.min(), DataBase.PM25.max(), 83)
     yreg = np.linspace(DataBase.gRH.min(), DataBase.gRH.max(), 34)
@@ -305,10 +301,6 @@ def gf_pm_ext():
     def f(x, y):
         return popt[0] * (x * y) ** (popt[1])
 
-    def fmt(x):
-        s = f"{x:.0f} 1/Mm"
-        return rf"{s}"
-
     plt.xlabel(Unit('PM25'))
     plt.ylabel('GF(RH)')
     plt.xlim(DataBase.PM25.min(), DataBase.PM25.max())
@@ -318,9 +310,9 @@ def gf_pm_ext():
     # pcolor = ax.pcolormesh(X, Y, (X * 4.5 * Y ** (1 / 3)), cmap='jet', shading='auto', vmin=0, vmax=843, alpha=0.8)
     cont = ax.contour(X, Y, f(X, Y), colors='black', levels=5, vmin=0, vmax=f(X, Y).max(), linewidths=2)
     conf = ax.contourf(X, Y, f(X, Y), cmap='YlGnBu', levels=100, vmin=0, vmax=f(X, Y).max())
-    ax.clabel(cont, colors=['black'], fmt=fmt, fontsize=16)
+    ax.clabel(cont, colors=['black'], fmt=lambda s: f"{s:.0f} 1/Mm")
 
-    cax = inset_axes(ax, width="3%",
+    cax = inset_axes(ax, width="5%",
                      height="100%",
                      loc='lower left',
                      bbox_to_anchor=(1.02, 0., 1, 1),
@@ -328,47 +320,20 @@ def gf_pm_ext():
                      borderpad=0)
 
     color_bar = plt.colorbar(conf, cax=cax)
-    color_bar.set_label(label='Extinction (1/Mm)', weight='bold', size=16)
-    color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int), size=16)
-    plt.show()
+    color_bar.set_label(label='Extinction (1/Mm)')
+    color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int))
+
+    return ax
 
 
-@set_figure(figsize=(6, 5))
 def four_quar():
     subdf = DataBase[['Vis_LPV', 'PM25', 'RH', 'VC']].dropna().resample('3h').mean()
-
-    item = 'RH'
-    fig, ax = plt.subplots()
-    plt.subplots_adjust(right=0.8, bottom=0.125)
-    sc = ax.scatter(subdf['PM25'], subdf['Vis_LPV'], s=50 * (subdf[item] / subdf[item].max()) ** 4, c=subdf['VC'],
-                    norm=plt.Normalize(vmin=0, vmax=2000), cmap='YlGnBu')
-
-    axins = inset_axes(ax, width="5%", height="100%", loc='lower left',
-                       bbox_to_anchor=(1.02, 0., 1, 1),
-                       bbox_transform=ax.transAxes,
-                       borderpad=0)
-    color_bar = plt.colorbar(sc, cax=axins, orientation='vertical')
-    color_bar.set_label(label=Unit('VC'))
-
-    ax.tick_params(axis='x', which='major', direction="out", length=6)
-    ax.tick_params(axis='y', which='major', direction="out", length=6)
-    ax.set_xlim(0., 80)
-    ax.set_ylim(0., 50)
-    ax.set_ylabel(r'$\bf Visibility\ (km)$')
-    ax.set_xlabel(r'$\bf PM_{2.5}\ (\mu g/m^3)$')
-
-    dot = np.linspace(subdf[item].min(), subdf[item].max(), 6).round(-1)
-
-    for dott in dot[1:-1]:
-        ax.scatter([], [], c='k', alpha=0.8, s=200 * (dott / subdf[item].max()) ** 4, label='{:.0f}'.format(dott))
-
-    ax.legend(loc='upper right', bbox_to_anchor=(0.8, 0.8, 0.2, 0.2), title=Unit('RH'))
-
-    plt.show()
+    scatter(subdf, x='PM25', y='Vis_LPV', c='VC', s='RH', cmap='YlGnBu', fig_kws={}, plot_kws={})
 
 
 if __name__ == '__main__':
     # koschmieder(DataBase, 'Vis_LPV', 'log')
     # koschmieder(DataBase, 'Vis_Naked', 'reciprocal')
-    four_quar()
+    corr_matrix(DataBase)
+    # four_quar()
     gf_pm_ext()

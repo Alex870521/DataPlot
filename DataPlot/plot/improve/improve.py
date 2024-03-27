@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import Axes
 from scipy.optimize import curve_fit
 from DataPlot.process import *
 from DataPlot.plot.core import *
@@ -69,7 +70,7 @@ def pie_plot():
 @set_figure(figsize=(10, 6))
 def chemical_enhancement(data_set: pd.DataFrame = mass_comp3_dict,
                          data_std: pd.DataFrame = mass_comp3_dict_std,
-                         ax: plt.Axes | None = None,
+                         ax: Axes | None = None,
                          **kwargs):
     if ax is None:
         fig, ax = plt.subplots()
@@ -133,14 +134,14 @@ def MLR_IMPROVE():
 
     # multiple_linear_regression(df, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y='Scattering', add_constant=True)
     # multiple_linear_regression(df, x=['POC', 'SOC', 'EC'], y='Absorption', add_constant=True)
-    # multiple_linear_regression(df, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], y='Extinction', add_constant=True)
+    multiple_linear_regression(df, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], y='Extinction', add_constant=False)
 
     multiplier = [2.675, 4.707, 11.6, 7.272, 0, 0.131, 10.638]
     df['Localized'] = df[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']].mul(multiplier).sum(axis=1)
     modify_IMPROVE = DataReader('modified_IMPROVE.csv')['total_ext_dry'].rename('Modified')
     revised_IMPROVE = DataReader('revised_IMPROVE.csv')['total_ext_dry'].rename('Revised')
 
-    df = concat([df, revised_IMPROVE, modify_IMPROVE], axis=1)
+    df = pd.concat([df, revised_IMPROVE, modify_IMPROVE], axis=1)
 
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']].mul(multiplier)
     mean, std = DataClassifier(n_df, 'State', statistic='Table')
@@ -153,21 +154,20 @@ def MLR_IMPROVE():
 
 frh = DataReader('fRH.json')
 
-@set_figure
-def fRH_plot() -> plt.Axes:
-    print('Plot: fRH_plot')
 
-    fig, ax = plt.subplots( figsize=(6, 6))
-    plt.plot(frh.index, frh['fRH'], 'k-o', lw=2)
-    plt.plot(frh.index, frh['fRHs'], 'g-o', lw=2)
-    plt.plot(frh.index, frh['fRHl'], 'r-o', lw=2)
-    plt.plot(frh.index, frh['fRHSS'], 'b-o', lw=2)
+@set_figure
+def fRH_plot() -> Axes:
+    fig, ax = plt.subplots()
+    plt.plot(frh.index, frh['fRH'], 'k-o')
+    plt.plot(frh.index, frh['fRHs'], 'g-o')
+    plt.plot(frh.index, frh['fRHl'], 'r-o')
+    plt.plot(frh.index, frh['fRHSS'], 'b-o')
     plt.xlim(0, 100)
     plt.ylim(1, )
     plt.title(r'$\bf Hygroscopic\ growth\ factor$')
     plt.grid(axis='y', color='gray', linestyle='dashed', linewidth=1, alpha=0.6)
-    plt.xlabel(r'$\bf RH\ (\%)$')
-    plt.ylabel(r'$\bf f(RH)$')
+    plt.xlabel('$RH (\\%)$')
+    plt.ylabel('$f(RH)$')
     plt.legend([fr'$\bf f(RH)_{{original}}$',
                 fr'$\bf f(RH)_{{small\ mode}}$',
                 fr'$\bf f(RH)_{{large\ mode}}$',
@@ -191,19 +191,19 @@ def fRH_fit():
 
     popt, pcov = curve_fit(f__RH, x1, y1)
     a, b, c = popt
-    yvals = f__RH(x1, a, b, c) #擬合y值
+    yvals = f__RH(x1, a, b, c)
     print(u'係數a:', a)
     print(u'係數b:', b)
     print(u'係數c:', c)
 
     popt2, pcov2 = curve_fit(f__RH, x2, y2)
     a2, b2, c2 = popt2
-    yvals2 = f__RH(x2, a2, b2, c2) #擬合y值
+    yvals2 = f__RH(x2, a2, b2, c2)
     print(u'係數a2:', a2)
     print(u'係數b2:', b2)
     print(u'係數c2:', c2)
 
-    fig, axes = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots()
     plt.scatter(x1, y1, label='original values')
     plt.plot(x1, yvals, 'r', label='polyfit values')
     plt.scatter(x2, y2, label='original values')
@@ -212,18 +212,16 @@ def fRH_fit():
     plt.ylabel(r'$\bf f(RH)$')
     plt.legend(loc='best')
     plt.title(r'$\bf Curve fit$')
-    plt.show()
 
 
 @set_figure
-def ammonium_rich(_df: pd.DataFrame, **kwargs) -> plt.Axes:
-    print('Plot: ammonium_rich')
-    df = _df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
+def ammonium_rich(df: pd.DataFrame, **kwargs) -> Axes:
+    df = df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
     df['required_ammonium'] = df['NO3-'] + 2 * df['SO42-']
 
     fig, ax = plt.subplots()
 
-    scatter = ax.scatter(df['required_ammonium'], df[['NH4+']], c=df[['PM25']].values,
+    scatter = ax.scatter(df['required_ammonium'].to_numpy(), df['NH4+'].to_numpy(), c=df['PM25'].to_numpy(),
                          vmin=0, vmax=70, cmap='jet', marker='o', s=10, alpha=1)
     ax.axline((0, 0), slope=1., color='r', lw=3, ls='--', label='1:1')
     ax.set_xlabel(r'$\bf NO_{3}^{-}\ +\ 2\ \times\ SO_{4}^{2-}\ (mole\ m^{-3})$')
@@ -246,4 +244,6 @@ def ammonium_rich(_df: pd.DataFrame, **kwargs) -> plt.Axes:
 if __name__ == '__main__':
     # pie_plot()
     # chemical_enhancement()
-    extinction_by_particle_gas()
+    # extinction_by_particle_gas()
+    MLR_IMPROVE()
+    # ammonium_rich(DataBase)

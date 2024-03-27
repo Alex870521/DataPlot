@@ -2,7 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as plc
-import matplotlib as mpl
+from matplotlib import colormaps
 
 
 class Color:
@@ -23,13 +23,9 @@ class Color:
                     'Transition': ['#4a9f1d', '#a7e984'],
                     'Event': ['#9f1d4a', '#e984a7']}
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def getColor(num: int = 6, cmap: str = 'jet_r'):
         category_colors = plt.colormaps[cmap](np.linspace(0.1, 0.9, num))
-
         return [plc.to_hex(category_colors[i]) for i in range(num)]
 
     @staticmethod
@@ -57,9 +53,7 @@ class Color:
     @staticmethod
     def color_maker(obj, cmap='Blues'):
         colors = np.nan_to_num(obj, nan=0)
-        colors_alpha = np.where(colors == 0, 0, 1)
-        cmap = mpl.colormaps[cmap]  # choose a colormap
-        scalar_map = plt.cm.ScalarMappable(cmap=cmap)  # create a scalar map for the colorbar
+        scalar_map = plt.cm.ScalarMappable(cmap=colormaps[cmap])  # create a scalar map for the colorbar
         scalar_map.set_array(colors)
         return scalar_map, colors
 
