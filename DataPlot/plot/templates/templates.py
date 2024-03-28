@@ -1,7 +1,8 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import Axes
 from typing import Literal
 from DataPlot.plot.core import *
 
@@ -32,9 +33,9 @@ class Pie:
                 labels: list[str],
                 unit: str,
                 style: Literal["pie", 'donut'],
-                ax: plt.Axes | None = None,
+                ax: Axes | None = None,
                 symbol: bool = True,
-                **kwargs) -> plt.Axes:
+                **kwargs) -> Axes:
         """
         Create a pie or donut chart based on the provided data.
 
@@ -105,7 +106,6 @@ class Pie:
         ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.0, 0, 0.5, 1))
 
         # fig.savefig(f"pie_{style}_{title}")
-        plt.show()
 
         return ax
 
@@ -114,9 +114,9 @@ class Pie:
     def donuts(data_set: pd.DataFrame | dict,
                labels: list[str],
                unit: str,
-               ax: plt.Axes | None = None,
+               ax: Axes | None = None,
                symbol=True,
-               **kwargs) -> plt.Axes:
+               **kwargs) -> Axes:
         """
         Plot a donut chart based on the data set.
 
@@ -183,7 +183,6 @@ class Pie:
                   bbox_to_anchor=(0.7, 0, 0.5, 1))
 
         # fig.savefig(f"donuts_{title}")
-        plt.show()
 
         return ax
 
@@ -196,11 +195,11 @@ class Bar:
                 data_std: pd.DataFrame | None,
                 labels: list[str],
                 unit: str,
-                display: Literal["stacked", "dispersed"] = "dispersed",
+                style: Literal["stacked", "dispersed"] = "dispersed",
                 orientation: Literal["va", "ha"] = 'va',
-                ax: plt.Axes | None = None,
+                ax: Axes | None = None,
                 symbol=True,
-                **kwargs):
+                **kwargs) -> Axes:
         """
         Parameters
         ----------
@@ -212,7 +211,7 @@ class Bar:
             The species names.
         unit : str
             The unit for the values.
-        display : {'stacked', 'dispersed'}, default 'dispersed'
+        style : {'stacked', 'dispersed'}, default 'dispersed'
             Whether to display the bars stacked or dispersed.
         orientation : {'va', 'ha'}, default 'va'
             The orientation of the bars, 'va' for vertical and 'ha' for horizontal.
@@ -254,7 +253,7 @@ class Bar:
         if ax is None:
             fig, ax = plt.subplots()
 
-        if display == "stacked":
+        if style == "stacked":
             for i in range(species):
                 widths = pct_data[:, i]
                 starts = data_cum[:, i] - pct_data[:, i]
@@ -268,7 +267,7 @@ class Bar:
                 if symbol:
                     ax.bar_label(_, fmt=_auto_label_pct, label_type='center', padding=0, fontsize=10, weight='bold')
 
-        if display == "dispersed":
+        if style == "dispersed":
             width = 0.1
             block = width / 4
 
@@ -285,18 +284,18 @@ class Bar:
                     ax.bar_label(_, fmt=_auto_label_pct, label_type='center', padding=0, fontsize=8, weight='bold')
 
         if orientation == 'va':
-            xticks = groups_arr + (species / 2 + 0.5) * (width + block) if display == "dispersed" else groups_arr
+            xticks = groups_arr + (species / 2 + 0.5) * (width + block) if style == "dispersed" else groups_arr
             ax.set_xticks(xticks, category_names, weight='bold')
-            ax.set_ylabel(Unit(unit) if display == "dispersed" else r'$\bf Contribution\ (\%)$')
-            ax.set_ylim(0, None if display == "dispersed" else 100)
+            ax.set_ylabel(Unit(unit) if style == "dispersed" else r'$\bf Contribution\ (\%)$')
+            ax.set_ylim(0, None if style == "dispersed" else 100)
             ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
 
         if orientation == 'ha':
             ax.invert_yaxis()
-            yticks = groups_arr + 3.5 * (width + block) if display == "dispersed" else groups_arr
+            yticks = groups_arr + 3.5 * (width + block) if style == "dispersed" else groups_arr
             ax.set_yticks(yticks, category_names, weight='bold')
-            ax.set_xlabel(Unit(unit) if display == "dispersed" else r'$\bf Contribution\ (\%)$')
-            ax.set_xlim(0, None if display == "dispersed" else 100)
+            ax.set_xlabel(Unit(unit) if style == "dispersed" else r'$\bf Contribution\ (\%)$')
+            ax.set_xlim(0, None if style == "dispersed" else 100)
             ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
 
         # fig.savefig(f"Barplot_{title}")
@@ -309,8 +308,8 @@ class Violin:
     @set_figure(figsize=(6, 6), fs=12)
     def violin(data_set: pd.DataFrame | dict,
                unit: str,
-               ax: plt.Axes | None = None,
-               **kwargs) -> plt.Axes:
+               ax: Axes | None = None,
+               **kwargs) -> Axes:
         """
         Generate a violin plot for multiple data sets.
 
@@ -370,6 +369,5 @@ class Violin:
         ax.set_xticks(x_position, xticks, fontweight='bold', fontsize=12)
 
         # fig.savefig(f'Violin_{unit}')
-        plt.show()
 
         return ax

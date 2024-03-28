@@ -11,18 +11,24 @@ from DataPlot.plot.templates import *
 
 __all__ = ['chemical_enhancement',
            'ammonium_rich',
+           'pie_IMPROVE',
            'MLR_IMPROVE',
            'fRH_plot',
+           'extinction_by_particle_gas'
            ]
 
 
 @set_figure(figsize=(10, 6))
-def chemical_enhancement(data_set: pd.DataFrame,
-                         data_std: pd.DataFrame,
+def chemical_enhancement(data_set: pd.DataFrame = None,
+                         data_std: pd.DataFrame = None,
                          ax: Axes | None = None,
                          **kwargs):
     if ax is None:
         fig, ax = plt.subplots()
+
+    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase, by='State', statistic='Table')
+    species = ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC']
+    data_set, data_std = ser_grp_sta.loc[:, species], ser_grp_sta_std.loc[:, species]
 
     width = 0.20
     block = width / 4
@@ -84,16 +90,16 @@ def ammonium_rich(df: pd.DataFrame = DataBase,
 
     scatter = ax.scatter(df['required_ammonium'].to_numpy(), df['NH4+'].to_numpy(), c=df['PM25'].to_numpy(),
                          vmin=0, vmax=70, cmap='jet', marker='o', s=10, alpha=1)
-    ax.axline((0, 0), slope=1., color='r', lw=3, ls='--', label='1:1')
+
+    ax.axline((0, 0), slope=1., color='k', lw=2, ls='--', alpha=0.5, label='1:1')
+    plt.text(0.97, 0.97, r'$\bf 1:1\ Line$', color='k', ha='right', va='top', transform=ax.transAxes)
+
     ax.set_xlabel(r'$\bf NO_{3}^{-}\ +\ 2\ \times\ SO_{4}^{2-}\ (mole\ m^{-3})$')
     ax.set_ylabel(r'$\bf NH_{4}^{+}\ (mole\ m^{-3})$')
     ax.set_xlim(0, 1.2)
     ax.set_ylim(0, 1.2)
     ax.set_xticks(ax.get_yticks())
     ax.set_title(kwargs.get('title', ''))
-
-    lines, labels = ax.get_legend_handles_labels()
-    ax.legend(lines, labels, loc='best')
 
     color_bar = plt.colorbar(scatter, extend='both')
     color_bar.set_label(label=Unit('PM25'), size=14)
@@ -103,11 +109,20 @@ def ammonium_rich(df: pd.DataFrame = DataBase,
 
 
 def pie_IMPROVE():
-    pass
+    Species1 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry']
+    Species2 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry', 'ALWC_ext']
+    Species3 = ['AS_ext', 'AN_ext', 'OM_ext', 'Soil_ext', 'SS_ext', 'EC_ext']
 
+    ser_grp_sta, _ = DataClassifier(DataBase, by='State', statistic='Table')
 
-def bar_IMPROVE():
-    pass
+    ext_dry_dict = ser_grp_sta.loc[:, Species1]
+    ext_amb_dict = ser_grp_sta.loc[:, Species2]
+    ext_mix_dict = ser_grp_sta.loc[:, Species3]
+
+    Pie.donuts(data_set=ext_dry_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
+    Pie.donuts(data_set=ext_mix_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
+    Pie.donuts(data_set=ext_amb_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC', 'ALWC'],
+               unit='Extinction', colors=Color.colors2)
 
 
 def MLR_IMPROVE(**kwargs):
@@ -161,9 +176,14 @@ def MLR_IMPROVE(**kwargs):
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']].mul(multiplier)
     mean, std = DataClassifier(n_df, 'State', statistic='Table')
 
+    ser_grp_sta, _ = DataClassifier(DataBase, by='State', statistic='Table')
+    mass_comp = ser_grp_sta.loc[:, ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']]
+
     # plot
     linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
                       regression=True, diagonal=True)
+    Pie.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
+               unit='PM25', colors=Color.colors3)
     Pie.donuts(mean, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
 
 
@@ -172,7 +192,7 @@ def fRH_plot(**kwargs) -> Axes:
     frh = DataReader('fRH.json')
 
     def fitting_func(RH, a, b, c):
-        f = a + b * (RH/100)**c
+        f = a + b * (RH / 100) ** c
         return f
 
     x = frh.index.to_numpy()
@@ -202,7 +222,24 @@ def fRH_plot(**kwargs) -> Axes:
     return ax
 
 
+def extinction_by_particle_gas():  # PG : sum of ext by particle and gas
+    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase, by='State', statistic='Table')
+    ext_particle_gas = ser_grp_sta.loc[:, ['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']]
+
+    Bar.barplot(data_set=ext_particle_gas, data_std=None,
+                labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
+                style="stacked",
+                unit='Extinction',
+                colors=Color.paired)
+
+    Pie.pieplot(data_set=ext_particle_gas,
+                labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
+                unit='Extinction',
+                style='donut',
+                colors=Color.paired)
+
+
 if __name__ == '__main__':
-    # chemical_enhancement()
+    chemical_enhancement()
     MLR_IMPROVE()
-    # ammonium_rich()
+    ammonium_rich()

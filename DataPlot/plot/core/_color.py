@@ -26,6 +26,8 @@ class Color:
                     'Transition': ['#4a9f1d', '#a7e984'],
                     'Event': ['#9f1d4a', '#e984a7']}
 
+    paired = [plt.get_cmap('Paired')(i) for i in range(4)]
+
     @staticmethod
     def getColor(num: int = 6, cmap: str = 'jet_r'):
         category_colors = plt.colormaps[cmap](np.linspace(0.1, 0.9, num))

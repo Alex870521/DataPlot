@@ -45,10 +45,10 @@ def set_figure(func=None,
                 plt.rcParams['legend.title_fontsize'] = 'medium'
                 plt.rcParams['legend.handlelength'] = 1.5
 
-                plt.rcParams['figure.figsize'] = figsize or (6, 6)
+                plt.rcParams['figure.figsize'] = figsize or (6, 5)
                 plt.rcParams['figure.dpi'] = 150
                 plt.rcParams['figure.subplot.left'] = 0.125
-                plt.rcParams['figure.subplot.right'] = 0.825
+                plt.rcParams['figure.subplot.right'] = 0.85
                 plt.rcParams['figure.subplot.bottom'] = 0.125
                 plt.rcParams['figure.subplot.top'] = 0.88
                 # plt.rcParams['figure.autolayout'] = True
