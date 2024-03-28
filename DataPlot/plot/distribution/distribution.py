@@ -14,7 +14,18 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.pyplot import Figure, Axes
 from matplotlib.ticker import ScalarFormatter, FuncFormatter
 from matplotlib.collections import PolyCollection
-from DataPlot.plot.core import set_figure, Unit, Color
+from DataPlot.plot.core import *
+from DataPlot.process import *
+
+
+__all__ = ['heatmap',
+           'heatmap_tms',
+           'plot_dist',
+           'three_dimension',
+           'curve_fitting',
+           'ls_mode',
+           'lognorm_dist',
+           ]
 
 
 @set_figure(fs=12)
@@ -595,3 +606,8 @@ def lognorm_dist(**kwargs) -> Axes:
     ax4.semilogx()
 
     return ax
+
+
+if __name__ == '__main__':
+    PNSD = DataReader('PNSD_dNdlogdp.csv')
+    heatmap(PNSD, unit="Number")

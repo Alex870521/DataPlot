@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 
 
+__all__ = ['Unit']
+
+
 class Unit:
     file_path = Path(__file__).parent / 'units.json'
     data = None

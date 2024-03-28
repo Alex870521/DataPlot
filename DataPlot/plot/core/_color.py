@@ -5,6 +5,9 @@ import matplotlib.colors as plc
 from matplotlib import colormaps
 
 
+__all__ = ['Color']
+
+
 class Color:
     linecolor = [{'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'},
                  {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'},

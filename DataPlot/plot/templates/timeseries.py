@@ -8,6 +8,9 @@ from typing import Literal
 from DataPlot.plot.core import *
 
 
+__all__ = ['timeseries']
+
+
 def _inset_colorbar(axes_image: ScalarMappable,
                     ax: Axes,
                     orientation: Literal['vertical', 'horizontal'] = 'vertical',

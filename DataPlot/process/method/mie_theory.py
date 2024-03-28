@@ -5,8 +5,7 @@ import math
 
 def Mie_Q(m: complex,
           wavelength: float,
-          dp: np.ndarray
-          ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+          dp: float | np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate Mie scattering efficiency (Q) for a distribution of spherical particles.
 
@@ -33,22 +32,17 @@ def Mie_Q(m: complex,
     >>> dp = np.array([0.1, 0.2, 0.5, 1.0])  # particle diameters in micrometers
     >>> result = Mie_Q(m, wavelength, dp)
     """
+    dp_arr = np.atleast_1d(dp)  # Ensure dp is a numpy array
 
-    try:
-        _length = len(dp)
-        result_list = list(map(lambda i: AutoMieQ(m, wavelength, dp[i], nMedium=1.0), range(_length)))
-        Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = map(np.array, zip(*result_list))
-
-    except TypeError:
-        _length = 1
-        Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = AutoMieQ(m, wavelength, dp, nMedium=1.0)
+    result_list = [AutoMieQ(m, wavelength, dp, nMedium=1.0) for dp in dp_arr]
+    Q_ext, Q_sca, Q_abs, g, Q_pr, Q_back, Q_ratio = np.array(result_list).T  # Transpose for proper unpacking
 
     return Q_ext, Q_sca, Q_abs
 
 
 def Mie_MEE(m: complex,
             wavelength: float,
-            dp: np.ndarray,
+            dp: float | np.ndarray,
             density: float):
     """
     Calculate mass extinction efficiency and other parameters.
@@ -79,7 +73,6 @@ def Mie_MEE(m: complex,
     >>> density = 1.2  # density of particles
     >>> result = Mie_MEE(m, wavelength, dp, density)
     """
-
     Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     MEE = (3 * Q_ext) / (2 * density * dp) * 1000
@@ -91,8 +84,8 @@ def Mie_MEE(m: complex,
 
 def Mie_PESD(m: complex,
              wavelength: float,
-             dp: np.ndarray,
-             ndp: np.ndarray):
+             dp: float | np.ndarray,
+             ndp: float | np.ndarray):
     """
     Simultaneously calculate "extinction distribution" and "integrated results" using the Mie_Q method.
 
@@ -122,11 +115,10 @@ def Mie_PESD(m: complex,
     >>> ndp = [100, 50, 30, 20]  # number concentration of particles
     >>> result = Mie_PESD(m, wavelength, dp, ndp)
     """
-
     Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     # dN / dlogdp
-    dNdlogdp = ndp
+    dNdlogdp = np.atleast_1d(ndp)
 
     # dN = equal to the area under n(dp)
     # The 1E-6 here is so that the final value is the same as 1/10^6m.
@@ -176,9 +168,9 @@ def Mie_Lognormal(m: complex,
     Note:
     The function uses the Mie_PESD function to calculate the scattering properties based on a lognormal size distribution.
     """
-
-    ithPart = lambda gammai, dp, geoMean, geoStdDev: (
-            (gammai / (np.sqrt(2 * np.pi) * np.log(geoStdDev) * dp)) * np.exp(-(np.log(dp) - np.log(geoMean)) ** 2 / (2 * np.log(geoStdDev) ** 2)))
+    ithPart = lambda gammai, dp, gmd, gsd: (
+            (gammai / (np.sqrt(2 * np.pi) * np.log(gsd) * dp)) *
+            np.exp(-(np.log(dp) - np.log(gmd)) ** 2 / (2 * np.log(gsd) ** 2)))
 
     dp = np.logspace(np.log10(lower), np.log10(upper), numberOfBins)
 
@@ -187,3 +179,10 @@ def Mie_Lognormal(m: complex,
     Bext, Bsca, Babs = Mie_PESD(m, wavelength, dp, ndp)
 
     return Bext, Bsca, Babs
+
+
+if __name__ == '__main__':
+    m = 1.5 + 0.02j
+    wavelength = 550  # in nm
+    dp = np.array([0.1, 0.2, 0.5, 1.0, 11, 150] * 100)  # particle diameters in micrometers
+    result = Mie_Q(m, wavelength, dp)

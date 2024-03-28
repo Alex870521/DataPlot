@@ -22,11 +22,12 @@ PVSD_amb_dis, PVSD_amb_dis_std = DataClassifier(PVSD, by='State', statistic='Tab
 
 ext_grp, _ = DataClassifier(PESD_inter, by='Extinction', statistic='Table', qcut=10)
 
-df_mean_all, df_std_all = DataClassifier(DataBase, by='Hour', statistic='Table')
 
-
-class TestDataPlot(unittest.TestCase):
+class TestDistribution(unittest.TestCase):
     def setUp(self):
+        # TODO: import the default size distribution data
+        # if data is None import default data from io.py
+
         self.data = {'Clean': np.array([1, 2, 3, 4]),
                      'Transition': np.array([2, 3, 4, 5]),
                      'Event': np.array([3, 4, 5, 6])}
@@ -36,18 +37,29 @@ class TestDataPlot(unittest.TestCase):
         plt.close()
         pass
 
-    def test_distribution(self):
+    def test_heatmap(self):
         ax = plot.distribution.heatmap(PNSD)
         self.assertIsInstance(ax, Axes)
 
-    def test_heatmap_tms(self):
-        plot.distribution.heatmap_tms(PNSD, freq='60d')
-        plot.distribution.heatmap_tms(PSSD, unit='Surface', freq='60d')
-        plot.distribution.heatmap_tms(PVSD, unit='Volume', freq='60d')
-        plot.distribution.heatmap_tms(PESD_inter, unit='Extinction', freq='60d')
+    def test_heatmap_tms_PNSD(self):
+        ax = plot.distribution.heatmap_tms(PNSD, freq='60d')
+        self.assertIsInstance(ax, Axes)
+
+    def test_heatmap_tms_PSSD(self):
+        ax = plot.distribution.heatmap_tms(PSSD, unit='Surface', freq='60d')
+        self.assertIsInstance(ax, Axes)
+
+    def test_heatmap_tms_PVSD(self):
+        ax = plot.distribution.heatmap_tms(PVSD, unit='Volume', freq='60d')
+        self.assertIsInstance(ax, Axes)
+
+    def test_heatmap_tms_PESD_inter(self):
+        ax = plot.distribution.heatmap_tms(PESD_inter, unit='Extinction', freq='60d')
+        self.assertIsInstance(ax, Axes)
 
     def test_curve_fitting(self):
-        plot.distribution.curve_fitting(np.array(Ext_amb_dis_internal.columns, dtype=float), Ext_amb_dis_internal.loc['Transition'], mode=3)
+        ax = plot.distribution.curve_fitting(np.array(Ext_amb_dis_internal.columns, dtype=float), Ext_amb_dis_internal.loc['Transition'], mode=3)
+        self.assertIsInstance(ax, Axes)
 
     def test_std_additional(self):
         ax = plot.distribution.plot_dist(self.data_set, data_std=self.data_set * 0.1)
@@ -61,10 +73,17 @@ class TestDataPlot(unittest.TestCase):
         ax = plot.distribution.plot_dist(self.data_set, additional='error')
         self.assertEqual(len(ax.get_legend().legend_handles), 5)  # Assuming 2 error curves added
 
-    def test_(self):
-        plot.distribution.three_dimension(ext_grp, unit='Extinction')
-        plot.distribution.ls_mode()
-        plot.distribution.lognorm_dist()
+    def test_three_dimension(self):
+        ax = plot.distribution.three_dimension(ext_grp, unit='Extinction')
+        self.assertIsInstance(ax, Axes)
+
+    def test_ls_mode(self):
+        ax = plot.distribution.ls_mode()
+        self.assertIsInstance(ax, Axes)
+
+    def test_lognorm_dist(self):
+        ax = plot.distribution.lognorm_dist()
+        self.assertIsInstance(ax, np.ndarray)
 
 
 if __name__ == '__main__':

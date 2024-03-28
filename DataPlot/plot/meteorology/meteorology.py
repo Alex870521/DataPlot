@@ -4,8 +4,14 @@ import seaborn as sns
 import matplotlib.colors as plc
 import matplotlib.pyplot as plt
 from windrose import WindroseAxes
-from DataPlot.process import *
 from DataPlot.plot.core import *
+from DataPlot.process import *
+
+
+__all__ = ['wind_tms',
+           'wind_rose',
+           'wind_heatmap',
+           ]
 
 
 @set_figure(fs=6)
@@ -49,7 +55,7 @@ def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
             a = np.array([0.5 + idx, 3.5])
             drawArrow(a, a, ax)
 
-    plt.show()
+    return ax
 
 
 @set_figure(fs=15)
@@ -67,6 +73,8 @@ def wind_rose(ws: pd.Series, wd: pd.Series):
     plt.show()
     # ax.set_legend(framealpha=0, bbox_to_anchor=[-.05,-.05], fontsize=fs-2., loc='lower left', ncol=3)
     # fig.savefig(f'windrose/windrose_{state}.png')
+
+    return ax
 
 
 def wind_heatmap(ws, wd, values):  # CBPF
@@ -91,7 +99,7 @@ def wind_heatmap(ws, wd, values):  # CBPF
     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
     # plt.scatter(theta, val)
 
-    surf, _ = ax.pcolormesh(x, y, val, shading='auto', antialiased=True)
+    # surf, _ = ax.pcolormesh(x, y, val, shading='auto', antialiased=True)
     pass
 
 

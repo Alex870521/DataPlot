@@ -1,13 +1,19 @@
 import math
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.pyplot import Axes
 from PyMieScatt import ScatteringFunction
 from typing import Literal
 from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
-from DataPlot.plot.core import set_figure
-from DataPlot.plot.templates import scatter, linear_regression
-from DataPlot.process import DataBase
+from DataPlot.plot.core import *
+
+
+__all__ = ['Q_plot',
+           'IJ_couple',
+           'RRI_2D',
+           'scattering_phase',
+           'response_surface',
+           ]
 
 
 mapping_dic = {'AS': {'m': 1.53 + 0j, 'density': 1.73, 'label': fr'$NH_{4}NO_{3}$', 'color': '#A65E58'},
@@ -19,13 +25,49 @@ mapping_dic = {'AS': {'m': 1.53 + 0j, 'density': 1.73, 'label': fr'$NH_{4}NO_{3}
                'Water': {'m': 1.333 + 0j, 'density': 1.00, 'label': 'Water', 'color': '#96c8e6'}}
 
 
-@set_figure(figsize=(6, 6))
+@set_figure
 def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
            x: Literal["dp", "sp"] = 'dp',
            y: Literal["Q", "MEE"] = "Q",
            mode: Literal["ext", "sca", "abs"] = 'ext',
            **kwargs) -> Axes:
-    dp = np.geomspace(10, 10000, 5000)
+    """
+    Generate a plot showing optical efficiency or mass optical efficiency for different particle species.
+
+    Parameters
+    ----------
+    species : Union[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"], list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]]]
+        The particle species or list of particle species to plot. Valid species include 'AS' (Ammonium Sulfate),
+        'AN' (Ammonium Nitrate), 'OM' (Organic Matter), 'Soil', 'SS' (Sea Salt), 'BC' (Black Carbon), and 'Water'.
+
+    x : Literal["dp", "sp"], optional
+        The x-axis parameter. 'dp' represents particle diameter, and 'sp' represents size parameter (alpha).
+        Default is 'dp'.
+
+    y : Literal["Q", "MEE"], optional
+        The y-axis parameter. 'Q' represents optical efficiency (Q_ext, Q_sca, Q_abs), and 'MEE' represents
+        mass optical efficiency (MEE, MSE, MAE). Default is 'Q'.
+
+    mode : Literal["ext", "sca", "abs"], optional
+        The mode of efficiency to plot. 'ext' for extinction efficiency, 'sca' for scattering efficiency,
+        and 'abs' for absorption efficiency. Default is 'ext'.
+
+    **kwargs
+        Additional keyword arguments to pass to the plot function.
+
+    Returns
+    -------
+    ax : Axes
+        Matplotlib Axes object containing the generated plot.
+
+    Examples
+    --------
+    Example usage of the Q_plot function:
+
+    >>> Q_plot('AS', x='dp', y='Q', mode='ext')
+    >>> Q_plot(['AS', 'AN'], x='sp', y='MEE')
+    """
+    dp = np.geomspace(10, 10000, 2000)
 
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
@@ -61,8 +103,7 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
             mapping_dic[specie]['Q'] = Mie_Q(mapping_dic[specie]['m'], 550, dp)
             mapping_dic[specie]['MEE'] = Mie_MEE(mapping_dic[specie]['m'], 550, dp, mapping_dic[specie]['density'])
 
-            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, linestyle='-', alpha=1, lw=2,
-                     zorder=3)
+            plt.plot(dp_, mapping_dic[specie][f'{y}'][typ], color=color, label=label, alpha=1, lw=2)
 
     else:
         legend_label = {'Q': [r'$\bf Q_{{ext}}$', r'$\bf Q_{{scat}}$', r'$\bf Q_{{abs}}$'],
@@ -77,16 +118,15 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
         mapping_dic[species]['Q'] = Mie_Q(mapping_dic[species]['m'], 550, dp)
         mapping_dic[species]['MEE'] = Mie_MEE(mapping_dic[species]['m'], 550, dp, mapping_dic[species]['density'])
 
-        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0], linestyle='-', alpha=1, lw=2,
-                 zorder=3)
-        plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1], linestyle='-', alpha=1, lw=2)
-        plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2], linestyle='-', alpha=1, lw=2)
+        plt.plot(dp_, mapping_dic[species][f'{y}'][0], color='b', label=legend[0])
+        plt.plot(dp_, mapping_dic[species][f'{y}'][1], color='g', label=legend[1])
+        plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2])
         plt.text(0.04, 0.92, mapping_dic[species]['label'], transform=ax.transAxes, weight='bold')
 
-    plt.legend(loc='best', prop={'weight': 'bold', 'size': 14}, handlelength=1.5, frameon=False)
-    plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=1, alpha=0.4)
+    ax.legend(loc='best', prop={'weight': 'bold'})
+    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
-    xlim = kwargs.get('xlim') or (dp_[0], dp_[-1])
+    xlim = kwargs.get('xlim') or (dp.min(), dp.max())
     ylim = kwargs.get('ylim') or (0, None)
     xlabel = kwargs.get('xlabel') or xlabel
     ylabel = kwargs.get('ylabel') or ylabel
@@ -97,24 +137,41 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
     return ax
 
 
-@set_figure(figsize=(12, 5))
-def IJ_couple() -> Axes:
-    """ 測試實虛部是否互相影響
+@set_figure(figsize=(9, 4))
+def IJ_couple(**kwargs) -> Axes:
+    """
+    Generate a plot to test the influence of imaginary parts on scattering and absorption efficiencies.
 
-    :return:
+    Parameters
+    ----------
+    **kwargs
+        Additional keyword arguments to pass to the plot function.
+
+    Returns
+    -------
+    ax : Axes
+        Matplotlib Axes object containing the generated plot.
+
+    Examples
+    --------
+    Example usage of the IJ_couple function:
+
+    >>> ax = IJ_couple()
     """
     dp = np.geomspace(10, 10000, 5000)
 
     a = Mie_Q(1.50 + 0.01j, 550, dp)
     b = Mie_Q(1.50 + 0.1j, 550, dp)
     c = Mie_Q(1.50 + 0.5j, 550, dp)
+
     fig, ax = plt.subplots(1, 2)
+    plt.subplots_adjust(right=0.9, wspace=0.4)
     (ax1, ax2) = ax
     size_para = math.pi * dp / 550
 
-    ax1.plot(size_para, a[1], 'k-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.01$')
-    ax1.plot(size_para, b[1], 'b-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.10$')
-    ax1.plot(size_para, c[1], 'g-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.50$')
+    ax1.plot(size_para, a[1], 'k-', alpha=1, label=r'$\bf\ k\ =\ 0.01$')
+    ax1.plot(size_para, b[1], 'b-', alpha=1, label=r'$\bf\ k\ =\ 0.10$')
+    ax1.plot(size_para, c[1], 'g-', alpha=1, label=r'$\bf\ k\ =\ 0.50$')
     ax1.legend()
 
     ax1.set_xlim(0, size_para[-1])
@@ -122,9 +179,9 @@ def IJ_couple() -> Axes:
     ax1.set_xlabel(r'$\bf Size\ parameter\ (\alpha)$')
     ax1.set_ylabel(r'$\bf Scattering\ efficiency\ (Q_{{scat}})$')
 
-    ax2.plot(size_para, a[2], 'k-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.01$')
-    ax2.plot(size_para, b[2], 'b-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.10$')
-    ax2.plot(size_para, c[2], 'g-', alpha=1, lw=2.5, label=r'$\bf\ k\ =\ 0.50$')
+    ax2.plot(size_para, a[2], 'k-', alpha=1, label=r'$\bf\ k\ =\ 0.01$')
+    ax2.plot(size_para, b[2], 'b-', alpha=1, label=r'$\bf\ k\ =\ 0.10$')
+    ax2.plot(size_para, c[2], 'g-', alpha=1, label=r'$\bf\ k\ =\ 0.50$')
     ax2.legend()
 
     ax2.set_xlim(0, size_para[-1])
@@ -138,9 +195,35 @@ def IJ_couple() -> Axes:
     return ax
 
 
-@set_figure(figsize=(6, 5))
+@set_figure
 def RRI_2D(mode: Literal["ext", "sca", "abs"] = 'ext',
            **kwargs) -> Axes:
+    """
+    Generate a 2D plot of scattering efficiency (Q) against real and imaginary parts of the refractive index.
+
+    Parameters
+    ----------
+    mode : {'ext', 'sca', 'abs'}, optional
+        The mode of scattering efficiency to plot:
+        - 'ext' for extinction efficiency (Q_ext)
+        - 'sca' for scattering efficiency (Q_sca)
+        - 'abs' for absorption efficiency (Q_abs)
+        Default is 'ext'.
+
+    **kwargs
+        Additional keyword arguments to pass to the plot function.
+
+    Returns
+    -------
+    ax : Axes
+        Matplotlib Axes object containing the generated 2D plot.
+
+    Examples
+    --------
+    Example usage of the RRI_2D function:
+
+    >>> RRI_2D(mode='sca', xlabel='Real Part (n)', ylabel='Imaginary Part (k)', title='Scattering Efficiency 2D Plot')
+    """
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
     typ = mode_mapping.get(mode, None)
@@ -154,24 +237,47 @@ def RRI_2D(mode: Literal["ext", "sca", "abs"] = 'ext',
             for j, R_RI in enumerate(RRI):
                 arr[i, j] = Mie_Q(R_RI + 1j * I_RI, 550, dp)[typ]
 
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots()
         plt.title(fr'$\bf dp\ = {dp}\ nm$', )
         plt.xlabel(r'$\bf Real\ part\ (n)$', )
         plt.ylabel(r'$\bf Imaginary\ part\ (k)$', )
 
         im = plt.imshow(arr, extent=(1.3, 2, 0, 0.7), cmap='jet', origin='lower')
         color_bar = plt.colorbar(im, extend='both')
-        color_bar.set_label(label=fr'$\bf Scattering\ efficiency\ (Q_{{{mode}}})$')
+        color_bar.set_label(label=fr'$\bf Q_{{{mode}}}$')
 
         # fig.savefig(PATH_MAIN/f'RRI_{mode}_{dp}')
 
     return ax
 
 
-@set_figure(figsize=(5, 5), fs=10)
+@set_figure
 def scattering_phase(m: complex = 1.55 + 0.01j,
                      wave: float = 600,
                      dp: float = 200) -> Axes:
+    """
+    Generate a polar plot to visualize the scattering phase function.
+
+    Parameters
+    ----------
+    m : complex, optional
+        The complex refractive index of the scattering medium. Default is 1.55 + 0.01j.
+    wave : float, optional
+        The wavelength of the incident light in nanometers. Default is 600 nm.
+    dp : float, optional
+        The particle diameter in nanometers. Default is 200 nm.
+
+    Returns
+    -------
+    ax : Axes
+        Matplotlib Axes object containing the generated polar plot.
+
+    Examples
+    --------
+    Example usage of the scattering_phase function:
+
+    >>> ax = scattering_phase(m=1.55 + 0.01j, wave=600, dp=200)
+    """
     theta, _SL, _SR, _SU = ScatteringFunction(m, wave, dp)
 
     SL = np.append(_SL, _SL[::-1])
@@ -199,21 +305,40 @@ def scattering_phase(m: complex = 1.55 + 0.01j,
     return ax
 
 
-def verify_scat_plot():
-    linear_regression(DataBase, x='Extinction', y=['Bext_internal', 'Bext_external'], xlim=[0, 300], ylim=[0, 600])
-    linear_regression(DataBase, x='Scattering', y=['Bsca_internal', 'Bsca_external'], xlim=[0, 300], ylim=[0, 600])
-    linear_regression(DataBase, x='Absorption', y=['Babs_internal', 'Babs_external'], xlim=[0, 100], ylim=[0, 200])
-
-
-def extinction_sensitivity():
-    scatter(DataBase, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD',
-            regression=True, diagonal=True)
-    scatter(DataBase, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI',
-            regression=True, diagonal=True)
-
-
 @set_figure
-def response_surface(**kwargs):
+def response_surface(real_range=(1.33, 1.7),
+                     gmd_range=(60, 400),
+                     num=50,
+                     **kwargs) -> Axes:
+    """
+    Generate a response surface plot for sensitivity tests of extinction based on Mie scattering.
+
+    Parameters
+    ----------
+    real_range : tuple, optional
+        The range of real part (refractive index) values for sensitivity testing. Default is (1.33, 1.7).
+
+    gmd_range : tuple, optional
+        The range of geometric mean diameter (GMD) values for sensitivity testing. Default is (60, 400).
+
+    num : int, optional
+        The number of points to generate within the specified ranges. Default is 50.
+
+    **kwargs
+        Additional keyword arguments to pass to the plot function.
+
+    Returns
+    -------
+    ax : Axes
+        Matplotlib Axes object containing the generated response surface plot.
+
+    Examples
+    --------
+    Example usage of the response_surface function:
+
+    >>> response_surface(real_range=(1.4, 1.6), gmd_range=(100, 300), num=30, xlabel='Real Part (n)',
+    ...                  ylabel='GMD (nm)', zlabel='Extinction (1/Mm)', title='Sensitivity Tests of Extinction')
+    """
     def function(RI, GMD):
         Z = np.zeros_like(RI)  # 使用 np.zeros_like 可以確保 Z 和 RI 具有相同的形狀
 
@@ -228,8 +353,8 @@ def response_surface(**kwargs):
         return Z
 
     # 假設 RI、GSD、GMD
-    RI = np.linspace(1.33, 1.6, 50)
-    GMD = np.linspace(60, 400, 50)
+    RI = np.linspace(real_range[0], real_range[1], num)
+    GMD = np.linspace(gmd_range[0], gmd_range[1], num)
 
     # 建立三維 meshgrid
     real, gmd = np.meshgrid(RI, GMD, indexing='xy')
@@ -249,13 +374,13 @@ def response_surface(**kwargs):
 
     ax.zaxis.get_offset_text().set_visible(False)
     exponent = math.floor(math.log10(np.max(ext)))
-    ax.text(ax.get_xlim()[1] * 1.01, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1,
-            s=fr'${{\times}}\ 10^{exponent}$')
+    ax.text(ax.get_xlim()[1] * 1.01, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1, s=fr'${{\times}}\ 10^{exponent}$')
     ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
 
     return ax
 
 
-
 if __name__ == '__main__':
-    response_surface()
+    # Q_plot(['AS', 'AN'], x='dp', y='Q')
+    IJ_couple()
+    # response_surface()

@@ -1,20 +1,9 @@
-
-from .templates import Pie, Bar, Violin
-from .scripts import corr_matrix, diurnal_pattern, koschmieder, gf_pm_ext, four_quar
-from .scatter import scatter, linear_regression, multiple_linear_regression
-from .timeseries import timeseries
-
-__all__ = [
-    'scatter',
-    'linear_regression',
-    'multiple_linear_regression',
-    'corr_matrix',
-    'diurnal_pattern',
-    'koschmieder',
-    'gf_pm_ext',
-    'four_quar',
-    'Pie',
-    'Violin',
-    'Bar',
-    'timeseries'
-]
+from .contour import *
+from .corr_matrix import *
+from .diurnal_pattern import *
+from .koschmieder import *
+from .radar import *
+from .regression import *
+from .scatter import *
+from .templates import *
+from .timeseries import *

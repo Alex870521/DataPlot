@@ -3,6 +3,9 @@ from functools import wraps
 from tqdm import tqdm
 
 
+__all__ = ['set_figure']
+
+
 # For more details please see https://matplotlib.org/stable/users/explain/customizing.html
 
 
