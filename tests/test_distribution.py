@@ -27,7 +27,7 @@ class TestDistribution(unittest.TestCase):
     def setUp(self):
         # TODO: import the default size distribution data
         # if data is None import default data from io.py
-
+        io.default_data()
         self.data = {'Clean': np.array([1, 2, 3, 4]),
                      'Transition': np.array([2, 3, 4, 5]),
                      'Event': np.array([3, 4, 5, 6])}
@@ -87,5 +87,5 @@ class TestDistribution(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
 

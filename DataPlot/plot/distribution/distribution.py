@@ -93,19 +93,14 @@ def heatmap(data: DataFrame,
     # ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='k', lw=2, label='mean')
     # ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='k', lw=2, label='mean')
 
-    xlim = kwargs.get('xlim', (np.log(dp).min(), np.log(dp).max()))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$D_{p} (nm)$')
-    ylabel = kwargs.get('ylabel', Unit(f'{unit}_dist'))
-    title = kwargs.get('title', unit)
-
-    major_ticks = np.log([10, 100, 1000])
-    minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
-    ax.set_xticks(major_ticks)
-    ax.set_xticks(minor_ticks, minor=True)
+    ax.set_xticks(np.log([10, 100, 1000]))
+    ax.set_xticks(np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000]), minor=True)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda tick, pos: "{:.0f}".format(np.exp(tick))))
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
     ax.ticklabel_format(style='sci', axis='y', scilimits=(-1, 4), useMathText=True, useLocale=True)
+
+    ax.set(xlim=(np.log(dp).min(), np.log(dp).max()), ylim=(0, None),
+           xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
+
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
     # cbar
@@ -159,6 +154,8 @@ def heatmap_tms(data: DataFrame,
     if ax is None:
         fig, ax = plt.subplots(figsize=(len(data.index) * 0.02, 3), **kwargs.get('fig_kws', {}))
 
+    fig.subplots_adjust(right=0.99)
+
     # Copy to avoid modifying original data
     time = data.index
     dp = np.array(data.columns, dtype=float)
@@ -174,7 +171,7 @@ def heatmap_tms(data: DataFrame,
 
     # Set the colorbar min and max based on the min and max of the values
     cbar_min = kwargs.get('cbar_kws', {}).pop('cbar_min', vmin_mapping[unit])
-    cbar_max = kwargs.get('cbar_kws', {}).pop('cbar_max', data.max())
+    cbar_max = kwargs.get('cbar_kws', {}).pop('cbar_max', np.nanmax(data))
 
     # Set the plot_kws
     plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **kwargs.get('plot_kws', {}))
@@ -273,12 +270,9 @@ def plot_dist(data: DataFrame | np.ndarray,
                             edgecolor=None, label='__nolegend__')
 
     # figure_set
-    xlim = kwargs.get('xlim', (dp.min(), dp.max()))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$D_{p} (nm)$')
-    ylabel = kwargs.get('ylabel', Unit(f'{unit}_dist'))
-    title = kwargs.get('title', unit)
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title, xscale='log')
+    ax.set(xlim=(dp.min(), dp.max()), ylim=(0, None), xscale='log',
+           xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
+
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
 
@@ -290,7 +284,7 @@ def plot_dist(data: DataFrame | np.ndarray,
         ax2 = ax.twinx()
         ax2.plot(dp, Transition / Clean, ls='dashed', color='k', label='Enhancement ratio 1')
         ax2.plot(dp, Event / Transition, ls='dashed', color='gray', label='Enhancement ratio 2')
-        ax2.set(xlim=xlim, ylim=(0.5, None), xlabel=xlabel, ylabel='Enhancement ratio')
+        ax2.set(xlim=ax.get_xlim(), ylim=(0.5, None), xlabel=ax.get_xlabel(), ylabel='Enhancement ratio')
 
     elif additional == "error":
         ax2 = ax.twinx()
@@ -299,7 +293,7 @@ def plot_dist(data: DataFrame | np.ndarray,
 
         ax2.plot(dp, error1, ls='--', color='k', label='Error 1 ')
         ax2.plot(dp, error2, ls='--', color='gray', label='Error 2')
-        ax2.set(xlim=xlim, ylim=(None, None), xlabel=xlabel, ylabel='Error (%)')
+        ax2.set(xlim=ax.get_xlim(), ylim=(None, None), xlabel=ax.get_xlabel(), ylabel='Error (%)')
 
     # Combine legends from ax and ax2
     axes_list = fig.get_axes()
@@ -366,7 +360,7 @@ def three_dimension(data: DataFrame | np.ndarray,
     poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
     ax.add_collection3d(poly, zs=range(1, lines + 1), zdir='y')
     # ax.set_xscale('log') <- dont work
-    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=(0, _Z.max()))
+    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=(0, np.nanmax(_Z)))
     ax.set_xlabel(r'$\bf D_{p}\ (nm)$', labelpad=10)
     ax.set_ylabel(r'$\bf Class$', labelpad=10)
     ax.set_zlabel(Unit(f'{unit}_dist'), labelpad=15)
@@ -456,7 +450,7 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
     # 獲取擬合的參數
     params = popt.tolist()
 
-    print("Fitting Results:")
+    print('\n' + "Fitting Results:")
     table = []
 
     for i in range(mode):
@@ -475,12 +469,9 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
     plt.plot(dp, fit_curve, color='#c41b1b', label='Fitting curve', lw=2.5)
     plt.plot(dp, dist, color='b', label='Observed curve', lw=2.5)
 
-    xlim = kwargs.get('xlim', (11.8, 2500))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$\bf Diameter\ (nm)$')
-    ylabel = kwargs.get('ylabel', Unit(unit + '_dist'))
-    title = kwargs.get('title', '')
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title, xscale='log')
+    ax.set(xlim=(dp.min(), dp.max()), ylim=(0, None), xscale='log',
+           xlabel=r'$\bf D_{p}\ (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', ''))
+
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
     ax.legend()
@@ -522,12 +513,9 @@ def ls_mode(**kwargs) -> Axes:
         ax.semilogx(x, lognorm, color=_color, label=_label)
         ax.fill_between(x, lognorm, 0, where=(lognorm > 0), color=_color, alpha=0.3, label='__nolegend__')
 
-    xlim = kwargs.get('xlim', (0.001, 20))
-    ylim = kwargs.get('ylim', (0, None))
-    xlabel = kwargs.get('xlabel', r'$ Diameter\ (\mu m)$')
-    ylabel = kwargs.get('ylabel', r'$\bf Probability\ (dM/dlogdp)$')
-    title = kwargs.get('title', r'Log-normal Mass Size Distribution')
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title, xscale='log')
+    ax.set(xlim=(0.001, 20), ylim=(0, None), xscale='log', xlabel=r'$\bf D_{p}\ (nm)$',
+           ylabel=r'$\bf Probability\ (dM/dlogdp)$', title=r'Log-normal Mass Size Distribution')
+
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.legend()
 

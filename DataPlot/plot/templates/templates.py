@@ -103,7 +103,7 @@ class Pie:
             ax[i].text(0, 0, text[i], ha='center', va='center')
             ax[i].set_title(category_names[i])
 
-        ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.0, 0, 0.5, 1))
+        ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.1, 0, 0.5, 1))
 
         # fig.savefig(f"pie_{style}_{title}")
 
@@ -180,7 +180,7 @@ class Pie:
 
         ax.legend(labels, loc='center', prop={'weight': 'bold'}, title_fontproperties={'weight': 'bold'},
                   title=f'Outer : {category_names[2]}' + '\n' + f'Middle : {category_names[1]}' + '\n' + f'Inner : {category_names[0]}',
-                  bbox_to_anchor=(0.7, 0, 0.5, 1))
+                  bbox_to_anchor=(0.8, 0, 0.5, 1))
 
         # fig.savefig(f"donuts_{title}")
 
