@@ -1,10 +1,7 @@
-from DataPlot.plot.templates import Pie
+__all__ = ['load_default_data']
 
 
-__all__ = ['default_data']
-
-
-def default_data():
+def load_default_data():
     import pandas as pd
     # The following data is from the chemical composition of real atmospheric particles.
     #
@@ -30,4 +27,4 @@ def default_data():
 
 
 if __name__ == '__main__':
-    Pie.pieplot(default_data(), labels=default_data().columns, unit='PM25', style='donut')
+    df = load_default_data()

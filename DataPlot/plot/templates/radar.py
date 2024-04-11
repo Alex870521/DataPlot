@@ -1,16 +1,11 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-import pandas as pd
 from matplotlib.patches import Circle, RegularPolygon
 from matplotlib.path import Path
 from matplotlib.projections import register_projection
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.spines import Spine
 from matplotlib.transforms import Affine2D
-from typing import Literal
-from DataPlot.plot.core import *
-
 
 __all__ = ['radar_factory']
 

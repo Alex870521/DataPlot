@@ -1,7 +1,8 @@
 import numpy as np
-from pandas import read_csv, concat, DataFrame
+from pandas import read_csv, DataFrame
+
+from DataPlot.process.script.PSD import ParticleSizeDist
 from ..core import *
-from DataPlot.process.script.PSD import SizeDist
 
 
 class DryPSDProcessor(DataProcessor):
@@ -37,8 +38,8 @@ class DryPSDProcessor(DataProcessor):
 
     def process_data(self):
         if self.file_path.exists() and not self.reset:
-            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                return read_csv(f, parse_dates=['Time']).set_index('Time')
+            return read_csv(self.file_path, parse_dates=['Time']).set_index('Time')
+
         else:
             PNSD = DataReader('PNSD_dNdlogdp.csv')
             chemical = DataReader('chemical.csv')
@@ -47,7 +48,7 @@ class DryPSDProcessor(DataProcessor):
             # return _df
 
 
-psd = SizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
+psd = ParticleSizeDist(reset=True, filename='PNSD_dNdlogdp.csv')
 breakpoint()
 
 
@@ -80,21 +81,6 @@ def dry_PNSD_process(**kwargs):
         dry_ndp = np.array(dry_ndp)
         new_dry_ndp = np.zeros(_length)
         new_dry_ndp[:dry_ndp.shape[0]] = dry_ndp
-
-        # fig, ax = plt.subplots(1, 1, figsize=(6, 6), dpi=150, constrained_layout=True)
-        # widths = np.diff(dp)
-        # widths = np.append(widths, widths[-1])
-        # ax.bar(dp, ndp, width=widths, alpha=0.3)
-        # ax.bar(dp, new_dry_ndp, width=widths, color='g', alpha=0.3)
-        # plt.semilogx()
-        # ax.core(dp, ndp, ls='solid', color='b', lw=2)
-        # ax.core(dp[:np.size(dry_ndp)], dry_ndp, ls='solid', color='r', lw=2)
-        # xlim = kwargs.get('xlim') or (11.8, 2500)
-        # ylim = kwargs.get('ylim') or (0, 2e5)
-        # xlabel = kwargs.get('xlabel') or r'$\bf Diameter\ (nm)$'
-        # ylabel = kwargs.get('ylabel') or r'$\bf dN/dlogdp\ (1/Mm)$'
-        # ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
-        # plt.show()
 
         out_dis['dry_dist'].append(new_dry_ndp)
 

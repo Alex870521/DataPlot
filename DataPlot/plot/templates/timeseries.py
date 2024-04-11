@@ -1,12 +1,13 @@
+from typing import Literal
+
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.pyplot import Axes
 from matplotlib.cm import ScalarMappable
+from matplotlib.pyplot import Axes
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import date_range
-from typing import Literal
-from DataPlot.plot.core import *
 
+from DataPlot.plot.core import *
 
 __all__ = ['timeseries']
 
@@ -72,7 +73,6 @@ def _timeseries(df: pd.DataFrame,
                 ax: Axes | None = None,
                 set_visible=True,
                 **kwargs):
-
     time = df.index.copy()
 
     if ax is None:
@@ -95,8 +95,8 @@ def _timeseries(df: pd.DataFrame,
         default_plot_kws.update(kwargs.get('plot_kws', {}))
 
         ax.scatter(time, df[y], **default_plot_kws)
-
-        _inset_colorbar(ax.get_children()[0], ax, **kwargs.get('cbar_kws', {}))
+        plt.colorbar(mappable=ax.get_children()[0], ax=ax, pad=0.02, fraction=0.01, **kwargs.get('cbar_kws', {}))
+        # _inset_colorbar(ax.get_children()[0], ax, **kwargs.get('cbar_kws', {}))
 
     elif c is not None and style == 'bar':  # bar
         default_plot_kws = dict(
@@ -111,8 +111,8 @@ def _timeseries(df: pd.DataFrame,
         scalar_map, colors = Color.color_maker(df[c].values, cmap=default_plot_kws.pop('cmap'))
 
         ax.bar(time, df[y], color=scalar_map.to_rgba(colors), **default_plot_kws)
-
-        _inset_colorbar(scalar_map, ax, **kwargs.get('cbar_kws', {}))
+        plt.colorbar(mappable=scalar_map, ax=ax, pad=0.02, fraction=0.01, **(kwargs.get('cbar_kws', {})))
+        # _inset_colorbar(scalar_map, ax, **kwargs.get('cbar_kws', {}))
 
     else:  # line plot
         ax.plot(time, df[y], **kwargs.get('plot_kws', {}))
@@ -122,24 +122,19 @@ def _timeseries(df: pd.DataFrame,
 
     if kwargs is not None:
         st_tm, fn_tm = time[0], time[-1]
-        freq = kwargs.get('freq', '10d')
-        tick_time = date_range(st_tm, fn_tm, freq=freq)
+        tick_time = date_range(st_tm, fn_tm, freq=kwargs.get('freq', '10d'))
 
-        ax.set(
-            xlabel=kwargs.get('xlabel', ''),
-            ylabel=kwargs.get('ylabel', Unit(y)),
-            xticks=kwargs.get('xticks', tick_time),
-            xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
-            xlim=kwargs.get('xlim', (st_tm, fn_tm)),
-            ylim=kwargs.get('ylim', (None, None)),
-        )
+        ax.set(xlabel=kwargs.get('xlabel', ''), ylabel=kwargs.get('ylabel', Unit(y)),
+               xticks=kwargs.get('xticks', tick_time),
+               xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
+               xlim=kwargs.get('xlim', (st_tm, fn_tm)), ylim=kwargs.get('ylim', (None, None)),
+               )
 
     return ax
 
 
 @set_figure(fs=10)
-def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
-
+def timeseries(df: pd.DataFrame, rolling: int | None = None, **kwargs) -> Axes:
     if rolling is not None:
         df = df.rolling(rolling).mean(numeric_only=True)
 
@@ -151,8 +146,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(color="b", label='Extinction'),
                 ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                ylim=[0., df.Extinction.max() * 1.1]
-                )
+                ylim=[0., df.Extinction.max() * 1.1],
+                **kwargs)
 
     _timeseries(df,
                 y='Scattering',
@@ -160,8 +155,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(color="g", label='Scattering'),
                 ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                ylim=[0., df.Extinction.max() * 1.1]
-                )
+                ylim=[0., df.Extinction.max() * 1.1],
+                **kwargs)
 
     _timeseries(df,
                 y='Absorption',
@@ -169,8 +164,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(color="r", label='Absorption'),
                 ylabel=r'$\bf b_{{ext, scat, abs}}\ (1/Mm)$',
-                ylim=[0., df.Extinction.max() * 1.1]
-                )
+                ylim=[0., df.Extinction.max() * 1.1],
+                **kwargs)
 
     ax1.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=3, labelspacing=0.5, handlelength=1)
 
@@ -181,7 +176,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(color='r', label=Unit('AT')),
                 ylabel=Unit('AT'),
-                ylim=[df.AT.min() - 2, df.AT.max() + 2])
+                ylim=[df.AT.min() - 2, df.AT.max() + 2],
+                **kwargs)
 
     _timeseries(df,
                 y='RH',
@@ -189,7 +185,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(color='b', label=Unit('RH')),
                 ylabel=Unit('RH'),
-                ylim=[20, 100])
+                ylim=[20, 100],
+                **kwargs)
 
     _timeseries(df,
                 y='VC',
@@ -198,8 +195,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 ax=ax3,
                 set_visible=False,
                 plot_kws=dict(label=Unit('VC')),
-                cbar_kws=dict(label=Unit('PBLH'))
-                )
+                cbar_kws=dict(label=Unit('PBLH')),
+                **kwargs)
 
     _timeseries(df,
                 y='WS',
@@ -208,8 +205,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 set_visible=False,
                 plot_kws=dict(cmap='hsv', label=Unit('WS')),
                 cbar_kws=dict(label=Unit('WD')),
-                ylim=[0, df.WS.max() * 1.1]
-                )
+                ylim=[0, df.WS.max() * 1.1],
+                **kwargs)
 
     _timeseries(df,
                 y='PM25',
@@ -217,8 +214,8 @@ def timeseries(df: pd.DataFrame, rolling: int | None = None) -> Axes:
                 ax=ax5,
                 plot_kws=dict(label=Unit('PM1/PM25')),
                 cbar_kws=dict(label=Unit('PM1/PM25')),
-                ylim=[0, df.PM25.max() * 1.1]
-                )
+                ylim=[0, df.PM25.max() * 1.1],
+                **kwargs)
 
     # fig.savefig(f'tms_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
 

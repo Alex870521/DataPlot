@@ -1,5 +1,8 @@
-from pandas import read_csv, concat
+from pathlib import Path
 from typing import Literal
+
+from pandas import DataFrame, read_csv, concat
+
 from ..core import *
 
 
@@ -45,11 +48,9 @@ class ImproveProcessor(DataProcessor):
 
     """
 
-    def __init__(self, reset=False, filename='revised_IMPROVE.csv', version: Literal["revised", "modified"] = "revised"):
-        super().__init__(reset)
-
-        self.file_path = self.default_path / 'Level2' / filename
-        self.version = version
+    def __init__(self):
+        super().__init__()
+        self.file_path = self.DEFAULT_PATH / 'Level2'
 
     @staticmethod
     def frh(_RH):
@@ -64,12 +65,8 @@ class ImproveProcessor(DataProcessor):
 
     def revised(self, _df):
         def mode(Mass):
-            if Mass < 20:
-                L_mode = Mass ** 2 / 20
-                S_mode = Mass - L_mode
-            if Mass >= 20:
-                L_mode = Mass
-                S_mode = 0
+            L_mode = Mass ** 2 / 20 if Mass < 20 else Mass
+            S_mode = Mass - L_mode if Mass < 20 else 0
 
             return L_mode, S_mode
 
@@ -139,21 +136,20 @@ class ImproveProcessor(DataProcessor):
         _df['ExtinctionByGas'] = _df['ScatteringByGas'] + _df['AbsorptionByGas']
         return _df['ScatteringByGas':]
 
-    def process_data(self):
-        if self.file_path.exists() and not self.reset:
-            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                return read_csv(f, parse_dates=['Time']).set_index('Time')
+    def process_data(self, reset: bool = False, save_filename='revised_IMPROVE.csv',
+                     version: Literal["revised", "modified"] = "revised"):
+        file = self.file_path / save_filename
+        if file.exists() and not reset:
+            return read_csv(file, parse_dates=['Time']).set_index('Time')
         else:
-            df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv'), DataReader('chemical.csv')], axis=1)
+            data_files = ['EPB.csv', 'IMPACT.csv', 'chemical.csv']
+            df = concat([DataReader(file) for file in data_files], axis=1)
 
             # particle contribution '銨不足不納入計算'
             improve_input_df = df.loc[df['NH4_status'] != 'Deficiency', ['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'RH']]
 
-            if self.version == 'revised':
-                df_improve = improve_input_df.dropna().copy().apply(self.revised, axis=1)
-
-            else:
-                df_improve = improve_input_df.dropna().copy().apply(self.modified, axis=1)
+            df_improve = improve_input_df.dropna().copy().apply(self.revised if version == 'revised' else self.modified,
+                                                                axis=1)
 
             # gas contribution
             df_ext_gas = df[['NO2', 'AT']].dropna().copy().apply(self.gas, axis=1)
@@ -162,3 +158,6 @@ class ImproveProcessor(DataProcessor):
             _df.to_csv(self.file_path)
 
             return _df
+
+    def save_data(self, data: DataFrame, save_filename: str | Path):
+        data.to_csv(save_filename)

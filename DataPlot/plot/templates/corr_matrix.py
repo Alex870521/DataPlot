@@ -1,13 +1,13 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from matplotlib.pyplot import Axes
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from scipy.stats import pearsonr
-from DataPlot.plot.core import *
 
+from DataPlot.plot.core import *
 
 __all__ = [
         'corr_matrix',

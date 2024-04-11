@@ -1,11 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.pyplot import Axes
 from scipy.optimize import curve_fit
-from DataPlot.process import *
-from DataPlot.plot.core import *
-from DataPlot.plot.templates import *
+
+from DataPlot import *
 
 # TODO: this file has to be reorganized
 
@@ -14,7 +13,6 @@ __all__ = ['chemical_enhancement',
            'pie_IMPROVE',
            'MLR_IMPROVE',
            'fRH_plot',
-           'extinction_by_particle_gas'
            ]
 
 
@@ -81,7 +79,7 @@ def chemical_enhancement(data_set: pd.DataFrame = None,
 
 
 @set_figure
-def ammonium_rich(df: pd.DataFrame = DataBase,
+def ammonium_rich(df: pd.DataFrame,
                   **kwargs) -> Axes:
     df = df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
     df['required_ammonium'] = df['NO3-'] + 2 * df['SO42-']
@@ -119,9 +117,9 @@ def pie_IMPROVE():
     ext_amb_dict = ser_grp_sta.loc[:, Species2]
     ext_mix_dict = ser_grp_sta.loc[:, Species3]
 
-    Pie.donuts(data_set=ext_dry_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
-    Pie.donuts(data_set=ext_mix_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
-    Pie.donuts(data_set=ext_amb_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC', 'ALWC'],
+    plot.donuts(data_set=ext_dry_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
+    plot.donuts(data_set=ext_mix_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
+    plot.donuts(data_set=ext_amb_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC', 'ALWC'],
                unit='Extinction', colors=Color.colors2)
 
 
@@ -182,9 +180,9 @@ def MLR_IMPROVE(**kwargs):
     # plot
     linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
                       regression=True, diagonal=True)
-    Pie.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
+    plot.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
                unit='PM25', colors=Color.colors3)
-    Pie.donuts(mean, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
+    plot.donuts(mean, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
 
 
 @set_figure
@@ -198,8 +196,8 @@ def fRH_plot(**kwargs) -> Axes:
     x = frh.index.to_numpy()
     y = frh['fRHs'].to_numpy()
 
-    popt, pcov = curve_fit(fitting_func, x, y)
-    params = popt.tolist()
+    result = curve_fit(fitting_func, x, y)
+    params = result[0].tolist()
     val_fit = fitting_func(x, *params)
 
     fig, ax = plt.subplots()
@@ -220,23 +218,6 @@ def fRH_plot(**kwargs) -> Axes:
                loc='upper left', prop=dict(size=16))
     # fig.savefig('fRH_plot')
     return ax
-
-
-def extinction_by_particle_gas():  # PG : sum of ext by particle and gas
-    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase, by='State', statistic='Table')
-    ext_particle_gas = ser_grp_sta.loc[:, ['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']]
-
-    Bar.barplot(data_set=ext_particle_gas, data_std=None,
-                labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
-                style="stacked",
-                unit='Extinction',
-                colors=Color.paired)
-
-    Pie.pieplot(data_set=ext_particle_gas,
-                labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
-                unit='Extinction',
-                style='donut',
-                colors=Color.paired)
 
 
 if __name__ == '__main__':

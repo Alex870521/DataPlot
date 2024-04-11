@@ -10,7 +10,7 @@ class Unit:
     data = None
 
     def __new__(cls, unit: str):
-        cls.data = cls.__load_jsonfile()
+        cls.data = cls.load_jsonfile()
         try:
             value = cls.data[unit]
             return r'${}$'.format(value.replace(' ', r'\ '))
@@ -19,7 +19,7 @@ class Unit:
             return r'$ unit $'
 
     @classmethod
-    def __load_jsonfile(cls):
+    def load_jsonfile(cls):
         """ 讀取 JSON 檔中數據并將其變成屬性 """
         try:
             with open(cls.file_path, 'r', encoding='utf-8') as f:
@@ -31,7 +31,7 @@ class Unit:
             print(f"Invalid JSON format in '{cls.file_path}'.")
 
     @classmethod
-    def __update_unit_to_jsonfile(cls, key, value):
+    def update_jsonfile(cls, key, value):
         """ 更新JSON檔 """
         with open(cls.file_path, 'r', encoding='utf-8') as f:
             old_data = json.load(f)
@@ -42,7 +42,7 @@ class Unit:
             json.dump(old_data, f, indent=4)
 
     @classmethod
-    def __del_unit_from_jsonfile(cls, key):
+    def del_jsonfile(cls, key):
         """ 更新JSON檔 """
         with open(cls.file_path, 'r', encoding='utf-8') as f:
             old_data = json.load(f)

@@ -1,12 +1,12 @@
+import matplotlib.colors as plc
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.colors as plc
-import matplotlib.pyplot as plt
 from windrose import WindroseAxes
+
 from DataPlot.plot.core import *
 from DataPlot.process import *
-
 
 __all__ = ['wind_tms',
            'wind_rose',
@@ -58,7 +58,7 @@ def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
     return ax
 
 
-@set_figure(fs=15)
+@set_figure
 def wind_rose(ws: pd.Series, wd: pd.Series):
     color_lst = ['#8ecae6', '#f1dca7', '#f4a261', '#bc3908']
 

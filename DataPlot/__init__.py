@@ -1,3 +1,3 @@
-from .process import *
-from .plot import *
 from .io import *
+from .plot import *
+from .process import *

@@ -1,15 +1,16 @@
 import math
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import Axes
-from PyMieScatt import ScatteringFunction
 from typing import Literal
-from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
-from DataPlot.plot.core import *
 
+import matplotlib.pyplot as plt
+import numpy as np
+from PyMieScatt import ScatteringFunction
+from matplotlib.pyplot import Axes
+
+from DataPlot.plot.core import *
+from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
 
 __all__ = ['Q_plot',
-           'IJ_couple',
+           'RI_couple',
            'RRI_2D',
            'scattering_phase',
            'response_surface',
@@ -71,15 +72,15 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
 
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
-    xlabel_mapping = {'dp': r'$\bf Particle\ Diameter\ (nm)$',
-                      'sp': r'$\bf Size\ parameter\ (\alpha)$'}
+    xlabel_mapping = {'dp': 'Particle Diameter (nm)$',
+                      'sp': '$Size parameter (\\alpha)$'}
 
-    ylabel_mapping = {'Q': {'ext': r'$\bf Extinction\ efficiency\ (Q_{{ext}})$',
-                            'sca': r'$\bf Scattering\ efficiency\ (Q_{{sca}})$',
-                            'abs': r'$\bf Absorption\ efficiency\ (Q_{{abs}})$'},
-                      'MEE': {'ext': r'$\bf MEE\ (m^2/g)$',
-                              'sca': r'$\bf MSE\ (m^2/g)$',
-                              'abs': r'$\bf MAE\ (m^2/g)$'}}
+    ylabel_mapping = {'Q': {'ext': '$Extinction efficiency (Q_{{ext}})$',
+                            'sca': '$Scattering efficiency (Q_{{sca}})$',
+                            'abs': '$Absorption efficiency (Q_{{abs}})$'},
+                      'MEE': {'ext': '$MEE (m^2/g)$',
+                              'sca': '$MSE (m^2/g)$',
+                              'abs': '$MAE (m^2/g)$'}}
 
     typ = mode_mapping.get(mode, None)
     xlabel = xlabel_mapping.get(x, None)
@@ -123,14 +124,9 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
         plt.plot(dp_, mapping_dic[species][f'{y}'][2], color='r', label=legend[2])
         plt.text(0.04, 0.92, mapping_dic[species]['label'], transform=ax.transAxes, weight='bold')
 
-    ax.legend(loc='best', prop={'weight': 'bold'})
+    ax.set(xlim=(dp.min(), dp.max()), ylim=(0, None), xlabel=xlabel, ylabel=ylabel)
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-
-    xlim = kwargs.get('xlim') or (dp.min(), dp.max())
-    ylim = kwargs.get('ylim') or (0, None)
-    xlabel = kwargs.get('xlabel') or xlabel
-    ylabel = kwargs.get('ylabel') or ylabel
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel)
+    ax.legend(loc='best', prop={'weight': 'bold'})
 
     # fig.savefig(PATH_MAIN/f'Q_{species}')
 
@@ -138,7 +134,7 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
 
 
 @set_figure(figsize=(9, 4))
-def IJ_couple(**kwargs) -> Axes:
+def RI_couple(**kwargs) -> Axes:
     """
     Generate a plot to test the influence of imaginary parts on scattering and absorption efficiencies.
 
@@ -156,7 +152,7 @@ def IJ_couple(**kwargs) -> Axes:
     --------
     Example usage of the IJ_couple function:
 
-    >>> ax = IJ_couple()
+    >>> ax = RI_couple()
     """
     dp = np.geomspace(10, 10000, 5000)
 
@@ -366,11 +362,8 @@ def response_surface(real_range=(1.33, 1.7),
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     ax.plot_surface(real, gmd, ext, rstride=1, cstride=1, cmap=plt.get_cmap('jet'), edgecolor='none')
 
-    xlabel = kwargs.get('xlabel', r'$\bf Real\ part\ (n)$')
-    ylabel = kwargs.get('ylabel', r'$\bf GMD\ (nm)$')
-    zlabel = kwargs.get('zlabel', r'$\bf Extinction\ (1/Mm)$')
-    title = kwargs.get('title', r'$\bf Sensitive\ tests\ of\ Extinction$')
-    ax.set(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel, title=title)
+    ax.set(xlabel='$Real part (n)$', ylabel='$GMD (nm)$', zlabel=Unit('Extinction'),
+           title='$Sensitive tests of Extinction$')
 
     ax.zaxis.get_offset_text().set_visible(False)
     exponent = math.floor(math.log10(np.max(ext)))
@@ -382,5 +375,5 @@ def response_surface(real_range=(1.33, 1.7),
 
 if __name__ == '__main__':
     # Q_plot(['AS', 'AN'], x='dp', y='Q')
-    IJ_couple()
+    RI_couple()
     # response_surface()

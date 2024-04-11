@@ -1,4 +1,5 @@
 import numpy as np
+
 from .mie_theory import Mie_PESD
 
 
@@ -19,16 +20,14 @@ def external(ser, dp, dlogdp, wavelength=550) -> dict:
                       'EC_volume_ratio':   1.80 + 0.54j,
                       'ALWC_volume_ratio': 1.333 + 0j}
 
-    ext_dist, sca_dist, abs_dist = np.zeros((167,)), np.zeros((167,)), np.zeros((167,))
     ndp = np.array(ser[:np.size(dp)])
+    mie_results = (
+        Mie_PESD(refractive_dic[_specie], wavelength, dp, ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp) for
+        _specie in refractive_dic)
 
-    for _specie, _m in refractive_dic.items():
-        _ndp = ser[_specie] / (1 + ser['ALWC_volume_ratio']) * ndp
-        _Ext_dist, _Sca_dist, _Abs_dist = Mie_PESD(_m, wavelength, dp, _ndp)
-
-        ext_dist += _Ext_dist
-        sca_dist += _Sca_dist
-        abs_dist += _Abs_dist
+    ext_dist, sca_dist, abs_dist = (np.sum([res[0] for res in mie_results], axis=0),
+                                    np.sum([res[1] for res in mie_results], axis=0),
+                                    np.sum([res[2] for res in mie_results], axis=0))
 
     return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
 
@@ -37,15 +36,13 @@ def fix_PNSD(ser, dp, dlogdp, PNSD, wavelength=550):
     m = ser['n_amb'] + 1j * ser['k_amb']
     ndp = PNSD
     ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, ndp)
-    ext = np.sum(ext_dist * dlogdp)
 
-    return ext
+    return np.sum(ext_dist * dlogdp)
 
 
 def fix_RI(ser, dp, dlogdp, RI, wavelength=550):
     m = RI
     ndp = np.array(ser[:np.size(dp)])
     ext_dist, sca_dist, abs_dist = Mie_PESD(m, wavelength, dp, ndp)
-    ext = np.sum(ext_dist * dlogdp)
 
-    return ext
+    return np.sum(ext_dist * dlogdp)

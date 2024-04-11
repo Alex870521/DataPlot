@@ -1,9 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.pyplot import Axes
-from tabulate import tabulate
 from sklearn.linear_model import LinearRegression
+from tabulate import tabulate
+
 from DataPlot.plot.core import *
 
 __all__ = [
@@ -15,12 +16,13 @@ __all__ = [
 def _linear_regression(x_array: np.ndarray,
                        y_array: np.ndarray,
                        columns: str | list[str] | None = None,
-                       positive: bool = True):
+                       positive: bool = True,
+                       fit_intercept: bool = True):
     if len(x_array.shape) > 1 and x_array.shape[1] >= 2:
-        model = LinearRegression(positive=positive).fit(x_array, y_array)
+        model = LinearRegression(positive=positive, fit_intercept=fit_intercept).fit(x_array, y_array)
 
         coefficients = model.coef_[0].round(3)
-        intercept = model.intercept_[0].round(3)
+        intercept = model.intercept_[0].round(3) if fit_intercept else 'None'
         r_square = model.score(x_array, y_array).round(3)
         y_predict = model.predict(x_array)
 
@@ -38,10 +40,10 @@ def _linear_regression(x_array: np.ndarray,
         x_array = x_array.reshape(-1, 1)
         y_array = y_array.reshape(-1, 1)
 
-        model = LinearRegression(positive=positive).fit(x_array, y_array)
+        model = LinearRegression(positive=positive, fit_intercept=fit_intercept).fit(x_array, y_array)
 
         slope = model.coef_[0][0].round(3)
-        intercept = model.intercept_[0].round(3)
+        intercept = model.intercept_[0].round(3) if fit_intercept else 'None'
         r_square = model.score(x_array, y_array).round(3)
         y_predict = model.predict(x_array)
 
@@ -62,6 +64,8 @@ def linear_regression(df: pd.DataFrame,
                       labels: str | list[str] = None,
                       ax: Axes | None = None,
                       diagonal=False,
+                      postive: bool = True,
+                      fit_intercept: bool = True,
                       **kwargs) -> Axes:
     """
     Create a scatter plot with multiple regression lines for the given data.
@@ -128,17 +132,12 @@ def linear_regression(df: pd.DataFrame,
                              label=labels[i])
         handles.append(scatter)
 
-        text, y_predict, slope = _linear_regression(x_array, y_array)
+        text, y_predict, slope = _linear_regression(x_array, y_array, positive=postive, fit_intercept=fit_intercept)
         text_list.append(f'{labels[i]}: {text}')
         plt.plot(x_array, y_predict, linewidth=3, color=color['line'], alpha=1, zorder=3)
 
-    xlim = kwargs.get('xlim')
-    ylim = kwargs.get('ylim')
-    xlabel = kwargs.get('xlabel') or Unit(x)
-    ylabel = kwargs.get('ylabel') or Unit(y[0])  # Assuming all y variables have the same unit
-    title = kwargs.get('title', '')
-
-    ax.set(xlim=xlim, ylim=ylim, xlabel=xlabel, ylabel=ylabel, title=title)
+    ax.set(xlim=kwargs.get('xlim'), ylim=kwargs.get('ylim'), xlabel=Unit(x), ylabel=Unit(y[0]),
+           title=kwargs.get('title'))
 
     # Add regression info to the legend
     leg = plt.legend(handles=handles, labels=text_list, loc='upper left', prop={'weight': 'bold', 'size': 10})
@@ -161,6 +160,8 @@ def multiple_linear_regression(df: pd.DataFrame,
                                ax: Axes | None = None,
                                diagonal=False,
                                add_constant=True,
+                               postive: bool = True,
+                               fit_intercept: bool = True,
                                **kwargs) -> Axes:
     """
     Perform multiple linear regression analysis and plot the results.
@@ -213,17 +214,20 @@ def multiple_linear_regression(df: pd.DataFrame,
         labels = x
 
     if add_constant:
+        df = df[[*x, y]].dropna()
         df = df.assign(Const=1)
         x_array = df[[*x, 'Const']].to_numpy()
         y_array = df[[y]].to_numpy()
         columns = [*x, 'Const']
 
     else:
+        df = df[[*x, y]].dropna()
         x_array = df[[*x]].to_numpy()
         y_array = df[[y]].to_numpy()
         columns = [*x]
 
-    text, y_predict, coefficients = _linear_regression(x_array, y_array, columns=columns, positive=True)
+    text, y_predict, coefficients = _linear_regression(x_array, y_array, columns=columns, positive=postive,
+                                                       fit_intercept=fit_intercept)
 
     df = pd.DataFrame(np.concatenate([y_array, y_predict], axis=1), columns=['y_actual', 'y_predict'])
 

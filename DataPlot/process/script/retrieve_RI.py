@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, trange
-from DataPlot.process import DataBase, DataReader, SizeDist
+from tqdm import tqdm
+
+from DataPlot.process import DataBase, DataReader, ParticleSizeDist
 from DataPlot.process.method import Mie_PESD
 
 df = DataBase[['Extinction', 'Scattering', 'Absorption']]
@@ -29,7 +30,7 @@ for time, ser in df_.head(50).iterrows():
     bsca_mea = ser['Scattering']
     babs_mea = ser['Absorption']
 
-    dp = SizeDist().dp
+    dp = ParticleSizeDist().dp
     for ki, k in enumerate(kRange):
         for ni, n in enumerate(nRange):
             m = n + (1j * k)

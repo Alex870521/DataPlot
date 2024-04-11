@@ -1,8 +1,9 @@
 import unittest
+
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.pyplot import Axes
+
 from DataPlot import *
 
 PNSD = DataReader('PNSD_dNdlogdp.csv')
@@ -27,33 +28,26 @@ class TestDistribution(unittest.TestCase):
     def setUp(self):
         # TODO: import the default size distribution data
         # if data is None import default data from io.py
-        io.default_data()
+        io.load_default_data()
         self.data = {'Clean': np.array([1, 2, 3, 4]),
                      'Transition': np.array([2, 3, 4, 5]),
                      'Event': np.array([3, 4, 5, 6])}
         self.data_set = pd.DataFrame.from_dict(self.data, orient='index', columns=['11.8', '12.18', '100.58', '1200.00'])
 
     def tearDown(self):
-        plt.close()
         pass
 
     def test_heatmap(self):
-        ax = plot.distribution.heatmap(PNSD)
+        ax = plot.distribution.heatmap(PNSD, unit='Number', )
         self.assertIsInstance(ax, Axes)
 
-    def test_heatmap_tms_PNSD(self):
-        ax = plot.distribution.heatmap_tms(PNSD, freq='60d')
+    def test_heatmap_tms(self):
+        ax = plot.distribution.heatmap_tms(PNSD, unit='Number', freq='60d')
         self.assertIsInstance(ax, Axes)
-
-    def test_heatmap_tms_PSSD(self):
         ax = plot.distribution.heatmap_tms(PSSD, unit='Surface', freq='60d')
         self.assertIsInstance(ax, Axes)
-
-    def test_heatmap_tms_PVSD(self):
         ax = plot.distribution.heatmap_tms(PVSD, unit='Volume', freq='60d')
         self.assertIsInstance(ax, Axes)
-
-    def test_heatmap_tms_PESD_inter(self):
         ax = plot.distribution.heatmap_tms(PESD_inter, unit='Extinction', freq='60d')
         self.assertIsInstance(ax, Axes)
 
@@ -66,24 +60,16 @@ class TestDistribution(unittest.TestCase):
         self.assertEqual(len(ax.get_legend().legend_handles), 3)  # Assuming 3 states with std
 
     def test_enhancement_additional(self):
-        ax = plot.distribution.plot_dist(self.data_set, additional='enhancement')
+        ax = plot.distribution.plot_dist(self.data_set, additional='Enhancement')
         self.assertEqual(len(ax.get_legend().legend_handles), 5)  # Assuming 2 enhancement ratios added
 
     def test_error_additional(self):
-        ax = plot.distribution.plot_dist(self.data_set, additional='error')
+        ax = plot.distribution.plot_dist(self.data_set, additional='Error')
         self.assertEqual(len(ax.get_legend().legend_handles), 5)  # Assuming 2 error curves added
 
     def test_three_dimension(self):
         ax = plot.distribution.three_dimension(ext_grp, unit='Extinction')
         self.assertIsInstance(ax, Axes)
-
-    def test_ls_mode(self):
-        ax = plot.distribution.ls_mode()
-        self.assertIsInstance(ax, Axes)
-
-    def test_lognorm_dist(self):
-        ax = plot.distribution.lognorm_dist()
-        self.assertIsInstance(ax, np.ndarray)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
-import numpy as np
-from pandas import read_csv, concat, notna
-from ..core import *
+from pathlib import Path
 
-# Note: df['ALWC'] 不要加到 df_volume裡面
+import numpy as np
+from pandas import read_csv, concat, notna, DataFrame
+
+from DataPlot.process.core import *
 
 
 class ChemicalProcessor(DataProcessor):
@@ -37,13 +38,12 @@ class ChemicalProcessor(DataProcessor):
 
     Examples:
     ---------
-    >>> df = ChemicalProcessor(reset=True, filename='chemical.csv').process_data()
 
     """
 
-    def __init__(self, reset=False, filename='chemical.csv'):
-        super().__init__(reset)
-        self.file_path = self.default_path / 'Level2' / filename
+    def __init__(self):
+        super().__init__()
+        self.file_path = self.DEFAULT_PATH / 'Level2'
 
     @staticmethod
     def mass(_df):  # Series like
@@ -156,33 +156,38 @@ class ChemicalProcessor(DataProcessor):
         _df['kappa_vam'] = np.nan
 
     @staticmethod
-    def kappa(_df, dp=0.5):
-        water_surface_tension = 0.072
-        water_Mw = 18
-        water_density = 1
-        universal_gas_constant = 8.314  # J/mole*K
-        diameter = dp  # um
+    def kappa(_df, diameter=0.5):
+        water_surface_tension, water_Mw, water_density, universal_gas_constant = 0.072, 18, 1, 8.314  # J/mole*K
+
         A = 4 * (water_surface_tension * water_Mw) / (water_density * universal_gas_constant * (_df['AT'] + 273))
         power = A / diameter
         a_w = (_df['RH'] / 100) * (np.exp(-power))
-        Kappa = (_df['gRH'] ** 3 - 1) * (1 - a_w) / a_w
-        return Kappa
 
-    def process_data(self):
-        if self.file_path.exists() and not self.reset:
-            with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                return read_csv(f, parse_dates=['Time']).set_index('Time')
+        return (_df['gRH'] ** 3 - 1) * (1 - a_w) / a_w
+
+    @staticmethod
+    def ISORROPIA():
+        pass
+
+    def process_data(self, reset: bool = False, save_filename: str | Path = 'chemical.csv'):
+        file = self.file_path / save_filename
+        if file.exists() and not reset:
+            return read_csv(file, parse_dates=['Time']).set_index('Time')
         else:
-            df = concat([DataReader('EPB.csv'), DataReader('IMPACT.csv')], axis=1)
+            data_files = ['EPB.csv', 'IMPACT.csv']
+            df = concat([DataReader(file) for file in data_files], axis=1)
 
-            df_mass = df[['NH4+', 'SO42-', 'NO3-', 'O_OC', 'Fe', 'Na+', 'O_EC', 'PM25']].dropna().copy().apply(self.mass,
-                                                                                                               axis=1)
-            df_volume = df_mass[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'total_mass']].dropna().copy().apply(self.volume,
-                                                                                                            axis=1)
+            df_mass = df[['NH4+', 'SO42-', 'NO3-', 'O_OC', 'Fe', 'Na+', 'O_EC', 'PM25']].dropna().apply(self.mass,
+                                                                                                        axis=1)
+            df_volume = df_mass[['AS', 'AN', 'OM', 'Soil', 'SS', 'EC', 'total_mass']].dropna().apply(self.volume,
+                                                                                                     axis=1)
             df_volume['ALWC'] = df['ALWC']
             df_vam = df_volume.copy().apply(self.volume_average_mixing, axis=1)
 
             _df = concat([df_mass, df_volume.drop(['ALWC'], axis=1), df_vam], axis=1).reindex(df.index.copy())
-            _df.to_csv(self.file_path)
+            _df.to_csv(file)
 
             return _df
+
+    def save_data(self, data: DataFrame, save_filename: str | Path):
+        data.to_csv(save_filename)

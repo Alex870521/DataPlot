@@ -1,4 +1,5 @@
 import unittest
+
 from DataPlot.plot.core import Color
 
 

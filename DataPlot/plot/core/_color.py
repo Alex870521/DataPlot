@@ -1,9 +1,8 @@
+import matplotlib.colors as plc
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.colors as plc
 from matplotlib import colormaps
-
 
 __all__ = ['Color']
 

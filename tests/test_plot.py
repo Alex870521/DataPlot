@@ -1,9 +1,10 @@
 import unittest
+
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-import DataPlot.plot as plot
 from matplotlib.pyplot import Axes
+
+import DataPlot.plot as plot
 from DataPlot import *
 
 

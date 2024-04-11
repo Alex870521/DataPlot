@@ -1,52 +1,55 @@
-import numpy as np
-import pandas as pd
 from pathlib import Path
 from typing import Literal, Sequence
+
+import numpy as np
+import pandas as pd
 from pandas import read_csv, concat, DataFrame
 from tqdm import tqdm
-from collections import OrderedDict
-from .core import DataReader, DataProcessor, Classifier
-from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, SizeDist, OthersProcessor
+
+from .core import DataReader, Classifier
+from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, ParticleSizeDist, OthersProcessor
 
 __all__ = ['DataBase',
            'DataReader',
            'DataClassifier',
-           'SizeDist'
+           'ParticleSizeDist'
            ]
 
 
-class MainProcessor(DataProcessor):
+class MainProcessor:
     def __init__(self, reset=False, filename='All_data.csv'):
-        super().__init__(reset)
+        self.reset = reset
         self.file_path = Path(__file__).parents[1] / 'data' / filename
 
     def process_data(self):
         with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|", unit="it") as progress_bar:
 
             if self.file_path.exists() and not self.reset:
-                with open(self.file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    progress_bar.update(20)
-                    return read_csv(f, parse_dates=['Time'], na_values=('-', 'E', 'F'), low_memory=False).set_index('Time')
+                return read_csv(self.file_path, parse_dates=['Time'], na_values=('-', 'E', 'F'),
+                                low_memory=False).set_index('Time')
+
             else:
+                processor = [ImpactProcessor, ChemicalProcessor, ImproveProcessor, ParticleSizeDist]
+                reset = [False, False, False, False, False]
+                save_filename = ['IMPACT.csv', 'chemical.csv', 'revised_IMPROVE.csv', 'PSD.csv', 'PESD.csv']
+
+                _df = concat([processor().process_data(reset, save_filename) for processor, reset, save_filename in
+                              zip(processor, reset, save_filename)])
                 # 1. EPB
                 minion = DataReader('EPB.csv')
-                progress_bar.update(1)
 
                 # 2. IMPACT
-                impact = ImpactProcessor(reset=False, filename='IMPACT.csv').process_data()
-                progress_bar.update(1)
+                impact = ImpactProcessor().process_data(reset=False)
 
                 # 3. Mass_volume
-                chemical = ChemicalProcessor(reset=False, filename='chemical.csv').process_data()
-                progress_bar.update(1)
+                chemical = ChemicalProcessor().process_data(reset=False)
 
                 # 4. improve
-                improve = ImproveProcessor(reset=False, filename='revised_IMPROVE.csv', version='revised').process_data()
-                progress_bar.update(5)
+                improve = ImproveProcessor().process_data(reset=False, save_filename='revised_IMPROVE.csv',
+                                                          version='revised')
 
                 # 5. Number & Surface & volume & Extinction distribution
-                psd = SizeDist(reset=False, filename='PNSD_dNdlogdp.csv').process_data()
-                progress_bar.update(11)
+                psd = ParticleSizeDist().process_data(reset=False)
 
                 _df = concat([minion, impact, chemical, improve, psd], axis=1)
 

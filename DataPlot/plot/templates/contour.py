@@ -1,25 +1,17 @@
-import numpy as np
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib import colormaps
+import numpy as np
 from matplotlib.pyplot import Axes
-from matplotlib.ticker import AutoMinorLocator
-from typing import Literal
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from scipy.stats import pearsonr
 from scipy.optimize import curve_fit
-from DataPlot.plot.core import *
-from DataPlot.process import *
 
+from DataPlot.plot.core import *
 
 __all__ = [
-        'contourmap',
+    'contour',
 ]
 
 
 @set_figure
-def contourmap(DataBase) -> Axes:
+def contour(DataBase) -> Axes:
     fig, ax = plt.subplots()
 
     npoints = 1000
@@ -31,37 +23,31 @@ def contourmap(DataBase) -> Axes:
     DataBase['gRH'] = d_f['gRH'].round(2)
     DataBase['PM25'] = d_f['PM25'].round(2)
 
-    def func(para, a, b):
-        PM, GF = para
-        return a * (PM * GF) ** (b)
+    def func(data, *params):
+        return params[0] * data ** (params[1])
+
+    initial_guess = [1.0, 1.0]
 
     fit_df = DataBase[['PM25', 'gRH', 'Extinction']].dropna()
-    popt, pcov = curve_fit(func, xdata=(fit_df['PM25'], fit_df['gRH']), ydata=fit_df['Extinction'])
-    # print(popt)
+    popt, pcov = curve_fit(func, xdata=(fit_df['PM25'] * fit_df['gRH']), ydata=fit_df['Extinction'], p0=initial_guess,
+                           maxfev=2000000, method='trf')
 
-    def f(x, y):
-        return popt[0] * (x * y) ** (popt[1])
-
-    plt.xlabel(Unit('PM25'))
-    plt.ylabel('GF(RH)')
-    plt.xlim(DataBase.PM25.min(), DataBase.PM25.max())
-    plt.ylim(DataBase.gRH.min(), DataBase.gRH.max())
-    plt.title('')
+    x, y = DataBase.PM25, DataBase.gRH
 
     # pcolor = ax.pcolormesh(X, Y, (X * 4.5 * Y ** (1 / 3)), cmap='jet', shading='auto', vmin=0, vmax=843, alpha=0.8)
-    cont = ax.contour(X, Y, f(X, Y), colors='black', levels=5, vmin=0, vmax=f(X, Y).max(), linewidths=2)
-    conf = ax.contourf(X, Y, f(X, Y), cmap='YlGnBu', levels=100, vmin=0, vmax=f(X, Y).max())
+    Z = func(X * Y, *popt)
+    cont = ax.contour(X, Y, Z, colors='black', levels=5, vmin=0, vmax=Z.max())
+    conf = ax.contourf(X, Y, Z, cmap='YlGnBu', levels=100, vmin=0, vmax=Z.max())
     ax.clabel(cont, colors=['black'], fmt=lambda s: f"{s:.0f} 1/Mm")
+    ax.set(xlabel=Unit('PM25'), ylabel=Unit('gRH'), xlim=(x.min(), x.max()), ylim=(y.min(), y.max()))
 
-    cax = inset_axes(ax, width="5%",
-                     height="100%",
-                     loc='lower left',
-                     bbox_to_anchor=(1.02, 0., 1, 1),
-                     bbox_transform=ax.transAxes,
-                     borderpad=0)
-
-    color_bar = plt.colorbar(conf, cax=cax)
-    color_bar.set_label(label='Extinction (1/Mm)')
+    color_bar = plt.colorbar(conf, pad=0.02, fraction=0.05, label='Extinction (1/Mm)')
     color_bar.ax.set_xticklabels(color_bar.ax.get_xticks().astype(int))
 
     return ax
+
+
+if __name__ == '__main__':
+    from DataPlot import *
+
+    contour(DataBase)

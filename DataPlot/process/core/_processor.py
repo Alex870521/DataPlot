@@ -1,12 +1,21 @@
+from abc import ABC, abstractmethod
+
+from pandas import DataFrame
+
 from DataPlot.process.core._DEFAULT_PATH import *
 
 
-class DataProcessor:
+class DataProcessor(ABC):
 
-    def __init__(self, reset: bool = False, default_path: Path = DEFAULT_PATH):
-        self.reset: bool = reset
-        self.default_path: Path = default_path
+    def __init__(self):
+        self.DEFAULT_PATH: Path = DEFAULT_PATH
 
-    def process_data(self):
-        # Implement data process logic here
+    @abstractmethod
+    def process_data(self, reset: bool = False, save_filename: str | Path = None) -> DataFrame:
+        """ Implementation of processing data """
+        pass
+
+    @abstractmethod
+    def save_data(self, data: DataFrame, save_filename: str | Path):
+        """ Save data """
         pass

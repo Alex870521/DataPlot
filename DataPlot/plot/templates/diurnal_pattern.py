@@ -1,11 +1,9 @@
-import numpy as np
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.pyplot import Axes
 from matplotlib.ticker import AutoMinorLocator
-from DataPlot.plot.core import *
 
+from DataPlot.plot.core import *
 
 __all__ = ['diurnal_pattern']
 

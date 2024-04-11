@@ -1,13 +1,13 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.pyplot import Axes
 from matplotlib.colors import Normalize
+from matplotlib.pyplot import Axes
 from matplotlib.ticker import ScalarFormatter
+
 from DataPlot.plot.core import *
 from DataPlot.plot.templates.regression import _linear_regression
-
 
 __all__ = [
     'scatter',

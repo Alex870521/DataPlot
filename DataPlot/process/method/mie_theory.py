@@ -1,6 +1,7 @@
-from PyMieScatt import AutoMieQ
-import numpy as np
 import math
+
+import numpy as np
+from PyMieScatt import AutoMieQ
 
 
 def Mie_Q(m: complex,

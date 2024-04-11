@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
 from functools import wraps
-from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 __all__ = ['set_figure']
 
@@ -48,7 +48,7 @@ def set_figure(func=None,
                 plt.rcParams['figure.figsize'] = figsize or (6, 5)
                 plt.rcParams['figure.dpi'] = 150
                 plt.rcParams['figure.subplot.left'] = 0.125
-                plt.rcParams['figure.subplot.right'] = 0.85
+                plt.rcParams['figure.subplot.right'] = 0.875
                 plt.rcParams['figure.subplot.bottom'] = 0.125
                 plt.rcParams['figure.subplot.top'] = 0.88
                 # plt.rcParams['figure.autolayout'] = True

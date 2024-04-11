@@ -1,211 +1,28 @@
-import math
+from typing import Literal
+
+import matplotlib.colors as colors
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-from tabulate import tabulate
+from matplotlib.collections import PolyCollection
+from matplotlib.pyplot import Figure, Axes
+from matplotlib.ticker import FuncFormatter
 from numpy import log, exp, sqrt, pi
 from pandas import DataFrame, date_range
-from typing import Literal
-from scipy.stats import norm, lognorm
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from matplotlib.pyplot import Figure, Axes
-from matplotlib.ticker import ScalarFormatter, FuncFormatter
-from matplotlib.collections import PolyCollection
+from scipy.stats import norm, lognorm
+from tabulate import tabulate
+
 from DataPlot.plot.core import *
-from DataPlot.process import *
 
-
-__all__ = ['heatmap',
-           'heatmap_tms',
-           'plot_dist',
-           'three_dimension',
-           'curve_fitting',
-           'ls_mode',
-           'lognorm_dist',
-           ]
-
-
-@set_figure(fs=12)
-def heatmap(data: DataFrame,
-            unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
-            cmap: str = 'Blues',
-            ax: Axes | None = None,
-            **kwargs) -> Axes:
-    """
-    Plot a heatmap of particle size distribution.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        The data containing particle size distribution values. Each column corresponds to a size bin,
-        and each row corresponds to a different distribution.
-    unit : {'Number', 'Surface', 'Volume', 'Extinction'}, optional
-        The unit of measurement for the data.
-    ax : matplotlib.axes.Axes, optional
-        The axes to plot the heatmap on. If not provided, a new subplot will be created.
-    cmap : str, default='Blues'
-        The colormap to use for the heatmap.
-    **kwargs
-        Additional keyword arguments to pass to matplotlib functions.
-
-    Returns
-    -------
-    matplotlib.axes.Axes
-        The Axes object containing the heatmap.
-
-    Examples
-    --------
-    >>> ax = heatmap(DataFrame(...), unit='Number')
-
-    Notes
-    -----
-    This function calculates a 2D histogram of the log-transformed particle sizes and the distribution values.
-    It then plots the heatmap using a logarithmic color scale.
-
-    """
-    if ax is None:
-        fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
-
-    dp = np.array(data.columns, dtype=float)
-    x = np.append(np.tile(dp, data.values.shape[0]), 2750)
-    y = np.append(data.values.flatten(), 0.000001)
-
-    nan_indices = np.isnan(y)
-
-    limit = np.percentile(y, [90])
-
-    valid_indices = (y < limit) | (~nan_indices)
-
-    x = x[valid_indices]
-    y = y[valid_indices]
-
-    # using log(x)
-    heatmap, xedges, yedges = np.histogram2d(np.log(x), y, bins=50)
-    heatmap[heatmap == 0] = 0.000001  # Avoid log(0)
-
-    plot_kws = dict(norm=colors.LogNorm(vmin=1, vmax=heatmap.max()), cmap=cmap, **kwargs.get('plot_kws', {}))
-
-    surf = ax.pcolormesh(xedges[:-1], yedges[:-1], heatmap.T, shading='gouraud', antialiased=True, **plot_kws)
-    ax.plot(np.log(dp), data.mean(), ls='solid', color='k', lw=2, label='mean')
-    # ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='k', lw=2, label='mean')
-    # ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='k', lw=2, label='mean')
-
-    ax.set_xticks(np.log([10, 100, 1000]))
-    ax.set_xticks(np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000]), minor=True)
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda tick, pos: "{:.0f}".format(np.exp(tick))))
-    ax.ticklabel_format(style='sci', axis='y', scilimits=(-1, 4), useMathText=True, useLocale=True)
-
-    ax.set(xlim=(np.log(dp).min(), np.log(dp).max()), ylim=(0, None),
-           xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
-
-    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-
-    # cbar
-    cax = inset_axes(ax, width="5%", height="100%", loc='lower left',
-                     bbox_to_anchor=(1.02, 0., 1, 1), bbox_transform=ax.transAxes, borderpad=0)
-
-    plt.colorbar(surf, cax=cax, label='Counts')
-
-    ax.legend(prop=dict(weight='bold'))
-
-    return ax
-
-
-@set_figure(fs=12)
-def heatmap_tms(data: DataFrame,
-                logy: bool = True,
-                cbar: bool = True,
-                unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
-                hide_low: bool = True,
-                cmap: str = 'jet',
-                ax: Axes | None = None,
-                **kwargs) -> Axes:
-    """ Plot the size distribution over time.
-
-    Parameters
-    ----------
-    data : DataFrame
-        A DataFrame of particle concentrations to plot the heatmap.
-    ax : matplotlib.axis.Axis
-        An axis object to plot on. If none is provided, one will be created.
-    logy : bool, default=True
-        If true, the y-axis will be semilogy.
-    cbar : bool, default=True
-        If true, a colorbar will be added.
-    unit : Literal["Number", "Surface", "Volume", "Extinction"]
-        default='Number'
-    hide_low : bool, default=True
-        If true, low values will be masked.
-    cmap : matplotlib.colormap, default='viridis'
-        The colormap to use. Can be anything other that 'jet'.
-
-    Returns
-    -------
-    ax : matplotlib.axis.Axis
-
-    Examples
-    --------
-    Plot a SPMS + APS data:
-    >>> ax = heatmap_tms(DataFrame(...), cmap='jet')
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(len(data.index) * 0.02, 3), **kwargs.get('fig_kws', {}))
-
-    fig.subplots_adjust(right=0.99)
-
-    # Copy to avoid modifying original data
-    time = data.index
-    dp = np.array(data.columns, dtype=float)
-    data = data.copy().to_numpy()
-    data = np.nan_to_num(data)
-
-    # Increase values below cbar_min to cbar_min
-    if hide_low:
-        below_min = data == np.NaN
-        data[below_min] = np.NaN
-
-    vmin_mapping = {'Number': 1e4, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
-
-    # Set the colorbar min and max based on the min and max of the values
-    cbar_min = kwargs.get('cbar_kws', {}).pop('cbar_min', vmin_mapping[unit])
-    cbar_max = kwargs.get('cbar_kws', {}).pop('cbar_max', np.nanmax(data))
-
-    # Set the plot_kws
-    plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **kwargs.get('plot_kws', {}))
-
-    # main plot
-    pco1 = ax.pcolormesh(time, dp, data.T, shading='auto', **plot_kws)
-
-    # Set ax
-    st_tm, fn_tm = time[0], time[-1]
-    freq = kwargs.get('freq', '10d')
-    tick_time = date_range(st_tm, fn_tm, freq=freq)
-
-    ax.set(xlabel=kwargs.get('xlabel', ''),
-           ylabel=kwargs.get('ylim', r'$\bf D_p\ (nm)$'),
-           xticks=kwargs.get('xticks', tick_time),
-           xticklabels=kwargs.get('xticklabels', [_tm.strftime("%F") for _tm in tick_time]),
-           xlim=kwargs.get('xlim', (st_tm, fn_tm)),
-           ylim=kwargs.get('ylim', (dp.min(), dp.max())),
-           title=kwargs.get('title', f'{st_tm.strftime("%F")} - {fn_tm.strftime("%F")}')
-           )
-
-    # Set the axis to be log in the y-axis
-    if logy:
-        ax.semilogy()
-        ax.yaxis.set_major_formatter(ScalarFormatter())
-
-    # Set the figure keywords
-    if cbar:
-        cbar_kws = dict(label=Unit(f'{unit}_dist'), **kwargs.get('cbar_kws', {}))
-        plt.colorbar(pco1, pad=0.01, **cbar_kws)
-
-    # fig.savefig(f'heatmap_tm_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
-
-    return ax
+__all__ = [
+    'plot_dist',
+    'heatmap',
+    'heatmap_tms',
+    'three_dimension',
+    'curve_fitting'
+]
 
 
 @set_figure
@@ -213,7 +30,7 @@ def plot_dist(data: DataFrame | np.ndarray,
               data_std: DataFrame | None = None,
               std_scale: float | None = 1,
               unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
-              additional: Literal["std", "enhancement", "error"] = None,
+              additional: Literal["Std", "Enhancement", "Error"] = None,
               fig: Figure | None = None,
               ax: Axes | None = None,
               **kwargs) -> Axes:
@@ -236,7 +53,7 @@ def plot_dist(data: DataFrame | np.ndarray,
     fig : Figure, optional
         Matplotlib Figure object to use.
     ax : AxesSubplot, optional
-        Matplotlib AxesSubplot object to use. If not provided, a new subplot will be created.
+        Matplotlib AxesSubplot  object to use. If not provided, a new subplot will be created.
     **kwargs : dict
         Additional keyword arguments.
 
@@ -247,8 +64,7 @@ def plot_dist(data: DataFrame | np.ndarray,
 
     Examples
     --------
-    >>> data={'Clena': np.array([1, 2, 3, 4]), 'Transition': np.array([1, 2, 3, 4]), 'Event': np.array([1, 2, 3, 4])}
-    >>> plot_dist(DataFrame.from_dict(data, orient='index', columns=['11.8', '12.18', '12.58', '12.99']), additional="enhancement")
+    >>> plot_dist(DataFrame(...), additional="Enhancement")
     """
     if ax is None or fig is None:
         fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
@@ -261,11 +77,11 @@ def plot_dist(data: DataFrame | np.ndarray,
     states = np.array(data.index)
 
     for state in states:
-        mean = data.loc[state].values
+        mean = data.loc[state].to_numpy()
         ax.plot(dp, mean, label=state, color=Color.color_choose[state][0], **plot_kws)
 
-        if additional == 'std':
-            std = data_std.loc[state].values * std_scale
+        if additional == 'Std':
+            std = data_std.loc[state].to_numpy() * std_scale
             ax.fill_between(dp, y1=mean - std, y2=mean + std, alpha=0.4, color=Color.color_choose[state][1],
                             edgecolor=None, label='__nolegend__')
 
@@ -273,27 +89,27 @@ def plot_dist(data: DataFrame | np.ndarray,
     ax.set(xlim=(dp.min(), dp.max()), ylim=(0, None), xscale='log',
            xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
 
-    ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
+    ax.grid(axis='x', which='major', color='k', linestyle='dashdot', linewidth=0.4, alpha=0.4)
 
-    Clean = data.loc['Clean'].values
-    Transition = data.loc['Transition'].values
-    Event = data.loc['Event'].values
+    Clean = data.loc['Clean'].to_numpy()
+    Transition = data.loc['Transition'].to_numpy()
+    Event = data.loc['Event'].to_numpy()
 
-    if additional == "enhancement":
+    if additional == "Enhancement":
         ax2 = ax.twinx()
-        ax2.plot(dp, Transition / Clean, ls='dashed', color='k', label='Enhancement ratio 1')
-        ax2.plot(dp, Event / Transition, ls='dashed', color='gray', label='Enhancement ratio 2')
-        ax2.set(xlim=ax.get_xlim(), ylim=(0.5, None), xlabel=ax.get_xlabel(), ylabel='Enhancement ratio')
+        ax2.plot(dp, Transition / Clean, ls='dashed', color='k', label=f'{additional} ratio 1')
+        ax2.plot(dp, Event / Transition, ls='dashed', color='gray', label=f'{additional} ratio 2')
+        ax2.set(ylabel='Enhancement ratio')
 
-    elif additional == "error":
+    elif additional == "Error":
         ax2 = ax.twinx()
-        error1 = np.where(Transition != 0, np.abs(Clean - Transition) / Transition * 100, 0)
-        error2 = np.where(Event != 0, np.abs(Transition - Event) / Event * 100, 0)
+        error1 = np.where(Transition != 0, np.abs(Clean - Transition) / Clean * 100, 0)
+        error2 = np.where(Event != 0, np.abs(Transition - Event) / Transition * 100, 0)
 
         ax2.plot(dp, error1, ls='--', color='k', label='Error 1 ')
         ax2.plot(dp, error2, ls='--', color='gray', label='Error 2')
-        ax2.set(xlim=ax.get_xlim(), ylim=(None, None), xlabel=ax.get_xlabel(), ylabel='Error (%)')
+        ax2.set(ylabel='Error (%)')
 
     # Combine legends from ax and ax2
     axes_list = fig.get_axes()
@@ -307,9 +123,162 @@ def plot_dist(data: DataFrame | np.ndarray,
     return ax
 
 
+@set_figure(fs=12)
+def heatmap(data: DataFrame,
+            unit: Literal["Number", "Surface", "Volume", "Extinction"],
+            cmap: str = 'Blues',
+            ax: Axes | None = None,
+            **kwargs) -> Axes:
+    """
+    Plot a heatmap of particle size distribution.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data containing particle size distribution values. Each column corresponds to a size bin,
+        and each row corresponds to a different distribution.
+
+    unit : {'Number', 'Surface', 'Volume', 'Extinction'}, optional
+        The unit of measurement for the data.
+
+    cmap : str, default='Blues'
+        The colormap to use for the heatmap.
+
+    ax : matplotlib.axes.Axes, optional
+        The axes to plot the heatmap on. If not provided, a new subplot will be created.
+
+    **kwargs
+        Additional keyword arguments to pass to matplotlib functions.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The Axes object containing the heatmap.
+
+    Examples
+    --------
+    >>> heatmap(DataFrame(...), unit='Number')
+
+    Notes
+    -----
+    This function calculates a 2D histogram of the log-transformed particle sizes and the distribution values.
+    It then plots the heatmap using a logarithmic color scale.
+
+    """
+    if ax is None:
+        fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
+
+    min_value = 1e-8
+    dp = np.array(data.columns, dtype=float)
+    x = np.append(np.tile(dp, data.to_numpy().shape[0]), 2750)
+    y = np.append(data.to_numpy().flatten(), min_value)
+
+    # mask NaN
+    x = x[~np.isnan(y)]
+    y = y[~np.isnan(y)]
+
+    # using log(x)
+    histogram, xedges, yedges = np.histogram2d(np.log(x), y, bins=len(dp) + 2)
+    histogram[histogram == 0] = min_value  # Avoid log(0)
+
+    plot_kws = dict(norm=colors.LogNorm(vmin=1, vmax=histogram.max()), cmap=cmap, **kwargs.get('plot_kws', {}))
+
+    pco = ax.pcolormesh(xedges[:-1], yedges[:-1], histogram.T, shading='gouraud', **plot_kws)
+
+    # TODO:
+    ax.plot(np.log(dp), data.mean(), ls='dashed', color='k', alpha=0.5, label='mean')
+    # ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='r', label='pollutant')
+    # ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='b', label='clean')
+
+    ax.set(xlim=(np.log(dp).min(), np.log(dp).max()), ylim=(0, None),
+           xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
+
+    ax.set_xticks(np.log([100, 1000]))
+    ax.set_xticks(np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000]), minor=True)
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda tick, pos: "{:.0f}".format(np.exp(tick))))
+
+    ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
+    ax.grid(axis='x', which='major', color='k', linestyle='dashdot', linewidth=0.4, alpha=0.4)
+    ax.legend(prop={'weight': 'bold'})
+
+    # plt.colorbar(pco, pad=0.02, fraction=0.05, label='Counts', **kwargs.get('cbar_kws', {}))
+
+    return ax
+
+
+@set_figure(fs=12)
+def heatmap_tms(data: DataFrame,
+                unit: Literal["Number", "Surface", "Volume", "Extinction"],
+                cmap: str = 'jet',
+                ax: Axes | None = None,
+                **kwargs) -> Axes:
+    """ Plot the size distribution over time.
+
+    Parameters
+    ----------
+    data : DataFrame
+        A DataFrame of particle concentrations to plot the heatmap.
+
+    ax : matplotlib.axis.Axis
+        An axis object to plot on. If none is provided, one will be created.
+
+    unit : Literal["Number", "Surface", "Volume", "Extinction"]
+        default='Number'
+
+    cmap : matplotlib.colormap, default='viridis'
+        The colormap to use. Can be anything other that 'jet'.
+
+    Returns
+    -------
+    ax : matplotlib.axis.Axis
+
+    Notes
+    -----
+        Do not dropna when using this code.
+
+    Examples
+    --------
+    Plot a SPMS + APS data:
+    >>> heatmap_tms(DataFrame(...), cmap='jet')
+    """
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(len(data.index) * 0.02, 3), **kwargs.get('fig_kws', {}))
+
+    time = data.index
+    dp = np.array(data.columns, dtype=float)
+    data = np.nan_to_num(data.to_numpy())
+
+    vmin_mapping = {'Number': 1e4, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
+
+    # Set the colorbar min and max based on the min and max of the values
+    cbar_min = kwargs.get('cbar_kws', {}).pop('cbar_min', vmin_mapping[unit])
+    cbar_max = kwargs.get('cbar_kws', {}).pop('cbar_max', np.nanmax(data))
+
+    # Set the plot_kws
+    plot_kws = dict(norm=colors.LogNorm(vmin=cbar_min, vmax=cbar_max), cmap=cmap, **kwargs.get('plot_kws', {}))
+
+    # main plot
+    pco = ax.pcolormesh(time, dp, data.T, shading='auto', **plot_kws)
+
+    # Set ax
+    st_tm, fn_tm = time[0], time[-1]
+    tick_time = date_range(st_tm, fn_tm, freq=kwargs.get('freq', '10d')).strftime("%F")
+
+    ax.set(xlim=(st_tm, fn_tm), ylim=(dp.min(), dp.max()), ylabel='$D_p (nm)$',
+           xticks=tick_time, xticklabels=tick_time, yscale='log',
+           title=kwargs.get('title', f'{st_tm.strftime("%F")} - {fn_tm.strftime("%F")}'))
+
+    plt.colorbar(pco, pad=0.02, fraction=0.02, label=Unit(f'{unit}_dist'), **kwargs.get('cbar_kws', {}))
+
+    # fig.savefig(f'heatmap_tm_{st_tm.strftime("%F")}_{fn_tm.strftime("%F")}.png')
+
+    return ax
+
+
 @set_figure
 def three_dimension(data: DataFrame | np.ndarray,
                     unit: Literal["Number", "Surface", "Volume", "Extinction"],
+                    cmap: str = 'Blues',
                     ax: Axes | None = None,
                     **kwargs) -> Axes:
     """
@@ -319,8 +288,13 @@ def three_dimension(data: DataFrame | np.ndarray,
     ----------
     data : DataFrame or ndarray
         Input data containing the values to be plotted.
+
     unit : {'Number', 'Surface', 'Volume', 'Extinction'}
         Unit of measurement for the data.
+
+    cmap : str, default='Blues'
+        The colormap to use for the facecolors.
+
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot. If not provided, a new subplot will be created.
     **kwargs
@@ -339,15 +313,13 @@ def three_dimension(data: DataFrame | np.ndarray,
 
     Example
     -------
-    >>> data = DataFrame(...)
-    >>> three_dimension(data, unit='Number', figsize=(6, 6), cmap='Blues')
+    >>> three_dimension(DataFrame(...), unit='Number', cmap='Blues')
     """
     if ax is None:
         fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "3d"}, **kwargs.get('fig_kws', {}))
 
-    lines = data.shape[0]
-
     dp = np.array(['11.7', *data.columns, '2437.4'], dtype=float)
+    lines = data.shape[0]
 
     _X, _Y = np.meshgrid(np.log(dp), np.arange(lines))
     _Z = np.pad(data, ((0, 0), (1, 1)), 'constant')
@@ -356,33 +328,30 @@ def three_dimension(data: DataFrame | np.ndarray,
     for i in range(_X.shape[0]):
         verts.append(list(zip(_X[i, :], _Z[i, :])))
 
-    facecolors = plt.colormaps['Blues'](np.linspace(0, 1, len(verts)))
+    facecolors = plt.colormaps[cmap](np.linspace(0, 1, len(verts)))
     poly = PolyCollection(verts, facecolors=facecolors, edgecolors='k', lw=0.5, alpha=.7)
     ax.add_collection3d(poly, zs=range(1, lines + 1), zdir='y')
-    # ax.set_xscale('log') <- dont work
-    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=(0, np.nanmax(_Z)))
-    ax.set_xlabel(r'$\bf D_{p}\ (nm)$', labelpad=10)
-    ax.set_ylabel(r'$\bf Class$', labelpad=10)
-    ax.set_zlabel(Unit(f'{unit}_dist'), labelpad=15)
 
-    major_ticks = np.log([10, 100, 1000])
-    minor_ticks = np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000])
-    ax.set_xticks(major_ticks)
-    ax.set_xticks(minor_ticks, minor=True)
+    ax.set(xlim=(np.log(11.7), np.log(2437.4)), ylim=(1, lines), zlim=(0, np.nanmax(_Z)),
+           xlabel='$D_{p} (nm)$', ylabel='Class', zlabel=Unit(f'{unit}_dist'))
+
+    ax.set_xticks(np.log([10, 100, 1000]))
+    ax.set_xticks(np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000]), minor=True)
     ax.xaxis.set_major_formatter(FuncFormatter((lambda tick, pos: "{:.0f}".format(np.exp(tick)))))
+    ax.ticklabel_format(axis='z', style='sci', scilimits=(0, 3), useMathText=True)
+
     ax.zaxis.get_offset_text().set_visible(False)
-    exponent = math.floor(math.log10(np.max(data)))
+    exponent = np.floor(np.log10(np.nanmax(data))).astype(int)
     ax.text(ax.get_xlim()[1] * 1.05, ax.get_ylim()[1], ax.get_zlim()[1] * 1.1, s=fr'${{\times}}\ 10^{exponent}$')
-    ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0), useOffset=False)
 
     return ax
 
 
 @set_figure
-def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
+def curve_fitting(dp: np.ndarray,
                   dist: np.ndarray | pd.Series | DataFrame,
-                  mode: int,
-                  unit: Literal["Number", "Surface", "Volume", "Extinction"] = 'Number',
+                  mode: int = None,
+                  unit: Literal["Number", "Surface", "Volume", "Extinction"] = None,
                   ax: Axes | None = None,
                   **kwargs) -> Axes:
     """
@@ -407,7 +376,7 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
 
     Example
     -------
-    >>> curve_fitting(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution", figname="extinction")
+    >>> curve_fitting(dp, dist, mode=2, xlabel="Diameter (nm)", ylabel="Distribution")
     """
     if ax is None:
         fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
@@ -422,9 +391,8 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
 
         for i in range(num_distributions):
             offset = i * 3
-            _number = params[offset]
-            _geomean = params[offset + 1]
-            _geostd = params[offset + 2]
+            _number, _geomean, _geostd = params[offset: offset + 3]
+
             result += (_number / (log(_geostd) * sqrt(2 * pi)) *
                        exp(-(log(x) - log(_geomean)) ** 2 / (2 * log(_geostd) ** 2)))
 
@@ -437,18 +405,17 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
     peak = dp[_mode - 1]
     mode = mode or len(peak)
 
-    # 設定參數範圍
-    bounds = ([1e-6, 10, 1] * mode,
-              [1, 3000, 8] * mode)
-
     # 初始參數猜測
-    initial_guess = [0.05, 20, 2] * mode
+    initial_guess = [0.05, 20., 2.] * mode
+
+    # 設定參數範圍
+    bounds = ([1e-6, 10, 1] * mode, [1, 3000, 8] * mode)
 
     # 使用 curve_fit 函數進行擬合
-    popt, pcov = curve_fit(lognorm_func, dp, norm_data, p0=initial_guess, maxfev=2000000, method='trf', bounds=bounds)
+    result = curve_fit(lognorm_func, dp, norm_data, p0=initial_guess, bounds=bounds)
 
     # 獲取擬合的參數
-    params = popt.tolist()
+    params = result[0].tolist()
 
     print('\n' + "Fitting Results:")
     table = []
@@ -456,13 +423,10 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
     for i in range(mode):
         offset = i * 3
         num, mu, sigma = params[offset:offset + 3]
-        table.append([f'log-{i + 1}', num * total_num, mu, sigma])
-
-    formatted_data = [[item if not isinstance(item, float) else f"{item:.3f}" for item in row] for row in table]
+        table.append([f'log-{i + 1}', f"{num * total_num:.3f}", f"{mu:.3f}", f"{sigma:.3f}"])
 
     # 使用 tabulate 來建立表格並印出
-    tab = tabulate(formatted_data, headers=["log-", "number", "mu", "sigma"], floatfmt=".3f", tablefmt="fancy_grid")
-    print(tab)
+    print(tabulate(table, headers=["log-", "number", "mu", "sigma"], floatfmt=".3f", tablefmt="fancy_grid"))
 
     fit_curve = total_num * lognorm_func(dp, *params)
 
@@ -470,11 +434,11 @@ def curve_fitting(dp: np.ndarray | pd.Series | DataFrame,
     plt.plot(dp, dist, color='b', label='Observed curve', lw=2.5)
 
     ax.set(xlim=(dp.min(), dp.max()), ylim=(0, None), xscale='log',
-           xlabel=r'$\bf D_{p}\ (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', ''))
+           xlabel=r'$\bf D_{p}\ (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title'))
 
     plt.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
-    ax.legend()
+    ax.legend(prop={'weight': 'bold'})
 
     # plt.savefig(f'CurveFit_{figname}.png')
 
@@ -517,13 +481,14 @@ def ls_mode(**kwargs) -> Axes:
            ylabel=r'$\bf Probability\ (dM/dlogdp)$', title=r'Log-normal Mass Size Distribution')
 
     ax.grid(color='k', axis='x', which='major', linestyle='dashdot', linewidth=0.4, alpha=0.4)
-    ax.legend()
+    ax.legend(prop={'weight': 'bold'})
 
     return ax
 
 
 @set_figure
 def lognorm_dist(**kwargs) -> Axes:
+    #
     """
     Plot various particle size distributions to illustrate log-normal distributions and transformations.
 
@@ -554,48 +519,34 @@ def lognorm_dist(**kwargs) -> Axes:
     x = np.linspace(-10, 10, 1000)
     x2 = np.geomspace(0.01, 100, 1000)
 
-    # 生成常態分布
-    pdf = normpdf(x, mu=0, sigma=2)
-
-    pdf2_1 = lognormpdf(x2, gmean=0.8, gstd=1.5)
-    pdf2_2 = lognormpdf2(x2, gmean=0.8, gstd=1.5)
-    ln2_1 = lognorm(scale=0.8, s=np.log(1.5))  # == lognormpdf2(x2, gmean=0.8, gstd=1.5)
-
     # Question 1
-    # 若對數常態分布x有gmd=3, gstd=2，ln(x) ~ 常態分佈，試問其分布的平均值與標準差??
-    data3 = lognorm(scale=3, s=np.log(2)).rvs(size=5000)
-    Y = np.log(data3)  # Y ~ N(mu=log(gmean), sigma=log(gstd))
+    # 若對數常態分布x有gmd=3, gstd=2，ln(x) ~ 常態分佈，試問其分布的平均值與標準差??  Y ~ N(mu=log(gmean), sigma=log(gstd))
+    data1 = lognorm(scale=3, s=log(2)).rvs(size=5000)
 
     # Question 2
     # 若常態分布x有平均值3 標準差1，exp(x)則為一對數常態分佈? 由對數常態分佈的定義 若隨機變數ln(Z)是常態分布 則Z為對數常態分布
-    # 因此已知Z = exp(x), so ln(Z)=x，Z ~ 對數常態分佈，試問其分布的幾何平均值與幾何標準差是??
-    data5 = norm(loc=3, scale=1).rvs(size=5000)
-    Z = np.exp(data5)  # Z ~ LN(geoMean=exp(mu), geoStd=exp(sigma))
+    # 因此已知Z = exp(x), so ln(Z)=x，Z ~ 對數常態分佈，試問其分布的幾何平均值與幾何標準差是??  Z ~ LN(geoMean=exp(mu), geoStd=exp(sigma))
+    data2 = norm(loc=3, scale=1).rvs(size=5000)
 
-    def plot_distribution(ax, x, pdf, color='k-', **kwargs):
-        ax.plot(x, pdf, color, **kwargs)
-        ax.set_xlabel('Particle Size (micron)')
-        ax.set_ylabel('Probability Density')
-        ax.set_xlim(x.min(), x.max())
+    def plot_distribution(ax, x, pdf, color='k-', xscale='linear'):
+        ax.plot(x, pdf, color)
+        ax.set(xlabel='Particle Size (micron)', ylabel='Probability Density', xlim=(x.min(), x.max()), xscale=xscale)
 
     # 繪製粒徑分布
-    plot_distribution(ax1, x, pdf)
+    plot_distribution(ax1, x, normpdf(x, mu=0, sigma=2))
 
-    plot_distribution(ax2, x2, ln2_1.pdf(x2), 'b-*')
-    plot_distribution(ax2, x2, pdf2_1, 'g-')
-    plot_distribution(ax2, x2, pdf2_2, 'r--')
-    ax2.semilogx()
+    plot_distribution(ax2, x2, lognormpdf(x2, gmean=0.8, gstd=1.5), 'g-', xscale='log')
+    plot_distribution(ax2, x2, lognormpdf2(x2, gmean=0.8, gstd=1.5), 'r--', xscale='log')
+    plot_distribution(ax2, x2, lognorm(scale=0.8, s=log(1.5)).pdf(x2), 'b--', xscale='log')
 
     plot_distribution(ax3, x, normpdf(x, mu=log(3), sigma=log(2)), 'k-')
-    ax3.hist(Y, bins=100, density=True, alpha=0.6, color='g')
+    ax3.hist(log(data1), bins=100, density=True, alpha=0.6, color='g')
 
-    plot_distribution(ax4, x2, lognormpdf2(x2, gmean=exp(3), gstd=exp(1)), 'r-')
-    ax4.hist(Z, bins=100, density=True, alpha=0.6, color='g')
-    ax4.semilogx()
+    plot_distribution(ax4, x2, lognormpdf2(x2, gmean=exp(3), gstd=exp(1)), 'r-', xscale='log')
+    ax4.hist(exp(data2), bins=100, density=True, alpha=0.6, color='g')
 
     return ax
 
 
 if __name__ == '__main__':
-    PNSD = DataReader('PNSD_dNdlogdp.csv')
-    heatmap(PNSD, unit="Number")
+    lognorm_dist()
