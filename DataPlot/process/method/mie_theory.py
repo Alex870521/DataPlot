@@ -1,5 +1,5 @@
 import math
-from typing import Sequence
+from typing import Sequence, Literal
 
 import numpy as np
 from PyMieScatt import AutoMieQ
@@ -156,6 +156,64 @@ def Mie_PESD(m: complex,
     Abs = Q_abs * (math.pi / 4 * dp ** 2) * ndp * 1e-6
 
     return Ext, Sca, Abs
+
+
+def internal(dist,
+             dp: float | Sequence[float],
+             wavelength: float = 550,
+             result_type: Literal['extinction', 'scattering', 'absorption'] = 'extinction'
+             ) -> np.ndarray:
+    ext_dist, sca_dist, abs_dist = Mie_PESD(m=complex(dist['n_amb'], dist['k_amb']),
+                                            wavelength=wavelength,
+                                            dp=dp,
+                                            ndp=np.array(dist[:np.size(dp)]))
+
+    if result_type == 'extinction':
+        return ext_dist
+    elif result_type == 'scattering':
+        return sca_dist
+    else:
+        return abs_dist
+
+    # return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
+
+
+def external(dist,
+             dp: float | Sequence[float],
+             wavelength: float = 550,
+             result_type: Literal['extinction', 'scattering', 'absorption'] = 'extinction'
+             ) -> np.ndarray:
+    refractive_dic = {'AS_volume_ratio': complex(1.53, 0.00),
+                      'AN_volume_ratio': complex(1.55, 0.00),
+                      'OM_volume_ratio': complex(1.54, 0.00),
+                      'Soil_volume_ratio': complex(1.56, 0.01),
+                      'SS_volume_ratio': complex(1.54, 0.00),
+                      'EC_volume_ratio': complex(1.80, 0.54),
+                      'ALWC_volume_ratio': complex(1.33, 0.00)}
+
+    ndp = np.array(dist[:np.size(dp)])
+    mie_results = (
+        Mie_PESD(refractive_dic[_specie], wavelength, dp, dist[_specie] / (1 + dist['ALWC_volume_ratio']) * ndp) for
+        _specie in refractive_dic)
+
+    ext_dist, sca_dist, abs_dist = (np.sum([res[0] for res in mie_results], axis=0),
+                                    np.sum([res[1] for res in mie_results], axis=0),
+                                    np.sum([res[2] for res in mie_results], axis=0))
+
+    if result_type == 'extinction':
+        return ext_dist
+    elif result_type == 'scattering':
+        return sca_dist
+    else:
+        return abs_dist
+
+
+def core_shell():
+    pass
+
+
+def sensitivity():
+    pass
 
 
 if __name__ == '__main__':
