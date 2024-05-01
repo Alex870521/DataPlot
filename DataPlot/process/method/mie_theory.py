@@ -1,7 +1,7 @@
-import math
 from typing import Sequence, Literal
 
 import numpy as np
+import pandas as pd
 from PyMieScatt import AutoMieQ
 from numpy import exp, log, log10, sqrt, pi
 
@@ -151,18 +151,37 @@ def Mie_PESD(m: complex,
     Q_ext, Q_sca, Q_abs = Mie_Q(m, wavelength, dp)
 
     # The 1e-6 here is so that the final value is the same as the unit 1/10^6m.
-    Ext = Q_ext * (math.pi / 4 * dp ** 2) * ndp * 1e-6
-    Sca = Q_sca * (math.pi / 4 * dp ** 2) * ndp * 1e-6
-    Abs = Q_abs * (math.pi / 4 * dp ** 2) * ndp * 1e-6
+    Ext = Q_ext * (pi / 4 * dp ** 2) * ndp * 1e-6
+    Sca = Q_sca * (pi / 4 * dp ** 2) * ndp * 1e-6
+    Abs = Q_abs * (pi / 4 * dp ** 2) * ndp * 1e-6
 
     return Ext, Sca, Abs
 
 
-def internal(dist,
+def internal(dist: pd.Series,
              dp: float | Sequence[float],
              wavelength: float = 550,
              result_type: Literal['extinction', 'scattering', 'absorption'] = 'extinction'
              ) -> np.ndarray:
+    """
+    Calculate the extinction distribution by internal mixing model.
+
+    Parameters
+    ----------
+    dist : pd.Series
+        Particle size distribution data.
+    dp : float | Sequence[float]
+        Diameter(s) of the particles, either a single value or a sequence.
+    wavelength : float, optional
+        Wavelength of the incident light, default is 550 nm.
+    result_type : {'extinction', 'scattering', 'absorption'}, optional
+        Type of result to calculate, defaults to 'extinction'.
+
+    Returns
+    -------
+    np.ndarray
+        Extinction distribution calculated based on the internal mixing model.
+    """
     ext_dist, sca_dist, abs_dist = Mie_PESD(m=complex(dist['n_amb'], dist['k_amb']),
                                             wavelength=wavelength,
                                             dp=dp,
@@ -178,11 +197,30 @@ def internal(dist,
     # return dict(ext=ext_dist, sca=sca_dist, abs=abs_dist)
 
 
-def external(dist,
+def external(dist: pd.Series,
              dp: float | Sequence[float],
              wavelength: float = 550,
              result_type: Literal['extinction', 'scattering', 'absorption'] = 'extinction'
              ) -> np.ndarray:
+    """
+    Calculate the extinction distribution by external mixing model.
+
+    Parameters
+    ----------
+    dist : pd.Series
+        Particle size distribution data.
+    dp : float | Sequence[float]
+        Diameter(s) of the particles, either a single value or a sequence.
+    wavelength : float, optional
+        Wavelength of the incident light, default is 550 nm.
+    result_type : {'extinction', 'scattering', 'absorption'}, optional
+        Type of result to calculate, defaults to 'extinction'.
+
+    Returns
+    -------
+    np.ndarray
+        Extinction distribution calculated based on the external mixing model.
+    """
     refractive_dic = {'AS_volume_ratio': complex(1.53, 0.00),
                       'AN_volume_ratio': complex(1.55, 0.00),
                       'OM_volume_ratio': complex(1.54, 0.00),

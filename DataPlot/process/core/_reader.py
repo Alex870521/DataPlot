@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from pandas import read_csv, read_json, read_excel, DataFrame
 
-from DataPlot.process.core._DEFAULT_PATH import *
+from DataPlot.process.core._DEFAULT import *
 
 
 class FileHandler(ABC):
@@ -48,7 +48,7 @@ class FileFinder:
     @staticmethod
     def find_file(filename: Path | str) -> Path:
         if isinstance(filename, str):
-            file_path = list(DEFAULT_PATH.glob('**/' + filename))
+            file_path = list(DEFAULT_DATA_PATH.glob('**/' + filename))
             if len(file_path) == 1:
                 return file_path[0]
             elif len(file_path) == 0:

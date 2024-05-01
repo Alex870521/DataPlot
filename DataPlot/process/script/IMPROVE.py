@@ -50,7 +50,7 @@ class ImproveProcessor(DataProcessor):
 
     def __init__(self):
         super().__init__()
-        self.file_path = self.DEFAULT_PATH / 'Level2'
+        self.file_path = self.DEFAULT_DATA_PATH / 'Level2'
 
     @staticmethod
     def frh(_RH):

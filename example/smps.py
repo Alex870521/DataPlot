@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     # plot
     for data, unit in zip([PNSD, PSSD, PVSD], ['Number', 'Surface', 'Volume']):
-        # plot.distribution.heatmap(data, unit=unit)
+        plot.distribution.heatmap(data, unit=unit)
         plot.distribution.heatmap_tms(data, unit=unit, freq='60d')
 
     # Classify the data

@@ -33,7 +33,8 @@ def plot_dist(data: DataFrame | np.ndarray,
               additional: Literal["Std", "Enhancement", "Error"] = None,
               fig: Figure | None = None,
               ax: Axes | None = None,
-              **kwargs) -> Axes:
+              **kwargs
+              ) -> Axes:
     """
     Plot particle size distribution curves and optionally show enhancements.
 
@@ -128,7 +129,8 @@ def heatmap(data: DataFrame,
             unit: Literal["Number", "Surface", "Volume", "Extinction"],
             cmap: str = 'Blues',
             ax: Axes | None = None,
-            **kwargs) -> Axes:
+            **kwargs
+            ) -> Axes:
     """
     Plot a heatmap of particle size distribution.
 
@@ -211,7 +213,8 @@ def heatmap_tms(data: DataFrame,
                 unit: Literal["Number", "Surface", "Volume", "Extinction"],
                 cmap: str = 'jet',
                 ax: Axes | None = None,
-                **kwargs) -> Axes:
+                **kwargs
+                ) -> Axes:
     """ Plot the size distribution over time.
 
     Parameters
@@ -280,7 +283,8 @@ def three_dimension(data: DataFrame | np.ndarray,
                     unit: Literal["Number", "Surface", "Volume", "Extinction"],
                     cmap: str = 'Blues',
                     ax: Axes | None = None,
-                    **kwargs) -> Axes:
+                    **kwargs
+                    ) -> Axes:
     """
     Create a 3D plot with data from a pandas DataFrame or numpy array.
 
@@ -353,7 +357,8 @@ def curve_fitting(dp: np.ndarray,
                   mode: int = None,
                   unit: Literal["Number", "Surface", "Volume", "Extinction"] = None,
                   ax: Axes | None = None,
-                  **kwargs) -> Axes:
+                  **kwargs
+                  ) -> Axes:
     """
     Fit a log-normal distribution to the given data and plot the result.
 

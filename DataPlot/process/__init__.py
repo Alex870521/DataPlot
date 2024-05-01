@@ -7,12 +7,12 @@ from pandas import read_csv, concat, DataFrame
 from tqdm import tqdm
 
 from .core import DataReader, Classifier
-from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, ParticleSizeDist, OthersProcessor
+from .script import ImpactProcessor, ImproveProcessor, ChemicalProcessor, ParticleSizeDistProcessor, OthersProcessor
 
 __all__ = ['DataBase',
            'DataReader',
            'DataClassifier',
-           'ParticleSizeDist'
+           'ParticleSizeDistProcessor'
            ]
 
 
@@ -25,11 +25,12 @@ class MainProcessor:
         with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|", unit="it") as progress_bar:
 
             if self.file_path.exists() and not self.reset:
+                progress_bar.update(20)
                 return read_csv(self.file_path, parse_dates=['Time'], na_values=('-', 'E', 'F'),
                                 low_memory=False).set_index('Time')
 
             else:
-                processor = [ImpactProcessor, ChemicalProcessor, ImproveProcessor, ParticleSizeDist]
+                processor = [ImpactProcessor, ChemicalProcessor, ImproveProcessor, ParticleSizeDistProcessor]
                 reset = [False, False, False, False, False]
                 save_filename = ['IMPACT.csv', 'chemical.csv', 'revised_IMPROVE.csv', 'PSD.csv', 'PESD.csv']
 
@@ -49,13 +50,13 @@ class MainProcessor:
                                                           version='revised')
 
                 # 5. Number & Surface & volume & Extinction distribution
-                psd = ParticleSizeDist().process_data(reset=False)
+                psd = ParticleSizeDistProcessor().process_data(reset=False)
 
                 _df = concat([minion, impact, chemical, improve, psd], axis=1)
 
                 # 6. others
                 _df = OthersProcessor(reset=False, data=_df).process_data()
-                progress_bar.update(1)
+                progress_bar.update(20)
 
                 # 7. save result
                 _df.to_csv(self.file_path)

@@ -5,6 +5,7 @@ from matplotlib.pyplot import Axes
 from scipy.optimize import curve_fit
 
 from DataPlot import *
+from DataPlot.plot.core import set_figure
 
 # TODO: this file has to be reorganized
 
@@ -120,7 +121,7 @@ def pie_IMPROVE():
     plot.donuts(data_set=ext_dry_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
     plot.donuts(data_set=ext_mix_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], unit='Extinction')
     plot.donuts(data_set=ext_amb_dict, labels=['AS', 'AN', 'OM', 'Soil', 'SS', 'BC', 'ALWC'],
-               unit='Extinction', colors=Color.colors2)
+                unit='Extinction', colors=Color.colors2)
 
 
 def MLR_IMPROVE(**kwargs):
@@ -181,7 +182,7 @@ def MLR_IMPROVE(**kwargs):
     linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
                       regression=True, diagonal=True)
     plot.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
-               unit='PM25', colors=Color.colors3)
+                unit='PM25', colors=Color.colors3)
     plot.donuts(mean, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
 
 
@@ -201,22 +202,20 @@ def fRH_plot(**kwargs) -> Axes:
     val_fit = fitting_func(x, *params)
 
     fig, ax = plt.subplots()
-    plt.plot(frh.index, frh['fRH'], 'k-o')
-    plt.plot(frh.index, frh['fRHs'], 'g-o')
-    plt.plot(frh.index, frh['fRHl'], 'r-o')
-    plt.plot(frh.index, frh['fRHSS'], 'b-o')
-    plt.xlim(0, 100)
-    plt.ylim(1, )
-    plt.title(r'$\bf Hygroscopic\ growth\ factor$')
-    plt.grid(axis='y', color='gray', linestyle='dashed', linewidth=1, alpha=0.6)
-    plt.xlabel('$RH (\\%)$')
-    plt.ylabel('$f(RH)$')
-    plt.legend([fr'$\bf f(RH)_{{original}}$',
-                fr'$\bf f(RH)_{{small\ mode}}$',
-                fr'$\bf f(RH)_{{large\ mode}}$',
-                fr'$\bf f(RH)_{{sea\ salt}}$'],
-               loc='upper left', prop=dict(size=16))
+
+    ax.plot(frh.index, frh['fRH'], 'k-o')
+    ax.plot(frh.index, frh['fRHs'], 'g-o')
+    ax.plot(frh.index, frh['fRHl'], 'r-o')
+    ax.plot(frh.index, frh['fRHSS'], 'b-o')
+
+    ax.set(xlim=(0, 100), ylim=(1, None), xlabel='$RH (\\%)$', ylabel='$f(RH)$', title='$Hygroscopic growth factor$')
+    ax.grid(axis='y', color='gray', linestyle='dashed', linewidth=0.4, alpha=0.4)
+
+    ax.legend([f'$f(RH)_{{original}}$', f'$f(RH)_{{small mode}}$', f'$f(RH)_{{large mode}}$', f'$f(RH)_{{sea salt}}$'],
+              prop=dict(weight='bold'))
+
     # fig.savefig('fRH_plot')
+
     return ax
 
 

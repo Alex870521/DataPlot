@@ -7,7 +7,7 @@ from PyMieScatt import ScatteringFunction
 from matplotlib.pyplot import Axes
 
 from DataPlot.plot.core import *
-from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_Lognormal
+from DataPlot.process.method.mie_theory import Mie_Q, Mie_MEE, Mie_PESD
 
 __all__ = ['Q_plot',
            'RI_couple',
@@ -72,7 +72,7 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
 
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
-    xlabel_mapping = {'dp': 'Particle Diameter (nm)$',
+    xlabel_mapping = {'dp': 'Particle Diameter (nm)',
                       'sp': '$Size parameter (\\alpha)$'}
 
     ylabel_mapping = {'Q': {'ext': '$Extinction efficiency (Q_{{ext}})$',
@@ -303,7 +303,7 @@ def scattering_phase(m: complex = 1.55 + 0.01j,
 
 @set_figure
 def response_surface(real_range=(1.33, 1.7),
-                     gmd_range=(60, 400),
+                     gmd_range=(10, 500),
                      num=50,
                      **kwargs) -> Axes:
     """
@@ -341,9 +341,7 @@ def response_surface(real_range=(1.33, 1.7),
         for i in range(RI.shape[0]):
             for j in range(RI.shape[1]):
                 _RI, _GMD = RI[i, j], GMD[i, j]
-
-                Bext, Bsca, Babs = Mie_Lognormal(m=_RI, wavelength=550, geoMean=_GMD, geoStdDev=2,
-                                                 numberOfParticles=5e6)
+                Bext, Bsca, Babs = Mie_PESD(m=_RI, lognormal=True, geoMean=_GMD, geoStdDev=2.)
                 Z[i, j] = np.sum(Bext)
 
         return Z
@@ -362,8 +360,8 @@ def response_surface(real_range=(1.33, 1.7),
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     ax.plot_surface(real, gmd, ext, rstride=1, cstride=1, cmap=plt.get_cmap('jet'), edgecolor='none')
 
-    ax.set(xlabel='$Real part (n)$', ylabel='$GMD (nm)$', zlabel=Unit('Extinction'),
-           title='$Sensitive tests of Extinction$')
+    ax.set(xlabel='Real part (n)', ylabel='GMD (nm)', zlabel=Unit('Extinction'),
+           title='Sensitive tests of Extinction')
 
     ax.zaxis.get_offset_text().set_visible(False)
     exponent = math.floor(math.log10(np.max(ext)))
@@ -374,6 +372,6 @@ def response_surface(real_range=(1.33, 1.7),
 
 
 if __name__ == '__main__':
-    # Q_plot(['AS', 'AN'], x='dp', y='Q')
-    RI_couple()
-    # response_surface()
+    # Q_plot(['AS', 'AN'], x='dp', y='MEE')
+    # RI_couple()
+    response_surface()

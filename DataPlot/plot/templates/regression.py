@@ -8,9 +8,9 @@ from tabulate import tabulate
 from DataPlot.plot.core import *
 
 __all__ = [
-           'linear_regression',
-           'multiple_linear_regression',
-           ]
+    'linear_regression',
+    'multiple_linear_regression',
+]
 
 
 def _linear_regression(x_array: np.ndarray,
@@ -18,6 +18,7 @@ def _linear_regression(x_array: np.ndarray,
                        columns: str | list[str] | None = None,
                        positive: bool = True,
                        fit_intercept: bool = True):
+
     if len(x_array.shape) > 1 and x_array.shape[1] >= 2:
         model = LinearRegression(positive=positive, fit_intercept=fit_intercept).fit(x_array, y_array)
 
@@ -64,9 +65,10 @@ def linear_regression(df: pd.DataFrame,
                       labels: str | list[str] = None,
                       ax: Axes | None = None,
                       diagonal=False,
-                      postive: bool = True,
+                      positive: bool = True,
                       fit_intercept: bool = True,
-                      **kwargs) -> Axes:
+                      **kwargs
+                      ) -> Axes:
     """
     Create a scatter plot with multiple regression lines for the given data.
 
@@ -74,16 +76,28 @@ def linear_regression(df: pd.DataFrame,
     ----------
     df : DataFrame
         Input DataFrame containing the data.
+
     x : str or list of str
         Column name(s) for the x-axis variable(s).
+
     y : str or list of str
         Column name(s) for the y-axis variable(s).
+
     labels : str or list of str, optional
         Labels for the y-axis variable(s). If None, column names are used as labels. Default is None.
+
     ax : AxesSubplot, optional
         Matplotlib AxesSubplot to use for the plot. If None, a new subplot is created. Default is None.
+
     diagonal : bool, optional
         If True, a diagonal line (1:1 line) is added to the plot. Default is False.
+
+    positive : bool, optional
+       Whether to let coefficient positive. Default is True.
+
+    fit_intercept: bool, optional
+        Whether to fit intercept. Default is True.
+
     **kwargs
         Additional keyword arguments to customize the plot.
 
@@ -121,18 +135,22 @@ def linear_regression(df: pd.DataFrame,
 
     color_cycle = Color.linecolor
 
-    handles = []
-    text_list = []
+    handles, text_list = [], []
 
     for i, y_var in enumerate(y):
         y_array = df[[y_var]].to_numpy()
+
         color = color_cycle[i % len(color_cycle)]
 
         scatter = ax.scatter(x_array, y_array, s=25, color=color['face'], edgecolors=color['edge'], alpha=0.8,
                              label=labels[i])
         handles.append(scatter)
 
-        text, y_predict, slope = _linear_regression(x_array, y_array, positive=postive, fit_intercept=fit_intercept)
+        text, y_predict, slope = _linear_regression(x_array, y_array,
+                                                    columns=labels[i],
+                                                    positive=positive,
+                                                    fit_intercept=fit_intercept)
+
         text_list.append(f'{labels[i]}: {text}')
         plt.plot(x_array, y_predict, linewidth=3, color=color['line'], alpha=1, zorder=3)
 
@@ -159,10 +177,10 @@ def multiple_linear_regression(df: pd.DataFrame,
                                labels: str | list[str] = None,
                                ax: Axes | None = None,
                                diagonal=False,
-                               add_constant=True,
-                               postive: bool = True,
+                               positive: bool = True,
                                fit_intercept: bool = True,
-                               **kwargs) -> Axes:
+                               **kwargs
+                               ) -> Axes:
     """
     Perform multiple linear regression analysis and plot the results.
 
@@ -170,18 +188,28 @@ def multiple_linear_regression(df: pd.DataFrame,
     ----------
     df : pandas.DataFrame
        Input DataFrame containing the data.
+
     x : str or list of str
        Column name(s) for the independent variable(s). Can be a single string or a list of strings.
+
     y : str or list of str
        Column name(s) for the dependent variable(s). Can be a single string or a list of strings.
+
     labels : str or list of str, optional
        Labels for the dependent variable(s). If None, column names are used as labels. Default is None.
+
     ax : matplotlib.axes.Axes or None, optional
        Matplotlib Axes object to use for the plot. If None, a new subplot is created. Default is None.
+
     diagonal : bool, optional
        Whether to include a diagonal line (1:1 line) in the plot. Default is False.
-    add_constant : bool, optional
-       Whether to add a constant term to the independent variables. Default is True.
+
+    positive : bool, optional
+       Whether to let coefficient positive. Default is True.
+
+    fit_intercept: bool, optional
+        Whether to fit intercept. Default is True.
+
     **kwargs
        Additional keyword arguments to customize the plot.
 
@@ -213,20 +241,13 @@ def multiple_linear_regression(df: pd.DataFrame,
     if labels is None:
         labels = x
 
-    if add_constant:
-        df = df[[*x, y]].dropna()
-        df = df.assign(Const=1)
-        x_array = df[[*x, 'Const']].to_numpy()
-        y_array = df[[y]].to_numpy()
-        columns = [*x, 'Const']
+    df = df[[*x, y]].dropna()
+    x_array = df[[*x]].to_numpy()
+    y_array = df[[y]].to_numpy()
 
-    else:
-        df = df[[*x, y]].dropna()
-        x_array = df[[*x]].to_numpy()
-        y_array = df[[y]].to_numpy()
-        columns = [*x]
-
-    text, y_predict, coefficients = _linear_regression(x_array, y_array, columns=columns, positive=postive,
+    text, y_predict, coefficients = _linear_regression(x_array, y_array,
+                                                       columns=labels,
+                                                       positive=positive,
                                                        fit_intercept=fit_intercept)
 
     df = pd.DataFrame(np.concatenate([y_array, y_predict], axis=1), columns=['y_actual', 'y_predict'])

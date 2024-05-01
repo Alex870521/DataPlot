@@ -36,7 +36,7 @@ class ImpactProcessor(DataProcessor):
 
     def __init__(self):
         super().__init__()
-        self.file_path = self.DEFAULT_PATH / 'Level1'
+        self.file_path = self.DEFAULT_DATA_PATH / 'Level1'
 
     def process_data(self, reset: bool = False, save_filename: str | Path = 'IMPACT.csv') -> DataFrame:
         file = self.file_path / save_filename
@@ -47,9 +47,6 @@ class ImpactProcessor(DataProcessor):
             _df = concat([DataReader(file) for file in data_files], axis=1)
             _df.to_csv(file)
             return _df
-
-    def save_data(self, data: DataFrame, save_filename: str | Path):
-        data.to_csv(save_filename)
 
 
 if __name__ == '__main__':
