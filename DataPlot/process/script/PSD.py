@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import pandas as pd
+from pandas import concat, read_csv
 
 from DataPlot.process.core import *
 from DataPlot.process.script.SizeDist import SizeDist
@@ -42,11 +42,11 @@ class ParticleSizeDistProcessor(DataProcessor):
         self.psd = SizeDist(filename)
 
     def process_data(self, reset: bool = False, save_filename: Path | str = 'PSD.csv'):
-        # file = self.file_path / save_filename
-        # if file.exists() and not reset:
-        #     return read_csv(file, parse_dates=['Time']).set_index('Time')
+        file = self.file_path / save_filename
+        if file.exists() and not reset:
+            return read_csv(file, parse_dates=['Time']).set_index('Time')
 
-        result_df = pd.concat([
+        result_df = concat([
             SizeDist(data=self.psd.number(), weighting='n').properties(),
             SizeDist(data=self.psd.surface(save_filename=self.file_path / 'PSSD_dSdlogdp.csv'),
                      weighting='s').properties(),
@@ -71,11 +71,11 @@ class ExtinctionDistProcessor(DataProcessor):
                                               'ALWC_volume_ratio']]
 
     def process_data(self, reset: bool = False, save_filename: str | Path = 'PESD.csv'):
-        # file = self.file_path / save_filename
-        # if file.exists() and not reset:
-        #     return read_csv(file, parse_dates=['Time']).set_index('Time')
+        file = self.file_path / save_filename
+        if file.exists() and not reset:
+            return read_csv(file, parse_dates=['Time']).set_index('Time')
 
-        result_df = pd.concat([
+        result_df = concat([
             SizeDist(data=self.psd.extinction(self.RI, method='internal', result_type='extinction',
                                               save_filename=self.file_path / 'PESD_dextdlogdp_internal.csv'),
                      weighting='ext_in').properties(),
@@ -89,5 +89,5 @@ class ExtinctionDistProcessor(DataProcessor):
 
 
 if __name__ == '__main__':
-    df = ParticleSizeDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=True)
+    df = ParticleSizeDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=False)
     # df = ExtinctionDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=True)

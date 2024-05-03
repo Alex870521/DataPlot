@@ -53,7 +53,7 @@ class DryPSDProcessor(DataProcessor):
 
 def dry_PNSD_process(dist, dp, **kwargs):
     ndp = np.array(dist[:np.size(dp)])
-    gRH = resolved_gRH(np.size(dp), dist['gRH'], uniform=True)
+    gRH = resolved_gRH(dp, dist['gRH'], uniform=True)
 
     dry_dp = dp / gRH
     belong_which_ibin = np.digitize(dry_dp, dp) - 1
@@ -71,13 +71,13 @@ def dry_PNSD_process(dist, dp, **kwargs):
     return np.array(dry_ndp)
 
 
-def resolved_gRH(length, gRH=1.31, uniform=True):
+def resolved_gRH(dp, gRH=1.31, uniform=True):
     if uniform:
-        return np.array([gRH] * length)
+        return np.array([gRH] * dp.size)
 
     else:
         lognorm_dist = lambda x, geoMean, geoStd: (gRH / (np.log10(geoStd) * np.sqrt(2 * np.pi))) * np.exp(-(x - np.log10(geoMean))**2 / (2 * np.log10(geoStd)**2))
-        abc = lognorm_dist(np.log10(dp/1000), 0.5, 2.0)
+        abc = lognorm_dist(np.log10(dp), 200, 2.0)
         return np.where(abc < 1, 1, abc)
 
 

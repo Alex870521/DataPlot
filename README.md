@@ -45,21 +45,26 @@
 |                  **PNSD**                   |                  **PSSD**                   |                  **PVSD**                   |
 |:-------------------------------------------:|:-------------------------------------------:|:-------------------------------------------:|
 |   ![PNSD](assets/figure/PNSD_heatmap.png)   |   ![PSSD](assets/figure/PSSD_heatmap.png)   |   ![PVSD](assets/figure/PVSD_heatmap.png)   |
-| ![PNSD](assets/figure/PNSD_heatmap_tms.png) | ![PSSD](assets/figure/PSSD_heatmap_tms.png) | ![PVSD](assets/figure/PVSD_heatmap_tms.png) |
 
-|                 **Three_dimension**                  |                       ****                       |                 ****                  |                     ****                      |
-|:----------------------------------------------------:|:------------------------------------------------:|:-------------------------------------:|:---------------------------------------------:|
-|         ![PSD 3D](assets/figure/psd_3D.png)          |                                                  |                                       |
-|                   **Pie & Donut**                    |                    **Dounts**                    |              **BarPlot**              |         **Mutiply Linear Regression**         |
-|  ![IMPROVE donuts](assets/figure/IMPROVE_donut.png)  | ![IMPROVE bar](assets/figure/IMPROVE_donuts.png) |                                       | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
-|                **Correlation Matrix**                |                    **Mie_Q**                     |              **Scatter**              |                                               |
-| ![Correlation Matrix](assets/figure/corr_matrix.png) |                 | ![scatter](assets/figure/scatter.png) |                                               |
+|               **TimeSeries**                |
+|:-------------------------------------------:|
+| ![PNSD](assets/figure/PNSD_heatmap_tms.png) |
+| ![PSSD](assets/figure/PSSD_heatmap_tms.png) |
+| ![PVSD](assets/figure/PVSD_heatmap_tms.png) |
+
+### <div align="center">For some basic plot</div>
+
+|                **Three_dimension**                 |                **Correlation Matrix**                |         **Mutiply Linear Regression**         |
+|:--------------------------------------------------:|:----------------------------------------------------:|:---------------------------------------------:|
+|        ![PSD 3D](assets/figure/psd_3D.png)         | ![Correlation Matrix](assets/figure/corr_matrix.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
+|                  **Pie & Donut**                   |                      **Dounts**                      |                  **Scatter**                  |
+| ![IMPROVE donuts](assets/figure/IMPROVE_donut.png) |   ![IMPROVE bar](assets/figure/IMPROVE_donuts.png)   |     ![scatter](assets/figure/scatter.png)     |
 
 ### <div align="center">For "PyMieScatt"</div>
 
-|                  **Mie_Q**                   |              **Mie_MEE**              |
-|:-------------------------------------------:|:-------------------------------------:|
-|   ![Mie Q](assets/figure/Mie_Q.png)   | ![Mie MEE](assets/figure/Mie_MEE.png) |     |
+|             **Mie_Q**             |              **Mie_MEE**              |
+|:---------------------------------:|:-------------------------------------:|
+| ![Mie Q](assets/figure/Mie_Q.png) | ![Mie MEE](assets/figure/Mie_MEE.png) |     |
 
 
 

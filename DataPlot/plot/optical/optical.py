@@ -16,7 +16,6 @@ __all__ = ['Q_plot',
            'response_surface',
            ]
 
-
 mapping_dic = {'AS': {'m': 1.53 + 0j, 'density': 1.73, 'label': fr'$NH_{4}NO_{3}$', 'color': '#A65E58'},
                'AN': {'m': 1.55 + 0j, 'density': 1.77, 'label': fr'$(NH_{4})_{2}SO_{4}$', 'color': '#A5BF6B'},
                'OM': {'m': 1.54 + 0j, 'density': 1.40, 'label': 'OM', 'color': '#F2BF5E'},
@@ -27,7 +26,8 @@ mapping_dic = {'AS': {'m': 1.53 + 0j, 'density': 1.73, 'label': fr'$NH_{4}NO_{3}
 
 
 @set_figure
-def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
+def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | list[
+    Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"]],
            x: Literal["dp", "sp"] = 'dp',
            y: Literal["Q", "MEE"] = "Q",
            mode: Literal["ext", "sca", "abs"] = 'ext',
@@ -73,14 +73,14 @@ def Q_plot(species: Literal["AS", "AN", "OM", "Soil", "SS", "BC", "Water"] | lis
     mode_mapping = {'ext': 0, 'sca': 1, 'abs': 2}
 
     xlabel_mapping = {'dp': 'Particle Diameter (nm)',
-                      'sp': '$Size parameter (\\alpha)$'}
+                      'sp': 'Size parameter (\\alpha)'}
 
-    ylabel_mapping = {'Q': {'ext': '$Extinction efficiency (Q_{{ext}})$',
-                            'sca': '$Scattering efficiency (Q_{{sca}})$',
-                            'abs': '$Absorption efficiency (Q_{{abs}})$'},
-                      'MEE': {'ext': '$MEE (m^2/g)$',
-                              'sca': '$MSE (m^2/g)$',
-                              'abs': '$MAE (m^2/g)$'}}
+    ylabel_mapping = {'Q': {'ext': r'$Extinction\ efficiency\ (Q_{ext})$',
+                            'sca': r'$Scattering\ efficiency\ (Q_{sca})$',
+                            'abs': r'$Absorption\ efficiency\ (Q_{abs})$'},
+                      'MEE': {'ext': r'$MEE\ (m^{2}/g)$',
+                              'sca': r'$MSE\ (m^{2}/g)$',
+                              'abs': r'$MAE\ (m^{2}/g)$'}}
 
     typ = mode_mapping.get(mode, None)
     xlabel = xlabel_mapping.get(x, None)
@@ -335,6 +335,7 @@ def response_surface(real_range=(1.33, 1.7),
     >>> response_surface(real_range=(1.4, 1.6), gmd_range=(100, 300), num=30, xlabel='Real Part (n)',
     ...                  ylabel='GMD (nm)', zlabel='Extinction (1/Mm)', title='Sensitivity Tests of Extinction')
     """
+
     def function(RI, GMD):
         Z = np.zeros_like(RI)  # 使用 np.zeros_like 可以確保 Z 和 RI 具有相同的形狀
 
@@ -372,6 +373,8 @@ def response_surface(real_range=(1.33, 1.7),
 
 
 if __name__ == '__main__':
-    # Q_plot(['AS', 'AN'], x='dp', y='MEE')
+    Q_plot(['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], x='dp', y='MEE')
+    Q_plot(['AS', 'AN', 'OM', 'Soil', 'SS', 'BC'], x='dp', y='Q')
+
     # RI_couple()
-    response_surface()
+    # response_surface()
