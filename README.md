@@ -23,9 +23,6 @@
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
-  <a href=""><img src="assets/media/logo-social-twitter.png" width="3%" alt="Alex870521 Twitter"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href=""><img src="assets/media/logo-social-tiktok.png" width="3%" alt="Alex870521 Tiktok"></a>
 
 </div>
 
@@ -97,8 +94,5 @@ For bug reports and feature requests please visit [GitHub Issues](https://github
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
-  <a href=""><img src="assets/media/logo-social-twitter.png" width="3%" alt="Alex870521 Twitter"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href=""><img src="assets/media/logo-social-tiktok.png" width="3%" alt="Alex870521 Tiktok"></a>
 
 </div>
