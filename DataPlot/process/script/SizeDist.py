@@ -5,8 +5,6 @@ import numpy as np
 from pandas import DataFrame
 
 from DataPlot.process.core import *
-from DataPlot.process.script.DistCalculator import (NumberDistCalculator, SurfaceDistCalculator, VolumeDistCalculator,
-                                                    PropertiesDistCalculator, ExtinctionDistCalculator)
 
 
 class SizeDist:
@@ -45,7 +43,7 @@ class SizeDist:
     def __init__(self,
                  filename: Path | str = None,
                  data: DataFrame = None,
-                 state: Literal['ddp', 'dlogdp'] = 'dlogdp',
+                 state: Literal['dN', 'ddp', 'dlogdp'] = 'dlogdp',
                  weighting: Literal['n', 's', 'v', 'ext_in', 'ext_ex'] = 'n'
                  ):
 
@@ -86,7 +84,7 @@ class SizeDist:
 
     @state.setter
     def state(self, value):
-        if value not in ['dlogdp', 'ddp']:
+        if value not in ['dN', 'dlogdp', 'ddp']:
             raise ValueError("state must be 'dlogdp' or 'ddp'")
         self._state = value
 
@@ -96,11 +94,11 @@ class SizeDist:
 
     def number(self) -> DataFrame:
         """ Calculate number distribution """
-        return NumberDistCalculator(self).calculate()
+        return Number(self).useApply()
 
     def surface(self, save_filename: Path | str = None) -> DataFrame:
         """ Calculate surface distribution """
-        surface_dist = SurfaceDistCalculator(self).calculate()
+        surface_dist = SurfaceDistCalculator(self).useApply()
 
         if save_filename:
             surface_dist.to_csv(save_filename)
@@ -109,7 +107,7 @@ class SizeDist:
 
     def volume(self, save_filename: Path | str = None) -> DataFrame:
         """ Calculate volume distribution """
-        volume_dist = VolumeDistCalculator(self).calculate()
+        volume_dist = VolumeDistCalculator(self).useApply()
 
         if save_filename:
             volume_dist.to_csv(save_filename)
@@ -118,7 +116,7 @@ class SizeDist:
 
     def properties(self) -> DataFrame:
         """ Calculate properties of distribution """
-        return PropertiesDistCalculator(self).calculate()
+        return PropertiesDistCalculator(self).useApply()
 
     def extinction(self,
                    RI: DataFrame,
@@ -127,7 +125,7 @@ class SizeDist:
                    save_filename: Path | str = None
                    ) -> DataFrame:
         """ Calculate volume distribution """
-        ext_dist = ExtinctionDistCalculator(self, RI, method, result_type).calculate()
+        ext_dist = ExtinctionDistCalculator(self, RI, method, result_type).apply()
 
         if save_filename:
             ext_dist.to_csv(save_filename)

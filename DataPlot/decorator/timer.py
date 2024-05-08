@@ -50,5 +50,4 @@ def timer(func=None):
     if func is None:
         return decorator
 
-    else:
-        return decorator(func)
+    return decorator(func)

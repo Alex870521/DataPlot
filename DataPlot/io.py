@@ -1,8 +1,10 @@
+import pandas as pd
+
+
 __all__ = ['load_default_data']
 
 
 def load_default_data():
-    import pandas as pd
     # The following data is from the chemical composition of real atmospheric particles.
     #
     # The six main chemical components that comprised PM2.5 are listed in the data.

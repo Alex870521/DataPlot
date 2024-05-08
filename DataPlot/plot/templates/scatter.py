@@ -21,26 +21,21 @@ def scatter(df: pd.DataFrame,
             c: str | None = None,
             s: str | None = None,
             cmap='jet',
-            regression=None,
+            regression=False,
             diagonal=False,
             box=False,
             ax: Axes | None = None,
             **kwargs) -> Axes:
-
-    if ax is None:
-        fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
-
+    fig, ax = plt.subplots(**kwargs.get('fig_kws', {}))
     plt.subplots_adjust(right=0.9, bottom=0.125)
 
-    df = df.dropna(subset=[x, y]).copy()
-    x_data, y_data = df[x].to_numpy(), df[y].to_numpy()
-
     if c is not None and s is not None:
-        c_data = df[c].to_numpy()
-        s_data = df[s].to_numpy()
+        df_ = df.dropna(subset=[x, y, c, s]).copy()
+        x_data, y_data, c_data, s_data = df_[x].to_numpy(), df_[y].to_numpy(), df_[c].to_numpy(), df_[s].to_numpy()
 
-        scatter = ax.scatter(x_data, y_data, c=c_data, norm=Normalize(vmin=np.percentile(c_data, 10), vmax=np.percentile(c_data, 90)),
-                            cmap=cmap, s=50 * (s_data / s_data.max()) ** 1.5, alpha=0.7, edgecolors=None)
+        scatter = ax.scatter(x_data, y_data, c=c_data,
+                             norm=Normalize(vmin=np.percentile(c_data, 10), vmax=np.percentile(c_data, 90)),
+                             cmap=cmap, s=50 * (s_data / s_data.max()) ** 1.5, alpha=0.7, edgecolors=None)
         colorbar = True
 
         dot = np.linspace(s_data.min(), s_data.max(), 6).round(-1)
@@ -51,16 +46,20 @@ def scatter(df: pd.DataFrame,
         plt.legend(title=Unit(s))
 
     elif c is not None:
-        c_data = df[c].to_numpy()
+        df_ = df.dropna(subset=[x, y, c]).copy()
+        x_data, y_data, c_data = df_[x].to_numpy(), df_[y].to_numpy(), df_[c].to_numpy()
 
-        scatter = ax.scatter(x_data, y_data, c=c_data, vmin=c_data.min(), vmax=np.percentile(c_data, 90), cmap=cmap, alpha=0.7,
+        scatter = ax.scatter(x_data, y_data, c=c_data, vmin=c_data.min(), vmax=np.percentile(c_data, 90), cmap=cmap,
+                             alpha=0.7,
                              edgecolors=None)
         colorbar = True
 
     elif s is not None:
-        s_data = df[s].to_numpy()
+        df_ = df.dropna(subset=[x, y, s]).copy()
+        x_data, y_data, s_data = df_[x].to_numpy(), df_[y].to_numpy(), df_[s].to_numpy()
 
-        scatter = ax.scatter(x_data, y_data, s=50 * (s_data / s_data.max()) ** 1.5, color='#7a97c9', alpha=0.7, edgecolors='white')
+        scatter = ax.scatter(x_data, y_data, s=50 * (s_data / s_data.max()) ** 1.5, color='#7a97c9', alpha=0.7,
+                             edgecolors='white')
         colorbar = False
 
         # dealing
@@ -72,6 +71,9 @@ def scatter(df: pd.DataFrame,
         plt.legend(title=Unit(s))
 
     else:
+        df_ = df.dropna(subset=[x, y]).copy()
+        x_data, y_data = df_[x].to_numpy(), df_[y].to_numpy()
+
         scatter = ax.scatter(x_data, y_data, s=30, color='#7a97c9', alpha=0.7, edgecolors='white')
         colorbar = False
 
@@ -126,5 +128,4 @@ def scatter(df: pd.DataFrame,
     ax.xaxis.set_major_formatter(ScalarFormatter())
     ax.yaxis.set_major_formatter(ScalarFormatter())
     # savefig
-
     return ax

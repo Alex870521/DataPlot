@@ -46,6 +46,8 @@ class ParticleSizeDistProcessor(DataProcessor):
         if file.exists() and not reset:
             return read_csv(file, parse_dates=['Time']).set_index('Time')
 
+        self.psd.surface(save_filename=self.file_path / 'PSSD_dSdlogdp.csv')
+
         result_df = concat([
             SizeDist(data=self.psd.number(), weighting='n').properties(),
             SizeDist(data=self.psd.surface(save_filename=self.file_path / 'PSSD_dSdlogdp.csv'),

@@ -67,5 +67,4 @@ def set_figure(func=None,
     if func is None:
         return decorator
 
-    else:
-        return decorator(func)
+    return decorator(func)
