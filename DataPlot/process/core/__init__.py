@@ -1,8 +1,6 @@
-from ._classifier import Classifier
-from ._processor import DataProcessor
+from ._processor import DataProc
 from ._reader import DataReader
 
 __all__ = ['DataReader',
-           'DataProcessor',
-           'Classifier',
+           'DataProc',
            ]

@@ -7,7 +7,7 @@ from DataPlot.process.core import *
 from DataPlot.process.script.SizeDist import SizeDist
 
 
-class DryPSDProcessor(DataProcessor):
+class DryPSDProc(DataProc):
     """
     A class for process impact data.
 
@@ -31,7 +31,7 @@ class DryPSDProcessor(DataProcessor):
 
     Examples
     --------
-    >>> df = DryPSDProcessor(reset=True, filename='PNSD_dNdlogdp_dry.csv').process_data()
+    >>> df = DryPSDProc(reset=True, filename='PNSD_dNdlogdp_dry.csv').process_data()
     """
 
     def __init__(self, filename: str = 'PNSD_dNdlogdp.csv'):

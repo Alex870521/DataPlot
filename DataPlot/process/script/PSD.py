@@ -2,11 +2,12 @@ from pathlib import Path
 
 from pandas import concat, read_csv
 
-from DataPlot.process.core import *
+from DataPlot.process.core import DataReader, DataProc
+from DataPlot.process.script.AbstractDistCalc import DistributionCalculator
 from DataPlot.process.script.SizeDist import SizeDist
 
 
-class ParticleSizeDistProcessor(DataProcessor):
+class ParticleSizeDistProc(DataProc):
     """
     A class for process particle size distribution (PSD) data.
 
@@ -32,7 +33,7 @@ class ParticleSizeDistProcessor(DataProcessor):
     Examples
     --------
     Example 1: Use default path and filename
-    >>> psd_data = ParticleSizeDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=True)
+    >>> psd_data = ParticleSizeDistProc(filename='PNSD_dNdlogdp.csv').process_data(reset=True)
     """
 
     def __init__(self, filename: str = 'PNSD_dNdlogdp.csv'):
@@ -46,21 +47,24 @@ class ParticleSizeDistProcessor(DataProcessor):
         if file.exists() and not reset:
             return read_csv(file, parse_dates=['Time']).set_index('Time')
 
-        self.psd.surface(save_filename=self.file_path / 'PSSD_dSdlogdp.csv')
+        number = DistributionCalculator('number', self.psd).useApply()
+        surface = DistributionCalculator('surface', self.psd).useApply()
+        volume = DistributionCalculator('volume', self.psd).useApply()
 
-        result_df = concat([
-            SizeDist(data=self.psd.number(), weighting='n').properties(),
-            SizeDist(data=self.psd.surface(save_filename=self.file_path / 'PSSD_dSdlogdp.csv'),
-                     weighting='s').properties(),
-            SizeDist(data=self.psd.volume(save_filename=self.file_path / 'PVSD_dVdlogdp.csv'),
-                     weighting='v').properties()
-        ], axis=1)
+        surface.to_csv(self.file_path / 'PSSD_dSdlogdp.csv')
+        volume.to_csv(self.file_path / 'PVSD_dVdlogdp.csv')
+
+        result_df = concat(
+            [DistributionCalculator('property', SizeDist(data=number, weighting='n')).useApply(),
+             DistributionCalculator('property', SizeDist(data=surface, weighting='s')).useApply(),
+             DistributionCalculator('property', SizeDist(data=volume, weighting='v')).useApply()
+             ], axis=1)
 
         result_df.to_csv(self.file_path / save_filename)
         return result_df
 
 
-class ExtinctionDistProcessor(DataProcessor):
+class ExtinctionDistProc(DataProc):
 
     def __init__(self, filename: str = 'PNSD_dNdlogdp.csv'):
         super().__init__()
@@ -77,13 +81,17 @@ class ExtinctionDistProcessor(DataProcessor):
         if file.exists() and not reset:
             return read_csv(file, parse_dates=['Time']).set_index('Time')
 
+        ext_internal = DistributionCalculator('extinction', self.psd, self.RI, method='internal',
+                                              result_type='extinction').useApply()
+        ext_external = DistributionCalculator('extinction', self.psd, self.RI, method='external',
+                                              result_type='extinction').useApply()
+
+        ext_internal.to_csv(self.file_path / 'PESD_dextdlogdp_internal.csv')
+        ext_external.to_csv(self.file_path / 'PESD_dextdlogdp_external.csv')
+
         result_df = concat([
-            SizeDist(data=self.psd.extinction(self.RI, method='internal', result_type='extinction',
-                                              save_filename=self.file_path / 'PESD_dextdlogdp_internal.csv'),
-                     weighting='ext_in').properties(),
-            SizeDist(data=self.psd.extinction(self.RI, method='external', result_type='extinction',
-                                              save_filename=self.file_path / 'PESD_dextdlogdp_external.csv'),
-                     weighting='ext_ex').properties(),
+            DistributionCalculator('property', SizeDist(data=ext_internal, weighting='ext_in')).useApply(),
+            DistributionCalculator('property', SizeDist(data=ext_internal, weighting='ext_ex')).useApply(),
         ], axis=1)
 
         result_df.to_csv(self.file_path / save_filename)
@@ -91,5 +99,5 @@ class ExtinctionDistProcessor(DataProcessor):
 
 
 if __name__ == '__main__':
-    df = ParticleSizeDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=False)
+    df = ParticleSizeDistProc(filename='PNSD_dNdlogdp.csv').process_data(reset=False)
     # df = ExtinctionDistProcessor(filename='PNSD_dNdlogdp.csv').process_data(reset=True)

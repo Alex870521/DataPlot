@@ -1,12 +1,11 @@
-from pathlib import Path
 from typing import Literal
 
-from pandas import DataFrame, read_csv, concat
+from pandas import read_csv, concat
 
-from ..core import *
+from DataPlot.process.core import DataReader, DataProc
 
 
-class ImproveProcessor(DataProcessor):
+class ImproveProc(DataProc):
     """
     A class for process improved chemical data.
 
@@ -44,7 +43,7 @@ class ImproveProcessor(DataProcessor):
 
     Examples:
     ---------
-    >>> df = ImproveProcessor(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
+    >>> df = ImproveProc(reset=True, filename='revised_IMPROVE.csv', version='revised').process_data()
 
     """
 
@@ -158,6 +157,3 @@ class ImproveProcessor(DataProcessor):
             _df.to_csv(self.file_path)
 
             return _df
-
-    def save_data(self, data: DataFrame, save_filename: str | Path):
-        data.to_csv(save_filename)

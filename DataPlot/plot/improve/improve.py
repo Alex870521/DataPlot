@@ -25,7 +25,7 @@ def chemical_enhancement(data_set: pd.DataFrame = None,
     if ax is None:
         fig, ax = plt.subplots()
 
-    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase, by='State', statistic='Table')
+    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase(), by='State')
     species = ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC']
     data_set, data_std = ser_grp_sta.loc[:, species], ser_grp_sta_std.loc[:, species]
 
@@ -112,7 +112,7 @@ def pie_IMPROVE():
     Species2 = ['AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry', 'ALWC_ext']
     Species3 = ['AS_ext', 'AN_ext', 'OM_ext', 'Soil_ext', 'SS_ext', 'EC_ext']
 
-    ser_grp_sta, _ = DataClassifier(DataBase, by='State', statistic='Table')
+    ser_grp_sta, _ = DataClassifier(DataBase(), by='State')
 
     ext_dry_dict = ser_grp_sta.loc[:, Species1]
     ext_amb_dict = ser_grp_sta.loc[:, Species2]
@@ -159,7 +159,7 @@ def MLR_IMPROVE(**kwargs):
                'total_ext_dry', 'AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry',
                'AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'OM']
 
-    df = DataBase[species].dropna().copy()
+    df = DataBase()[species].dropna().copy()
 
     # multiple_linear_regression(df, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y='Scattering', add_constant=True)
     # multiple_linear_regression(df, x=['POC', 'SOC', 'EC'], y='Absorption', add_constant=True)
@@ -173,13 +173,13 @@ def MLR_IMPROVE(**kwargs):
     df = pd.concat([df, revised_IMPROVE, modify_IMPROVE], axis=1)
 
     n_df = df[['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']].mul(multiplier)
-    mean, std = DataClassifier(n_df, 'State', statistic='Table')
+    mean, std = DataClassifier(n_df, 'State')
 
-    ser_grp_sta, _ = DataClassifier(DataBase, by='State', statistic='Table')
+    ser_grp_sta, _ = DataClassifier(DataBase(), by='State')
     mass_comp = ser_grp_sta.loc[:, ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC']]
 
     # plot
-    linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
+    plot.linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
                       regression=True, diagonal=True)
     plot.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
                 unit='PM25', colors=Color.colors3)

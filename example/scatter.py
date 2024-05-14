@@ -3,5 +3,5 @@ from DataPlot import *
 
 if __name__ == '__main__':
     # example of using plot.scatter
-    df = DataBase[['Vis_LPV', 'PM25', 'RH', 'VC']].dropna()
-    plot.scatter(DataBase, x='PM25', y='Vis_LPV', c='VC', s='RH', cmap='YlGnBu')
+    df = DataBase()[['Vis_LPV', 'PM25', 'RH', 'VC']].dropna()
+    plot.scatter(df, x='PM25', y='Vis_LPV', c='VC', s='RH', cmap='YlGnBu')

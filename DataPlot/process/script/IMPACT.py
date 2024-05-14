@@ -2,10 +2,10 @@ from pathlib import Path
 
 from pandas import DataFrame, read_csv, concat
 
-from DataPlot.process.core import *
+from DataPlot.process.core import DataReader, DataProc
 
 
-class ImpactProcessor(DataProcessor):
+class ImpactProc(DataProc):
     """
     A class for processing impact data.
 
@@ -31,7 +31,7 @@ class ImpactProcessor(DataProcessor):
 
     Examples:
     ---------
-    >>> df_custom = ImpactProcessor().process_data(reset=True, save_filename='custom_file.csv')
+    >>> df_custom = ImpactProc().process_data(reset=True, save_filename='custom_file.csv')
     """
 
     def __init__(self):
@@ -50,4 +50,4 @@ class ImpactProcessor(DataProcessor):
 
 
 if __name__ == '__main__':
-    df = ImpactProcessor().process_data(reset=True, save_filename='IMPACT.csv')
+    df = ImpactProc().process_data(reset=True, save_filename='IMPACT.csv')

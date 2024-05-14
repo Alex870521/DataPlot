@@ -3,10 +3,10 @@ from pathlib import Path
 import numpy as np
 from pandas import read_csv, concat, notna
 
-from DataPlot.process.core import *
+from DataPlot.process.core import DataReader, DataProc
 
 
-class ChemicalProcessor(DataProcessor):
+class ChemicalProc(DataProc):
     """
     A class for process chemical data.
 
@@ -177,4 +177,4 @@ class ChemicalProcessor(DataProcessor):
 
 
 if __name__ == '__main__':
-    df = ChemicalProcessor().process_data(reset=True)
+    df = ChemicalProc().process_data(reset=True)

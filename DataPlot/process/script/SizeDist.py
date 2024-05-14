@@ -4,7 +4,7 @@ from typing import Literal
 import numpy as np
 from pandas import DataFrame
 
-from DataPlot.process.core import *
+from DataPlot.process.core import DataReader
 
 
 class SizeDist:
@@ -91,43 +91,3 @@ class SizeDist:
     @property
     def weighting(self):
         return self._weighting
-
-    def number(self) -> DataFrame:
-        """ Calculate number distribution """
-        return Number(self).useApply()
-
-    def surface(self, save_filename: Path | str = None) -> DataFrame:
-        """ Calculate surface distribution """
-        surface_dist = SurfaceDistCalculator(self).useApply()
-
-        if save_filename:
-            surface_dist.to_csv(save_filename)
-
-        return surface_dist
-
-    def volume(self, save_filename: Path | str = None) -> DataFrame:
-        """ Calculate volume distribution """
-        volume_dist = VolumeDistCalculator(self).useApply()
-
-        if save_filename:
-            volume_dist.to_csv(save_filename)
-
-        return volume_dist
-
-    def properties(self) -> DataFrame:
-        """ Calculate properties of distribution """
-        return PropertiesDistCalculator(self).useApply()
-
-    def extinction(self,
-                   RI: DataFrame,
-                   method: Literal['internal', 'external', 'core-shell', 'sensitivity'],
-                   result_type: Literal['extinction', 'scattering', 'absorption'] = 'extinction',
-                   save_filename: Path | str = None
-                   ) -> DataFrame:
-        """ Calculate volume distribution """
-        ext_dist = ExtinctionDistCalculator(self, RI, method, result_type).apply()
-
-        if save_filename:
-            ext_dist.to_csv(save_filename)
-
-        return ext_dist

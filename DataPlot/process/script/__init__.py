@@ -1,6 +1,5 @@
-
-from .Chemical import ChemicalProcessor
-from .IMPACT import ImpactProcessor
-from .IMPROVE import ImproveProcessor
-from .Others import OthersProcessor
-from .PSD import ParticleSizeDistProcessor
+from .Chemical import ChemicalProc
+from .IMPACT import ImpactProc
+from .IMPROVE import ImproveProc
+from .Others import OthersProc
+from .PSD import ParticleSizeDistProc, ExtinctionDistProc

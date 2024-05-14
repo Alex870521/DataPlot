@@ -13,22 +13,21 @@ PESD_inter = DataReader('PESD_dextdlogdp_internal.csv')
 PESD_dry_inter = DataReader('PESD_dextdlogdp_dry_internal.csv')
 PESD_exter = DataReader('PESD_dextdlogdp_external.csv')
 
-Ext_amb_dis_internal, Ext_amb_dis_std_internal = DataClassifier(PESD_inter, by='State', statistic='Table')
-Ext_dry_dis_internal, Ext_dry_dis_std_internal = DataClassifier(PESD_dry_inter, by='State', statistic='Table')
-Ext_amb_dis_external, Ext_amb_dis_std_external = DataClassifier(PESD_exter, by='State', statistic='Table')
+Ext_amb_dis_internal, Ext_amb_dis_std_internal = DataClassifier(PESD_inter, by='State')
+Ext_dry_dis_internal, Ext_dry_dis_std_internal = DataClassifier(PESD_dry_inter, by='State')
+Ext_amb_dis_external, Ext_amb_dis_std_external = DataClassifier(PESD_exter, by='State')
 
-PNSD_amb_dis, PNSD_amb_dis_std = DataClassifier(PNSD, by='State', statistic='Table')
-PSSD_amb_dis, PSSD_amb_dis_std = DataClassifier(PSSD, by='State', statistic='Table')
-PVSD_amb_dis, PVSD_amb_dis_std = DataClassifier(PVSD, by='State', statistic='Table')
+PNSD_amb_dis, PNSD_amb_dis_std = DataClassifier(PNSD, by='State')
+PSSD_amb_dis, PSSD_amb_dis_std = DataClassifier(PSSD, by='State')
+PVSD_amb_dis, PVSD_amb_dis_std = DataClassifier(PVSD, by='State')
 
-ext_grp, _ = DataClassifier(PESD_inter, by='Extinction', statistic='Table', qcut=10)
+ext_grp, _ = DataClassifier(PESD_inter, by='Extinction', qcut=10)
 
 
 class TestDistribution(unittest.TestCase):
     def setUp(self):
         # TODO: import the default size distribution data
         # if data is None import default data from io.py
-        io.load_default_data()
         self.data = {'Clean': np.array([1, 2, 3, 4]),
                      'Transition': np.array([2, 3, 4, 5]),
                      'Event': np.array([3, 4, 5, 6])}

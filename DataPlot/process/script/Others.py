@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 
-from ..core import *
+from DataPlot.process.core import DataProc
 
 
-class OthersProcessor(DataProcessor):
+class OthersProc(DataProc):
     """
     A class for process impact data.
 
@@ -27,7 +27,7 @@ class OthersProcessor(DataProcessor):
 
     Examples:
     ---------
-    >>> df = OthersProcessor(reset=True, filename=None).process_data()
+    >>> df = OthersProc(reset=True, filename=None).process_data()
 
     """
 
