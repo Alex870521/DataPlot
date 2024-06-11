@@ -11,7 +11,7 @@ class DataBase:
     def __new__(cls, reset: bool = False, filename: Path | str = 'All_data.csv'):
         file_path = Path(__file__).parents[1] / 'data' / filename
 
-        with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|", unit="it") as progress_bar:
+        with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|") as progress_bar:
             if file_path.exists() and not reset:
                 progress_bar.update(20)
                 return read_csv(file_path, parse_dates=['Time'], na_values=('-', 'E', 'F'),

@@ -41,7 +41,7 @@
     "Measured": "Measured Extinction (1/Mm)",
     "SOR": "SOR",
     "NOR": "NOR",
-    "O3": "O_{3} (\u00b5g/m^3)",
+  "O3": "O_{3} (ppb)",
     "kappa": "kappa",
     "RH": "RH (\\%)",
     "gRH": "g(RH)",
@@ -69,9 +69,9 @@
     "y_actual":  "y_{actual}",
     "y_predict":  "y_{predict}",
     "PG": "Extinction (1/Mm)",
-    "Number_dist": "dN/dlogdp ({\\mu}m^{-1}/cm^3)",
-    "Surface_dist": "dS/dlogdp ({\\mu}m/cm^3)",
-    "Volume_dist": "dV/dlogdp ({\\mu}m^2/cm^3)",
+  "Number_dist": "dN/dlogdp (nm^{-1}/cm^3)",
+  "Surface_dist": "dS/dlogdp (nm/cm^3)",
+  "Volume_dist": "dV/dlogdp (nm^2/cm^3)",
     "Extinction_dist": "d{\\sigma}/dlogdp (1/Mm)",
     "Vis_LPV": "Visibility (km)"
 }

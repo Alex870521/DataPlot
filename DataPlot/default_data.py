@@ -1,10 +1,13 @@
-import pandas as pd
+from typing import Literal
 
+from pandas import DataFrame
+
+from DataPlot.process import DataBase
 
 __all__ = ['load_default_data']
 
 
-def load_default_data():
+def load_default_chemical_data():
     # The following data is from the chemical composition of real atmospheric particles.
     #
     # The six main chemical components that comprised PM2.5 are listed in the data.
@@ -25,7 +28,18 @@ def load_default_data():
         'SS':      [0.20, 0.10, 0.07, 0.01]
         }
 
-    return pd.DataFrame(data, index=['Total', 'Clean', 'Transition', 'Event'])
+    return DataFrame(data, index=['Total', 'Clean', 'Transition', 'Event'])
+
+
+def load_default_data(station: Literal["Tunghai", "Taipei"] = "Tunghai"):
+    file = {
+        "Tunghai": {
+            "uri": "https://github.com/Alex870521/DataPlot/blob/main/DataPlot/data/All_data.csv"},
+        "Taipei": {
+            "uri": "https://raw.githubusercontent.com/plotly/datasets/master/iris.csv"}
+    }
+
+    return DataBase()
 
 
 if __name__ == '__main__':

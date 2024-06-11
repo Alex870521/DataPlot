@@ -128,6 +128,8 @@ def plot_dist(data: DataFrame | np.ndarray,
 def heatmap(data: DataFrame,
             unit: Literal["Number", "Surface", "Volume", "Extinction"],
             cmap: str = 'Blues',
+            colorbar: bool = False,
+            magic_number: int = 11,
             ax: Axes | None = None,
             **kwargs
             ) -> Axes:
@@ -145,6 +147,12 @@ def heatmap(data: DataFrame,
 
     cmap : str, default='Blues'
         The colormap to use for the heatmap.
+
+    colorbar : bool, default=False
+        Whether to show the colorbar.
+
+    magic_number : int, default=11
+        The number of bins to use for the histogram.
 
     ax : matplotlib.axes.Axes, optional
         The axes to plot the heatmap on. If not provided, a new subplot will be created.
@@ -172,7 +180,7 @@ def heatmap(data: DataFrame,
 
     min_value = 1e-8
     dp = np.array(data.columns, dtype=float)
-    x = np.append(np.tile(dp, data.to_numpy().shape[0]), 2750)
+    x = np.append(np.tile(dp, data.to_numpy().shape[0]), np.log(dp).max())
     y = np.append(data.to_numpy().flatten(), min_value)
 
     # mask NaN
@@ -180,7 +188,7 @@ def heatmap(data: DataFrame,
     y = y[~np.isnan(y)]
 
     # using log(x)
-    histogram, xedges, yedges = np.histogram2d(np.log(x), y, bins=len(dp) + 2)
+    histogram, xedges, yedges = np.histogram2d(np.log(x), y, bins=len(dp) + magic_number)
     histogram[histogram == 0] = min_value  # Avoid log(0)
 
     plot_kws = dict(norm=colors.LogNorm(vmin=1, vmax=histogram.max()), cmap=cmap, **kwargs.get('plot_kws', {}))
@@ -188,22 +196,26 @@ def heatmap(data: DataFrame,
     pco = ax.pcolormesh(xedges[:-1], yedges[:-1], histogram.T, shading='gouraud', **plot_kws)
 
     # TODO:
+    ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='r', label='pollutant')
     ax.plot(np.log(dp), data.mean(), ls='dashed', color='k', alpha=0.5, label='mean')
-    # ax.plot(np.log(dp), data.mean() + data.std(), ls='dashed', color='r', label='pollutant')
-    # ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='b', label='clean')
+    ax.plot(np.log(dp), data.mean() - data.std(), ls='dashed', color='b', label='clean')
 
     ax.set(xlim=(np.log(dp).min(), np.log(dp).max()), ylim=(0, None),
            xlabel=r'$D_{p} (nm)$', ylabel=Unit(f'{unit}_dist'), title=kwargs.get('title', unit))
 
-    ax.set_xticks(np.log([100, 1000]))
-    ax.set_xticks(np.log([20, 30, 40, 50, 60, 70, 80, 90, 200, 300, 400, 500, 600, 700, 800, 900, 2000]), minor=True)
+    major_ticks = np.power(10, np.arange(np.ceil(np.log10(dp.min())), np.floor(np.log10(dp.max())) + 1))
+    minor_ticks = [v for v in np.concatenate([_ * np.arange(2, 10) for _ in major_ticks]) if min(dp) <= v <= max(dp)]
+
+    ax.set_xticks(np.log(major_ticks))
+    ax.set_xticks(np.log(minor_ticks), minor=True)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda tick, pos: "{:.0f}".format(np.exp(tick))))
 
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 3), useMathText=True)
     ax.grid(axis='x', which='major', color='k', linestyle='dashdot', linewidth=0.4, alpha=0.4)
     ax.legend(prop={'weight': 'bold'})
 
-    # plt.colorbar(pco, pad=0.02, fraction=0.05, label='Counts', **kwargs.get('cbar_kws', {}))
+    if colorbar:
+        plt.colorbar(pco, pad=0.02, fraction=0.05, label='Counts', **kwargs.get('cbar_kws', {}))
 
     return ax
 
@@ -251,7 +263,7 @@ def heatmap_tms(data: DataFrame,
     dp = np.array(data.columns, dtype=float)
     data = np.nan_to_num(data.to_numpy())
 
-    vmin_mapping = {'Number': 1e4, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
+    vmin_mapping = {'Number': 1e2, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
 
     # Set the colorbar min and max based on the min and max of the values
     cbar_min = kwargs.get('cbar_kws', {}).pop('cbar_min', vmin_mapping[unit])
