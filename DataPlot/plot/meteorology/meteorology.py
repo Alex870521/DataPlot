@@ -1,21 +1,28 @@
+import math
+from typing import Literal
+
 import matplotlib.colors as plc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from windrose import WindroseAxes
+from pandas import DataFrame, Series
+from scipy.ndimage import gaussian_filter
 
 from DataPlot.plot.core import *
 from DataPlot.process import *
 
 __all__ = ['wind_tms',
            'wind_rose',
-           'wind_heatmap',
            ]
 
 
 @set_figure(fs=6)
-def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
+def wind_tms(df: DataFrame,
+             ws: Series,
+             wd: Series,
+             **kwargs
+             ):
     def drawArrow(A, B, ax: plt.Axes):  # 畫箭頭
         _ax = ax.twinx()
         if A[0] == B[0] and A[1] == B[1]:  # 靜風畫點
@@ -41,7 +48,8 @@ def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
     colors = ['lightskyblue', 'darkturquoise', 'lime', 'greenyellow', 'orangered', 'red']
     clrmap = plc.LinearSegmentedColormap.from_list("mycmap", colors)  # 自定义色标
     sns.heatmap(uniform_data, square=True, annot=True, fmt=".2f", linewidths=.5, cmap=clrmap,
-                yticklabels=['Wind speed (m/s)'], xticklabels=xticklabels, cbar=False, vmin=0, vmax=5, ax=ax)
+                yticklabels=['Wind speed (m/s)'], xticklabels=kwargs.get('xticklabels', None), cbar=False, vmin=0,
+                vmax=5, ax=ax)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     ax.spines['bottom'].set_position(('data', 1))  # 移动x轴
@@ -58,54 +66,202 @@ def wind_tms(df: pd.DataFrame, ws: pd.Series, wd: pd.Series, xticklabels):
     return ax
 
 
-@set_figure
-def wind_rose(ws: pd.Series, wd: pd.Series):
-    color_lst = ['#8ecae6', '#f1dca7', '#f4a261', '#bc3908']
+@set_figure(figsize=(4.3, 4))
+def wind_rose(df: DataFrame,
+              WS: Series | str,
+              WD: Series | str,
+              val: Series | str | None = None,
+              typ: Literal['bar', 'scatter', 'cbpf_polor', 'cbpf_Cartesian'] = 'cbpf_Cartesian',
+              statistic: Literal['bpf', 'cbpf'] = 'bpf',
+              percentile: list | float | int = 75,
+              masked_less: bool = 0.01,
+              max_ws: float | None = 5,
+              resolution: int = 25,
+              sigma: float | tuple = 5,
+              rlabel_pos: float = 30,
+              **kwargs
+              ):
+    # TODO: conditional bivariate probability function (cbpf) python
 
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.axis('off')
+    df = df.dropna(subset=[WS, WD] + ([val] if val is not None else []))
 
-    ax = WindroseAxes.from_ax(fig=fig)
-    ax.bar(wd.values, ws.values, bins=[0, 1, 2, 3], nsector=16, normed=True, colors=color_lst)
+    radius = df[WS].to_numpy()
+    theta = df[WD].to_numpy()
+    radian = np.radians(theta)
+    values = df[val].to_numpy() if val is not None else None
 
-    ax.set(ylim=(0, 30), yticks=[0, 15, 30], yticklabels=['', '15 %', '30 %'])
-    ax.tick_params(pad=-5)
-    plt.show()
-    # ax.set_legend(framealpha=0, bbox_to_anchor=[-.05,-.05], fontsize=fs-2., loc='lower left', ncol=3)
-    # fig.savefig(f'windrose/windrose_{state}.png')
+    # In this case, the windrose is a simple frequency diagram,
+    # the function automatically calculates the radians of the given wind direction.
+    if typ == 'bar':
+        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
+        fig.subplots_adjust(left=0)
 
-    return ax
+        ax.bar(theta, radius, bins=[0, 1, 2, 3], normed=True, colors=['#0F1035', '#365486', '#7FC7D9', '#DCF2F1'])
+        ax.set(
+            ylim=(0, 30),
+            yticks=[0, 15, 30],
+            yticklabels=['', '15 %', '30 %'],
+            rlabel_position=rlabel_pos
+        )
+        ax.set_thetagrids(angles=[0, 45, 90, 135, 180, 225, 270, 315],
+                          labels=["E", "NE", "N", "NW", "W", "SW", "S", "SE"])
 
+        ax.legend(units='m/s', bbox_to_anchor=[1.1, 0.5], loc='center left', ncol=1)
 
-def wind_heatmap(ws, wd, values):  # CBPF
-    # TODO:
-    ws = ws.to_numpy()
-    wd = wd.to_numpy()
-    values = values.to_numpy()
+    # In this case, the windrose is a scatter plot;
+    # in contrary, this function does not calculate the radians, so user have to input the radian.
+    elif typ == 'scatter':
+        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
+        fig.subplots_adjust(left=0)
 
-    x = []
-    y = []
-    val = []
-    theta = []
-    for _ws, _wd, _values in zip(ws, wd, values):
-        if not pd.isna(_values):
-            x.append(_ws*np.sin(_wd/180 * np.pi))
-            y.append(_ws*np.cos(_wd/180 * np.pi))
-            val.append(_ws)
-            theta.append(_wd/180 * np.pi)
+        scatter = ax.scatter(radian, radius, s=20, c=values, vmax=np.quantile(values, 0.90), edgecolors='none',
+                             cmap='jet', alpha=0.5)
+        ax.set(
+            ylim=(0, 7),
+            yticks=[1, 3, 5, 7],
+            yticklabels=['1 m/s', '3 m/s', '5 m/s', '7 m/s'],
+            rlabel_position=rlabel_pos,
+            theta_direction=-1,
+            theta_zero_location='N',
+        )
+        ax.set_thetagrids(angles=[0, 45, 90, 135, 180, 225, 270, 315],
+                          labels=["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+        plt.colorbar(scatter, ax=ax, label=val, pad=0.1, fraction=0.04)
+
+    # In this case, the windrose is a bivariate probability function (bpf) plot in polor coordinate.
+    elif typ == 'cbpf_polor':
+        u_bins = np.linspace(0, radius.max(), resolution)
+        v_bins = np.radians(np.linspace(0, 360, resolution))
+
+        histogram, v_edges, u_edges = np.histogram2d(radian, radius, bins=(v_bins, u_bins))
+        X, Y = np.meshgrid(v_edges, u_edges)
+
+        masked_array = np.ma.masked_less(gaussian_filter(histogram.T, sigma=sigma), masked_less)
+        vmax = np.percentile(np.ma.compressed(masked_array), 95)
+
+        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
+        fig.subplots_adjust(left=0)
+
+        surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
+        ax.set(
+            ylim=(0, 7),
+            yticks=[1, 3, 5, 7],
+            yticklabels=['1 m/s', '3 m/s', '5 m/s', '7 m/s'],
+            rlabel_position=rlabel_pos,
+            theta_direction=-1,
+            theta_zero_location='N',
+        )
+        ax.set_thetagrids(angles=[0, 45, 90, 135, 180, 225, 270, 315],
+                          labels=["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+        plt.colorbar(surf, ax=ax, label='Frequency', pad=0.1, fraction=0.04)
+
+    # In this case, the windrose is a bivariate probability function (bpf) plot in Cartesian coordinate.
+    else:
+        df = df.copy()
+        df['u'] = df[WS].to_numpy() * np.sin(np.radians(df[WD].to_numpy()))
+        df['v'] = df[WS].to_numpy() * np.cos(np.radians(df[WD].to_numpy()))
+
+        u_bins = np.arange(df.u.min(), df.u.max(), 1 / resolution)
+        v_bins = np.arange(df.v.min(), df.v.max(), 1 / resolution)
+
+        df['u_group'] = pd.cut(df['u'], u_bins)
+        df['v_group'] = pd.cut(df['v'], v_bins)
+
+        # 使用 u_group 和 v_group 進行分組
+        grouped = df.groupby(['u_group', 'v_group'], observed=False)
+
+        if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
+            raise ValueError("Percentile must be between 0 and 100")
+
+        if statistic == 'bpf':
+            histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
+            X, Y = np.meshgrid(u_bins, v_bins)
+            bottom_text = None
+
         else:
-            pass
+            if isinstance(percentile, (float, int)):
+                bottom_text = rf'$CPF:\ >{int(percentile)}^{{th}}$'
+                thershold = df[val].quantile(percentile / 100)
+                cond = lambda x: (x >= thershold).sum()
 
-    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-    # plt.scatter(theta, val)
+            else:
+                bottom_text = rf'$CPF:\ {int(percentile[0])}^{{th}}\ to\ {int(percentile[1])}^{{th}}$'
+                thershold_small, thershold_large = df[val].quantile([percentile[0] / 100, percentile[1] / 100])
+                cond = lambda x: ((x >= thershold_small) & (x < thershold_large)).sum()
 
-    # surf, _ = ax.pcolormesh(x, y, val, shading='auto', antialiased=True)
-    pass
+            histogram = (grouped[val].apply(cond) / grouped[val].count()).unstack().values
+            histogram = np.nan_to_num(histogram, nan=0.0001).T
+            # histogram = np.ma.masked_invalid(histogram).T
+
+            X, Y = np.meshgrid(u_bins, v_bins)
+
+        if masked_less:
+            masked_array = np.ma.masked_less(gaussian_filter(histogram, sigma=sigma), masked_less)
+            vmax = np.percentile(np.ma.compressed(masked_array), 99.5)
+
+        else:
+            masked_array = gaussian_filter(histogram, sigma=sigma)
+            vmax = np.percentile(masked_array, 99.5)
+
+        # plot
+        fig, ax = plt.subplots()
+        fig.subplots_adjust(left=0)
+
+        surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
+
+        max_ws = max_ws or np.concatenate((abs(df.u), abs(df.v))).max()  # Get the maximum value of the wind speed
+
+        radius_lst = np.arange(1, math.ceil(max_ws) + 1)  # Create a list of radius
+
+        for i, radius in enumerate(radius_lst):
+            circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
+            ax.add_artist(circle)
+
+            for angle, label in zip(range(0, 360, 90), ["E", "N", "W", "S"]):
+                radian = np.radians(angle)
+                line_x, line_y = radius * np.cos(radian), radius * np.sin(radian)
+
+                if i + 2 == len(radius_lst):  # Add wind direction line and direction label at the edge of the circle
+                    ax.plot([0, line_x * 1.05], [0, line_y * 1.05], color='k', linestyle='-', linewidth=1, alpha=0.5)
+                    ax.text(line_x * 1.15, line_y * 1.15, label, ha='center', va='center')
+
+            ax.text(radius * np.cos(np.radians(rlabel_pos)), radius * np.sin(np.radians(rlabel_pos)),
+                    str(radius) + ' m/s', ha='center', va='center', fontsize=8)
+
+        for radius in range(math.ceil(max_ws) + 1, 10):
+            circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
+            ax.add_artist(circle)
+
+        ax.set(xlim=(-max_ws * 1.02, max_ws * 1.02),
+               ylim=(-max_ws * 1.02, max_ws * 1.02),
+               xticks=[],
+               yticks=[],
+               xticklabels=[],
+               yticklabels=[],
+               aspect='equal',
+               )
+
+        ax.text(0.50, -0.05, bottom_text, fontweight='bold', fontsize=12, va='center', ha='center',
+                transform=ax.transAxes)
+        ax.text(0.03, 0.97, Unit(val), fontweight='bold', fontsize=12, va='top', ha='left', transform=ax.transAxes)
+
+        cbar = plt.colorbar(surf, ax=ax, label='Frequency', pad=0.01, fraction=0.04)
+        cbar.ax.yaxis.label.set_fontsize(8)
+        cbar.ax.tick_params(labelsize=8)
+
+
+# TODO:back trajectory
 
 
 if __name__ == "__main__":
-    df = DataBase.copy()
-    # wind_heatmap(df, df['WS'], df['WD'], df.index.strftime('%F'))
-    # wind_rose(df['WS'], df['WD'])
-    df = df[['WS', 'WD', 'Extinction']].dropna()
-    wind_heatmap(df['WS'], df['WD'], df['Extinction'])
+    df = DataBase().copy()
+    df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3']]
+
+    # wind_rose(df, 'WS', 'WD')
+    # wind_rose(df, 'WS', 'WD', 'PM25', typ='scatter')
+    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='bpf')
+    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[0, 25])
+    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[25, 50])
+    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[75, 100])
