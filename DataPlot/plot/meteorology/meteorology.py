@@ -74,14 +74,16 @@ def wind_rose(df: DataFrame,
               typ: Literal['bar', 'scatter', 'cbpf_polor', 'cbpf_Cartesian'] = 'cbpf_Cartesian',
               statistic: Literal['bpf', 'cbpf'] = 'bpf',
               percentile: list | float | int = 75,
-              masked_less: bool = 0.01,
+              masked_less: bool = 0.05,
               max_ws: float | None = 5,
               resolution: int = 25,
               sigma: float | tuple = 5,
               rlabel_pos: float = 30,
               **kwargs
               ):
-    # TODO: conditional bivariate probability function (cbpf) python
+    # conditional bivariate probability function (cbpf) python
+    # https://davidcarslaw.github.io/openair/reference/polarPlot.html
+    # https://github.com/davidcarslaw/openair/blob/master/R/polarPlot.R
 
     df = df.dropna(subset=[WS, WD] + ([val] if val is not None else []))
 
@@ -243,7 +245,7 @@ def wind_rose(df: DataFrame,
                aspect='equal',
                )
 
-        ax.text(0.50, -0.05, bottom_text, fontweight='bold', fontsize=12, va='center', ha='center',
+        ax.text(0.50, -0.05, bottom_text, fontweight='bold', fontsize=8, va='center', ha='center',
                 transform=ax.transAxes)
         ax.text(0.03, 0.97, Unit(val), fontweight='bold', fontsize=12, va='top', ha='left', transform=ax.transAxes)
 
@@ -264,4 +266,5 @@ if __name__ == "__main__":
     wind_rose(df1, 'WS', 'WD', 'PM25', statistic='bpf')
     wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[0, 25])
     wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[25, 50])
+    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[50, 75])
     wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[75, 100])
