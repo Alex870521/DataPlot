@@ -1,4 +1,3 @@
-# diagram.py
 from diagrams import Cluster, Diagram
 from diagrams.onprem.aggregator import Fluentd
 from diagrams.onprem.analytics import Spark
@@ -9,8 +8,8 @@ from diagrams.onprem.monitoring import Grafana, Prometheus
 from diagrams.onprem.network import Nginx
 from diagrams.onprem.queue import Kafka
 
-with Diagram("DataPlot flowchart", show=False):
-    ingress = Nginx("ingress")
+with Diagram("DataPlot flowchart", show=True, filename="assets/diagram"):
+    ingress = Nginx("ABC")
 
     metrics = Prometheus("metric")
     metrics << Grafana("monitoring")
