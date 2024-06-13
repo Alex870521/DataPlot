@@ -71,9 +71,8 @@ def wind_rose(df: DataFrame,
               WS: Series | str,
               WD: Series | str,
               val: Series | str | None = None,
-              typ: Literal['bar', 'scatter', 'cbpf_polor', 'cbpf_Cartesian'] = 'cbpf_Cartesian',
-              statistic: Literal['bpf', 'cbpf'] = 'bpf',
-              percentile: list | float | int = 75,
+              typ: Literal['bar', 'scatter', 'cbpf'] = 'cbpf',
+              percentile: list | float | int | None = None,
               masked_less: bool = 0.05,
               max_ws: float | None = 5,
               resolution: int = 25,
@@ -95,7 +94,7 @@ def wind_rose(df: DataFrame,
     # In this case, the windrose is a simple frequency diagram,
     # the function automatically calculates the radians of the given wind direction.
     if typ == 'bar':
-        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
+        fig, ax = plt.subplots(figsize=(5.5, 4), subplot_kw={'projection': 'windrose'})
         fig.subplots_adjust(left=0)
 
         ax.bar(theta, radius, bins=[0, 1, 2, 3], normed=True, colors=['#0F1035', '#365486', '#7FC7D9', '#DCF2F1'])
@@ -110,10 +109,10 @@ def wind_rose(df: DataFrame,
 
         ax.legend(units='m/s', bbox_to_anchor=[1.1, 0.5], loc='center left', ncol=1)
 
-    # In this case, the windrose is a scatter plot;
+    # In this case, the windrose is a scatter plot,
     # in contrary, this function does not calculate the radians, so user have to input the radian.
     elif typ == 'scatter':
-        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
+        fig, ax = plt.subplots(figsize=(5, 4), subplot_kw={'projection': 'windrose'})
         fig.subplots_adjust(left=0)
 
         scatter = ax.scatter(radian, radius, s=20, c=values, vmax=np.quantile(values, 0.90), edgecolors='none',
@@ -129,37 +128,9 @@ def wind_rose(df: DataFrame,
         ax.set_thetagrids(angles=[0, 45, 90, 135, 180, 225, 270, 315],
                           labels=["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
 
-        plt.colorbar(scatter, ax=ax, label=val, pad=0.1, fraction=0.04)
+        plt.colorbar(scatter, ax=ax, label=Unit(val), pad=0.1, fraction=0.04)
 
-    # In this case, the windrose is a bivariate probability function (bpf) plot in polor coordinate.
-    elif typ == 'cbpf_polor':
-        u_bins = np.linspace(0, radius.max(), resolution)
-        v_bins = np.radians(np.linspace(0, 360, resolution))
-
-        histogram, v_edges, u_edges = np.histogram2d(radian, radius, bins=(v_bins, u_bins))
-        X, Y = np.meshgrid(v_edges, u_edges)
-
-        masked_array = np.ma.masked_less(gaussian_filter(histogram.T, sigma=sigma), masked_less)
-        vmax = np.percentile(np.ma.compressed(masked_array), 95)
-
-        fig, ax = plt.subplots(subplot_kw={'projection': 'windrose'})
-        fig.subplots_adjust(left=0)
-
-        surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
-        ax.set(
-            ylim=(0, 7),
-            yticks=[1, 3, 5, 7],
-            yticklabels=['1 m/s', '3 m/s', '5 m/s', '7 m/s'],
-            rlabel_position=rlabel_pos,
-            theta_direction=-1,
-            theta_zero_location='N',
-        )
-        ax.set_thetagrids(angles=[0, 45, 90, 135, 180, 225, 270, 315],
-                          labels=["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
-
-        plt.colorbar(surf, ax=ax, label='Frequency', pad=0.1, fraction=0.04)
-
-    # In this case, the windrose is a bivariate probability function (bpf) plot in Cartesian coordinate.
+    # The Bivariate probability function (bpf) plot in Cartesian coordinate.
     else:
         df = df.copy()
         df['u'] = df[WS].to_numpy() * np.sin(np.radians(df[WD].to_numpy()))
@@ -174,15 +145,15 @@ def wind_rose(df: DataFrame,
         # 使用 u_group 和 v_group 進行分組
         grouped = df.groupby(['u_group', 'v_group'], observed=False)
 
-        if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
-            raise ValueError("Percentile must be between 0 and 100")
-
-        if statistic == 'bpf':
+        if percentile is None:
             histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
             X, Y = np.meshgrid(u_bins, v_bins)
             bottom_text = None
 
         else:
+            if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
+                raise ValueError("Percentile must be between 0 and 100")
+
             if isinstance(percentile, (float, int)):
                 bottom_text = rf'$CPF:\ >{int(percentile)}^{{th}}$'
                 thershold = df[val].quantile(percentile / 100)
@@ -254,17 +225,14 @@ def wind_rose(df: DataFrame,
         cbar.ax.tick_params(labelsize=8)
 
 
-# TODO:back trajectory
-
-
 if __name__ == "__main__":
     df = DataBase().copy()
     df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3']]
 
-    # wind_rose(df, 'WS', 'WD')
-    # wind_rose(df, 'WS', 'WD', 'PM25', typ='scatter')
-    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='bpf')
-    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[0, 25])
-    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[25, 50])
-    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[50, 75])
-    wind_rose(df1, 'WS', 'WD', 'PM25', statistic='cbpf', percentile=[75, 100])
+    wind_rose(df, 'WS', 'WD', typ='bar')
+    wind_rose(df, 'WS', 'WD', 'PM25', typ='scatter')
+    wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf')
+    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[0, 25])
+    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[25, 50])
+    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[50, 75])
+    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[75, 100])
