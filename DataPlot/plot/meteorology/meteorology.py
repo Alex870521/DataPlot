@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import windrose
 from pandas import DataFrame, Series
 from scipy.ndimage import gaussian_filter
 
@@ -19,8 +20,8 @@ __all__ = ['wind_tms',
 
 @set_figure(fs=6)
 def wind_tms(df: DataFrame,
-             ws: Series,
-             wd: Series,
+             WS: Series | str,
+             WD: Series | str,
              **kwargs
              ):
     def drawArrow(A, B, ax: plt.Axes):  # 畫箭頭
@@ -44,7 +45,7 @@ def wind_tms(df: DataFrame,
         plt.tight_layout()
 
     fig, ax = plt.subplots(figsize=(8, 2))
-    uniform_data = [ws]
+    uniform_data = [WS]
     colors = ['lightskyblue', 'darkturquoise', 'lime', 'greenyellow', 'orangered', 'red']
     clrmap = plc.LinearSegmentedColormap.from_list("mycmap", colors)  # 自定义色标
     sns.heatmap(uniform_data, square=True, annot=True, fmt=".2f", linewidths=.5, cmap=clrmap,
@@ -54,7 +55,7 @@ def wind_tms(df: DataFrame,
     ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     ax.spines['bottom'].set_position(('data', 1))  # 移动x轴
 
-    for idx, (x, value) in enumerate(wd.items()):
+    for idx, (x, value) in enumerate(WD.items()):
         if not pd.isna(value):
             a = np.array([0.5 + 0.5 * np.sin(value / 180 * np.pi) + idx, 3.5 + 0.5 * np.cos(value / 180 * np.pi)])
             b = np.array([0.5 - 0.5 * np.sin(value / 180 * np.pi) + idx, 3.5 - 0.5 * np.cos(value / 180 * np.pi)])
@@ -83,6 +84,7 @@ def wind_rose(df: DataFrame,
     # conditional bivariate probability function (cbpf) python
     # https://davidcarslaw.github.io/openair/reference/polarPlot.html
     # https://github.com/davidcarslaw/openair/blob/master/R/polarPlot.R
+    windrose.WindroseAxes._info = 'WindroseAxes'
 
     df = df.dropna(subset=[WS, WD] + ([val] if val is not None else []))
 
@@ -115,8 +117,8 @@ def wind_rose(df: DataFrame,
         fig, ax = plt.subplots(figsize=(5, 4), subplot_kw={'projection': 'windrose'})
         fig.subplots_adjust(left=0)
 
-        scatter = ax.scatter(radian, radius, s=20, c=values, vmax=np.quantile(values, 0.90), edgecolors='none',
-                             cmap='jet', alpha=0.5)
+        scatter = ax.scatter(radian, radius, s=15, c=values, vmax=np.quantile(values, 0.90), edgecolors='none',
+                             cmap='jet', alpha=0.8)
         ax.set(
             ylim=(0, 7),
             yticks=[1, 3, 5, 7],
@@ -227,12 +229,11 @@ def wind_rose(df: DataFrame,
 
 if __name__ == "__main__":
     df = DataBase().copy()
-    df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3']]
+    df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3', 'SO2']]
 
-    wind_rose(df, 'WS', 'WD', typ='bar')
-    wind_rose(df, 'WS', 'WD', 'PM25', typ='scatter')
-    wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf')
-    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[0, 25])
-    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[25, 50])
-    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[50, 75])
-    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=[75, 100])
+    # wind_rose(df1, 'WS', 'WD', typ='bar')
+    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='scatter')
+    wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=75)
+    wind_rose(df1, 'WS', 'WD', 'O3', typ='cbpf', percentile=75)
+    wind_rose(df1, 'WS', 'WD', 'NO2', typ='cbpf', percentile=75)
+    wind_rose(df1, 'WS', 'WD', 'SO2', typ='cbpf', percentile=75)
