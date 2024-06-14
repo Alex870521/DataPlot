@@ -37,6 +37,10 @@
 
 ## <div align="center">Visual Example</div>
 
+### <div align="center">WindRose & Conditional Bivariate Probability Function (CBPF)</div>
+
+![WindRose](assets/figure/wind_rose.png)
+
 ### <div align="center">For Particle Size Distribution</div>
 
 |                  **PNSD**                   |                  **PSSD**                   |                  **PVSD**                   |
