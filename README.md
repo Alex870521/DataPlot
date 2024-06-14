@@ -37,9 +37,12 @@
 
 ## <div align="center">Visual Example</div>
 
-### <div align="center">WindRose & Conditional Bivariate Probability Function (CBPF)</div>
-
+### <div align="center">WindRose</div>
 ![WindRose](assets/figure/wind_rose.png)
+
+### <div align="center">Conditional Bivariate Probability Function (CBPF)</div>
+
+![CBPF](assets/figure/cbpf.png)
 
 ### <div align="center">For Particle Size Distribution</div>
 

@@ -15,6 +15,7 @@ from DataPlot.process import *
 
 __all__ = ['wind_tms',
            'wind_rose',
+           'CBPF'
            ]
 
 
@@ -72,12 +73,7 @@ def wind_rose(df: DataFrame,
               WS: Series | str,
               WD: Series | str,
               val: Series | str | None = None,
-              typ: Literal['bar', 'scatter', 'cbpf'] = 'cbpf',
-              percentile: list | float | int | None = None,
-              masked_less: bool = 0.05,
-              max_ws: float | None = 5,
-              resolution: int = 25,
-              sigma: float | tuple = 5,
+              typ: Literal['bar', 'scatter'] = 'scatter',
               rlabel_pos: float = 30,
               **kwargs
               ):
@@ -132,108 +128,132 @@ def wind_rose(df: DataFrame,
 
         plt.colorbar(scatter, ax=ax, label=Unit(val), pad=0.1, fraction=0.04)
 
-    # The Bivariate probability function (bpf) plot in Cartesian coordinate.
+
+@set_figure(figsize=(4.3, 4))
+def CBPF(df: DataFrame,
+         WS: Series | str,
+         WD: Series | str,
+         val: Series | str | None = None,
+         percentile: list | float | int | None = None,
+         masked_less: bool = 0.05,
+         max_ws: float | None = 5,
+         resolution: int = 25,
+         sigma: float | tuple = 5,
+         rlabel_pos: float = 30,
+         bottom_text: str | None = None,
+         **kwargs
+         ):
+    # conditional bivariate probability function (cbpf) python
+    # https://davidcarslaw.github.io/openair/reference/polarPlot.html
+    # https://github.com/davidcarslaw/openair/blob/master/R/polarPlot.R
+
+    df = df.dropna(subset=[WS, WD] + ([val] if val is not None else [])).copy()
+
+    df['u'] = df[WS].to_numpy() * np.sin(np.radians(df[WD].to_numpy()))
+    df['v'] = df[WS].to_numpy() * np.cos(np.radians(df[WD].to_numpy()))
+
+    u_bins = np.arange(df.u.min(), df.u.max(), 1 / resolution)
+    v_bins = np.arange(df.v.min(), df.v.max(), 1 / resolution)
+
+    df['u_group'] = pd.cut(df['u'], u_bins)
+    df['v_group'] = pd.cut(df['v'], v_bins)
+
+    # 使用 u_group 和 v_group 進行分組
+    grouped = df.groupby(['u_group', 'v_group'], observed=False)
+
+    if percentile is None:
+        histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
+        X, Y = np.meshgrid(u_bins, v_bins)
+        bottom_text = rf'$CPF:\ 0^{{th}}\ to \ 100^{{th}}$'
+
     else:
-        df = df.copy()
-        df['u'] = df[WS].to_numpy() * np.sin(np.radians(df[WD].to_numpy()))
-        df['v'] = df[WS].to_numpy() * np.cos(np.radians(df[WD].to_numpy()))
+        if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
+            raise ValueError("Percentile must be between 0 and 100")
 
-        u_bins = np.arange(df.u.min(), df.u.max(), 1 / resolution)
-        v_bins = np.arange(df.v.min(), df.v.max(), 1 / resolution)
-
-        df['u_group'] = pd.cut(df['u'], u_bins)
-        df['v_group'] = pd.cut(df['v'], v_bins)
-
-        # 使用 u_group 和 v_group 進行分組
-        grouped = df.groupby(['u_group', 'v_group'], observed=False)
-
-        if percentile is None:
-            histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
-            X, Y = np.meshgrid(u_bins, v_bins)
-            bottom_text = None
+        if isinstance(percentile, (float, int)):
+            bottom_text = rf'$CPF:\ >{int(percentile)}^{{th}}$'
+            thershold = df[val].quantile(percentile / 100)
+            cond = lambda x: (x >= thershold).sum()
 
         else:
-            if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
-                raise ValueError("Percentile must be between 0 and 100")
+            bottom_text = rf'$CPF:\ {int(percentile[0])}^{{th}}\ to\ {int(percentile[1])}^{{th}}$'
+            thershold_small, thershold_large = df[val].quantile([percentile[0] / 100, percentile[1] / 100])
+            cond = lambda x: ((x >= thershold_small) & (x < thershold_large)).sum()
 
-            if isinstance(percentile, (float, int)):
-                bottom_text = rf'$CPF:\ >{int(percentile)}^{{th}}$'
-                thershold = df[val].quantile(percentile / 100)
-                cond = lambda x: (x >= thershold).sum()
+        histogram = (grouped[val].apply(cond) / grouped[val].count()).unstack().values
+        histogram = np.nan_to_num(histogram, nan=0.0001).T
+        # histogram = np.ma.masked_invalid(histogram).T
 
-            else:
-                bottom_text = rf'$CPF:\ {int(percentile[0])}^{{th}}\ to\ {int(percentile[1])}^{{th}}$'
-                thershold_small, thershold_large = df[val].quantile([percentile[0] / 100, percentile[1] / 100])
-                cond = lambda x: ((x >= thershold_small) & (x < thershold_large)).sum()
+        X, Y = np.meshgrid(u_bins, v_bins)
 
-            histogram = (grouped[val].apply(cond) / grouped[val].count()).unstack().values
-            histogram = np.nan_to_num(histogram, nan=0.0001).T
-            # histogram = np.ma.masked_invalid(histogram).T
+    if masked_less:
+        masked_array = np.ma.masked_less(gaussian_filter(histogram, sigma=sigma), masked_less)
+        vmax = np.percentile(np.ma.compressed(masked_array), 99.5)
 
-            X, Y = np.meshgrid(u_bins, v_bins)
+    else:
+        masked_array = gaussian_filter(histogram, sigma=sigma)
+        vmax = np.percentile(masked_array, 99.5)
 
-        if masked_less:
-            masked_array = np.ma.masked_less(gaussian_filter(histogram, sigma=sigma), masked_less)
-            vmax = np.percentile(np.ma.compressed(masked_array), 99.5)
+    # plot
+    fig, ax = plt.subplots()
+    fig.subplots_adjust(left=0)
 
-        else:
-            masked_array = gaussian_filter(histogram, sigma=sigma)
-            vmax = np.percentile(masked_array, 99.5)
+    surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
 
-        # plot
-        fig, ax = plt.subplots()
-        fig.subplots_adjust(left=0)
+    max_ws = max_ws or np.concatenate((abs(df.u), abs(df.v))).max()  # Get the maximum value of the wind speed
 
-        surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
+    radius_lst = np.arange(1, math.ceil(max_ws) + 1)  # Create a list of radius
 
-        max_ws = max_ws or np.concatenate((abs(df.u), abs(df.v))).max()  # Get the maximum value of the wind speed
+    for i, radius in enumerate(radius_lst):
+        circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
+        ax.add_artist(circle)
 
-        radius_lst = np.arange(1, math.ceil(max_ws) + 1)  # Create a list of radius
+        for angle, label in zip(range(0, 360, 90), ["E", "N", "W", "S"]):
+            radian = np.radians(angle)
+            line_x, line_y = radius * np.cos(radian), radius * np.sin(radian)
 
-        for i, radius in enumerate(radius_lst):
-            circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
-            ax.add_artist(circle)
+            if i + 2 == len(radius_lst):  # Add wind direction line and direction label at the edge of the circle
+                ax.plot([0, line_x * 1.05], [0, line_y * 1.05], color='k', linestyle='-', linewidth=1, alpha=0.5)
+                ax.text(line_x * 1.15, line_y * 1.15, label, ha='center', va='center')
 
-            for angle, label in zip(range(0, 360, 90), ["E", "N", "W", "S"]):
-                radian = np.radians(angle)
-                line_x, line_y = radius * np.cos(radian), radius * np.sin(radian)
+        ax.text(radius * np.cos(np.radians(rlabel_pos)), radius * np.sin(np.radians(rlabel_pos)),
+                str(radius) + ' m/s', ha='center', va='center', fontsize=8)
 
-                if i + 2 == len(radius_lst):  # Add wind direction line and direction label at the edge of the circle
-                    ax.plot([0, line_x * 1.05], [0, line_y * 1.05], color='k', linestyle='-', linewidth=1, alpha=0.5)
-                    ax.text(line_x * 1.15, line_y * 1.15, label, ha='center', va='center')
+    for radius in range(math.ceil(max_ws) + 1, 10):
+        circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
+        ax.add_artist(circle)
 
-            ax.text(radius * np.cos(np.radians(rlabel_pos)), radius * np.sin(np.radians(rlabel_pos)),
-                    str(radius) + ' m/s', ha='center', va='center', fontsize=8)
-
-        for radius in range(math.ceil(max_ws) + 1, 10):
-            circle = plt.Circle((0, 0), radius, fill=False, color='gray', linewidth=1, linestyle='--', alpha=0.5)
-            ax.add_artist(circle)
-
-        ax.set(xlim=(-max_ws * 1.02, max_ws * 1.02),
-               ylim=(-max_ws * 1.02, max_ws * 1.02),
-               xticks=[],
-               yticks=[],
-               xticklabels=[],
-               yticklabels=[],
-               aspect='equal',
-               )
-
+    ax.set(xlim=(-max_ws * 1.02, max_ws * 1.02),
+           ylim=(-max_ws * 1.02, max_ws * 1.02),
+           xticks=[],
+           yticks=[],
+           xticklabels=[],
+           yticklabels=[],
+           aspect='equal',
+           )
+    if bottom_text is not None:
         ax.text(0.50, -0.05, bottom_text, fontweight='bold', fontsize=8, va='center', ha='center',
                 transform=ax.transAxes)
-        ax.text(0.03, 0.97, Unit(val), fontweight='bold', fontsize=12, va='top', ha='left', transform=ax.transAxes)
 
-        cbar = plt.colorbar(surf, ax=ax, label='Frequency', pad=0.01, fraction=0.04)
-        cbar.ax.yaxis.label.set_fontsize(8)
-        cbar.ax.tick_params(labelsize=8)
+    ax.text(0.03, 0.97, Unit(val), fontweight='bold', fontsize=12, va='top', ha='left', transform=ax.transAxes)
+
+    cbar = plt.colorbar(surf, ax=ax, label='Frequency', pad=0.01, fraction=0.04)
+    cbar.ax.yaxis.label.set_fontsize(8)
+    cbar.ax.tick_params(labelsize=8)
 
 
 if __name__ == "__main__":
     df = DataBase().copy()
     df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3', 'SO2']]
 
-    # wind_rose(df1, 'WS', 'WD', typ='bar')
-    # wind_rose(df1, 'WS', 'WD', 'PM25', typ='scatter')
-    wind_rose(df1, 'WS', 'WD', 'PM25', typ='cbpf', percentile=75)
-    wind_rose(df1, 'WS', 'WD', 'O3', typ='cbpf', percentile=75)
-    wind_rose(df1, 'WS', 'WD', 'NO2', typ='cbpf', percentile=75)
-    wind_rose(df1, 'WS', 'WD', 'SO2', typ='cbpf', percentile=75)
+    wind_rose(df1, 'WS', 'WD', typ='bar')
+    wind_rose(df1, 'WS', 'WD', 'PM25', typ='scatter')
+
+    # CBPF(df1, 'WS', 'WD', 'PM25')
+    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[0, 25])
+    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[25, 50])
+    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[50, 75])
+    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[75, 100])
+    #
+    # CBPF(df1, 'WS', 'WD', 'NO2', percentile=75)
+    # CBPF(df1, 'WS', 'WD', 'SO2', percentile=75)
