@@ -73,6 +73,22 @@ def _timeseries(df: pd.DataFrame,
                 ax: Axes | None = None,
                 set_visible=True,
                 **kwargs):
+    """
+
+    Parameters
+    ----------
+    df
+    y
+    c
+    style
+    ax
+    set_visible
+    kwargs
+
+    Returns
+    -------
+
+    """
     time = df.index.copy()
 
     if ax is None:

@@ -16,7 +16,7 @@ class Unit:
             return r'${}$'.format(value.replace(' ', r'\ '))
         except KeyError:
             print(f"Attribute '{unit}' not found. Using default value.")
-            return r'$ unit $'
+            return r'${}$'.format(unit.replace(' ', r'\ '))
 
     @classmethod
     def load_jsonfile(cls):

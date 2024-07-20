@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.pyplot import Axes
+from pandas import DataFrame
 
 from DataPlot.plot.core import *
 
@@ -20,7 +21,7 @@ def _auto_label_pct(pct,
                     symbol: bool = True,
                     include_pct: bool = False,
                     ignore: Literal["inner", "outer"] = 'inner',
-                    value: float = 5):
+                    value: float = 2):
     if not symbol:
         return ''
     cond = pct <= value if ignore == 'inner' else pct > value
@@ -29,7 +30,7 @@ def _auto_label_pct(pct,
 
 
 @set_figure(fs=8, fw='bold')
-def pie(data_set: pd.DataFrame | dict,
+def pie(data_set: DataFrame | dict,
         labels: list[str],
         unit: str,
         style: Literal["pie", 'donut'],
@@ -75,10 +76,20 @@ def pie(data_set: pd.DataFrame | dict,
     >>> labels = ['Species 1', 'Species 2', 'Species 3']
     >>> pie(data_set, labels, unit='kg', style='pie', symbol=True)
     """
-    category_names = list(data_set.index)
-    data = data_set.values
+    if isinstance(data_set, DataFrame):
+        category_names = list(data_set.index)
+        data = data_set.to_numpy()
 
-    pies, species = data.shape
+        pies, species = data.shape
+
+    elif isinstance(data_set, dict):
+        category_names = list(data_set.keys())
+        data = np.array(list(data_set.values()))
+
+        pies, species = data.shape
+
+    else:
+        raise ValueError('data_set must be a DataFrame or a dictionary.')
 
     colors = kwargs.get('colors') or (Color.colors1 if species == 6 else Color.getColor(num=species))
 
@@ -89,7 +100,10 @@ def pie(data_set: pd.DataFrame | dict,
     pct_distance = 0.6 if style == 'pie' else 0.88
 
     if ax is None:
-        fig, ax = plt.subplots(1, pies, figsize=(pies * 3, 3))
+        fig, ax = plt.subplots(1, pies, figsize=((pies * 3) + 1, 3))
+
+    if pies == 1:
+        ax = [ax]
 
     for i in range(pies):
         ax[i].pie(data[i], labels=None, colors=colors, textprops=None,
@@ -103,7 +117,7 @@ def pie(data_set: pd.DataFrame | dict,
         ax[i].text(0, 0, text[i], ha='center', va='center')
         ax[i].set_title(category_names[i])
 
-    ax[-1].legend(labels, loc='center', prop={'weight': 'bold'}, bbox_to_anchor=(1.1, 0, 0.5, 1))
+    ax[-1].legend(labels, loc='center left', prop={'weight': 'bold'}, bbox_to_anchor=(1, 0, 1.15, 1))
 
     # fig.savefig(f"pie_{style}_{title}")
 
@@ -111,7 +125,7 @@ def pie(data_set: pd.DataFrame | dict,
 
 
 @set_figure(fs=8, fw='bold')
-def donuts(data_set: pd.DataFrame | dict,
+def donuts(data_set: DataFrame | dict,
            labels: list[str],
            unit: str,
            ax: Axes | None = None,
@@ -144,10 +158,20 @@ def donuts(data_set: pd.DataFrame | dict,
         The axes containing the donut chart.
     """
 
-    category_names = list(data_set.index)
-    data = data_set.values
+    if isinstance(data_set, DataFrame):
+        category_names = list(data_set.index)
+        data = data_set.to_numpy()
 
-    pies, species = data.shape
+        pies, species = data.shape
+
+    elif isinstance(data_set, dict):
+        category_names = list(data_set.keys())
+        data = np.array(list(data_set.values()))
+
+        pies, species = data.shape
+
+    else:
+        raise ValueError('data_set must be a DataFrame or a dictionary.')
 
     colors1 = kwargs.get('colors') or (Color.colors1 if species == 6 else Color.getColor(num=species))
     colors2 = Color.adjust_opacity(colors1, 0.8)
@@ -188,8 +212,8 @@ def donuts(data_set: pd.DataFrame | dict,
 
 
 @set_figure(figsize=(8, 5))
-def bar(data_set: pd.DataFrame | dict,
-        data_std: pd.DataFrame | None,
+def bar(data_set: DataFrame | dict,
+        data_std: DataFrame | None,
         labels: list[str],
         unit: str,
         style: Literal["stacked", "dispersed"] = "dispersed",
@@ -301,7 +325,7 @@ def bar(data_set: pd.DataFrame | dict,
 
 
 @set_figure
-def violin(data_set: pd.DataFrame | dict,
+def violin(data_set: DataFrame | dict,
            unit: str,
            ax: Axes | None = None,
            **kwargs) -> Axes:

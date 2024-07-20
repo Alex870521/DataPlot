@@ -15,7 +15,7 @@ class FileHandler(ABC):
 
 class CsvFileHandler(FileHandler):
     def read_data(self, file_path: Path) -> DataFrame:
-        return read_csv(file_path, na_values=('-', 'E', 'F'), parse_dates=['Time'], low_memory=False).set_index('Time')
+        return read_csv(file_path, na_values=('-', 'E', 'F'), parse_dates=['Time'], low_memory=False, index_col='Time')
 
 
 class JsonFileHandler(FileHandler):

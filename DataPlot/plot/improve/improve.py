@@ -5,7 +5,7 @@ from matplotlib.pyplot import Axes
 from scipy.optimize import curve_fit
 
 from DataPlot import *
-from DataPlot.plot.core import set_figure
+from DataPlot.plot.core import set_figure, Unit
 
 # TODO: this file has to be reorganized
 

@@ -8,8 +8,8 @@ from DataPlot.process.script import (ImpactProc, ImproveProc, ChemicalProc, Part
 
 
 class DataBase:
-    def __new__(cls, reset: bool = False, filename: Path | str = 'All_data.csv'):
-        file_path = Path(__file__).parents[1] / 'data' / filename
+    def __new__(cls, file_path, reset: bool = False, filename: Path | str = 'All_data.csv'):
+        file_path = Path(file_path)
 
         with tqdm(total=20, desc="Loading Data", bar_format="{l_bar}{bar}|") as progress_bar:
             if file_path.exists() and not reset:
