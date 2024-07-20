@@ -2,6 +2,7 @@
 
 # MacOX product
 .DS_store
+tests/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
