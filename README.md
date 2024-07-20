@@ -37,26 +37,18 @@
 
 ## <div align="center">Visual Example</div>
 
-### <div align="center">WindRose</div>
+## <div align="center">WindRose</div>
 ![WindRose](assets/figure/wind_rose.png)
 
-### <div align="center">Conditional Bivariate Probability Function (CBPF)</div>
+## <div align="center">Conditional Bivariate Probability Function (CBPF)</div>
 
 ![CBPF](assets/figure/cbpf.png)
 
-### <div align="center">For Particle Size Distribution</div>
+## <div align="center">For Particle Size Distribution</div>
 
-|                  **PNSD**                   |                  **PSSD**                   |                  **PVSD**                   |
-|:-------------------------------------------:|:-------------------------------------------:|:-------------------------------------------:|
-|   ![PNSD](assets/figure/PNSD_heatmap.png)   |   ![PSSD](assets/figure/PSSD_heatmap.png)   |   ![PVSD](assets/figure/PVSD_heatmap.png)   |
+![PNSD](assets/figure/OverPSD.png)
 
-|               **TimeSeries**                |
-|:-------------------------------------------:|
-| ![PNSD](assets/figure/PNSD_heatmap_tms.png) |
-| ![PSSD](assets/figure/PSSD_heatmap_tms.png) |
-| ![PVSD](assets/figure/PVSD_heatmap_tms.png) |
-
-### <div align="center">For some basic plot</div>
+## <div align="center">For some basic plot</div>
 
 |                **Three_dimension**                 |                **Correlation Matrix**                |         **Mutiply Linear Regression**         |
 |:--------------------------------------------------:|:----------------------------------------------------:|:---------------------------------------------:|
@@ -64,7 +56,7 @@
 |                  **Pie & Donut**                   |                      **Dounts**                      |                  **Scatter**                  |
 | ![IMPROVE donuts](assets/figure/IMPROVE_donut.png) |   ![IMPROVE bar](assets/figure/IMPROVE_donuts.png)   |     ![scatter](assets/figure/scatter.png)     |
 
-### <div align="center">For "PyMieScatt"</div>
+## <div align="center">For "PyMieScatt"</div>
 
 |             **Mie_Q**             |              **Mie_MEE**              |
 |:---------------------------------:|:-------------------------------------:|
