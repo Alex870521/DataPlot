@@ -135,12 +135,11 @@ def CBPF(df: DataFrame,
          WD: Series | str,
          val: Series | str | None = None,
          percentile: list | float | int | None = None,
-         masked_less: bool = 0.05,
          max_ws: float | None = 5,
-         resolution: int = 25,
-         sigma: float | tuple = 5,
+         resolution: int = 100,
+         sigma: float | tuple = 2,
          rlabel_pos: float = 30,
-         bottom_text: str | None = None,
+         bottom_text: str | bool | None = None,
          **kwargs
          ):
     # conditional bivariate probability function (cbpf) python
@@ -152,19 +151,26 @@ def CBPF(df: DataFrame,
     df['u'] = df[WS].to_numpy() * np.sin(np.radians(df[WD].to_numpy()))
     df['v'] = df[WS].to_numpy() * np.cos(np.radians(df[WD].to_numpy()))
 
-    u_bins = np.arange(df.u.min(), df.u.max(), 1 / resolution)
-    v_bins = np.arange(df.v.min(), df.v.max(), 1 / resolution)
-
-    df['u_group'] = pd.cut(df['u'], u_bins)
-    df['v_group'] = pd.cut(df['v'], v_bins)
+    u_bins = np.linspace(df.u.min(), df.u.max(), resolution)
+    v_bins = np.linspace(df.v.min(), df.v.max(), resolution)
 
     # 使用 u_group 和 v_group 進行分組
+    df['u_group'] = pd.cut(df['u'], u_bins)
+    df['v_group'] = pd.cut(df['v'], v_bins)
     grouped = df.groupby(['u_group', 'v_group'], observed=False)
 
+    X, Y = np.meshgrid(u_bins, v_bins)
+
+    # Note:
+    # The CBPF is the ratio between the number of points in each cell and the total number of points.
+    # So, it is not equal to the probability density function (PDF) of the wind speed and wind direction.
+
     if percentile is None:
-        histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
-        X, Y = np.meshgrid(u_bins, v_bins)
-        bottom_text = rf'$CPF:\ 0^{{th}}\ to \ 100^{{th}}$'
+        histogram = (grouped[val].count() / grouped[val].count().sum()).unstack().values.T
+        # histogram, v_edges, u_edges = np.histogram2d(df.v, df.u, bins=(v_bins, u_bins))
+        # histogram = histogram / histogram.sum()
+        histogram = np.where(histogram == 0, np.nan, histogram)
+        bottom_text = rf'$PDF\ plot$'
 
     else:
         if not all(0 <= p <= 100 for p in (percentile if isinstance(percentile, list) else [percentile])):
@@ -175,30 +181,89 @@ def CBPF(df: DataFrame,
             thershold = df[val].quantile(percentile / 100)
             cond = lambda x: (x >= thershold).sum()
 
+        elif isinstance(percentile, list) and len(percentile) == 1:
+            # Extract the single element from the list
+            single_percentile = percentile[0]
+            bottom_text = rf'$CPF:\ >{int(single_percentile)}^{{th}}$'
+            threshold = df[val].quantile(single_percentile / 100)
+            cond = lambda x: (x >= threshold).sum()
+
         else:
             bottom_text = rf'$CPF:\ {int(percentile[0])}^{{th}}\ to\ {int(percentile[1])}^{{th}}$'
             thershold_small, thershold_large = df[val].quantile([percentile[0] / 100, percentile[1] / 100])
             cond = lambda x: ((x >= thershold_small) & (x < thershold_large)).sum()
 
-        histogram = (grouped[val].apply(cond) / grouped[val].count()).unstack().values
-        histogram = np.nan_to_num(histogram, nan=0.0001).T
-        # histogram = np.ma.masked_invalid(histogram).T
+        histogram = (grouped[val].apply(cond) / grouped[val].count()).unstack().values.T
 
-        X, Y = np.meshgrid(u_bins, v_bins)
+    # if np.isnan(histogram).all():
+    #     raise "CBPF_array contains only NaN values."
+    # else:
+    #     print(f"\nHistogram contains NaN before masking: {np.isnan(histogram).sum()}")
 
-    if masked_less:
-        masked_array = np.ma.masked_less(gaussian_filter(histogram, sigma=sigma), masked_less)
-        vmax = np.percentile(np.ma.compressed(masked_array), 99.5)
+    histogram_filled = np.nan_to_num(histogram, nan=0)  # 將 NaN 替換為 0
 
-    else:
-        masked_array = gaussian_filter(histogram, sigma=sigma)
-        vmax = np.percentile(masked_array, 99.5)
+    filtered_histogram = gaussian_filter(histogram_filled, sigma=sigma)
+    filtered_histogram[np.isnan(histogram)] = np.nan
+
+    def is_within_circle(center_row, center_col, row, col, radius):
+        return np.sqrt((center_row - row) ** 2 + (center_col - col) ** 2) <= radius
+
+    def remove_lonely_point(filtered_histogram, radius=3):
+        rows, cols = filtered_histogram.shape
+        data_positions = np.where(~np.isnan(filtered_histogram))
+
+        for row, col in zip(*data_positions):
+            valid_data_count = 0
+            for i in range(max(0, row - radius), min(rows, row + radius + 1)):
+                for j in range(max(0, col - radius), min(cols, col + radius + 1)):
+                    if (i, j) != (row, col) and is_within_circle(row, col, i, j, radius):
+                        if not np.isnan(filtered_histogram[i, j]):
+                            valid_data_count += 1
+
+            if valid_data_count <= 13:
+                filtered_histogram[row, col] = np.nan
+
+        return filtered_histogram
+
+    def fill_nan_with_mean(filtered_histogram, radius=3):
+        rows, cols = filtered_histogram.shape
+        nan_positions = np.where(np.isnan(filtered_histogram))
+
+        for row, col in zip(*nan_positions):
+            surrounding_values = []
+            surrounding_values_within_one = []
+            nan_count = 0
+
+            for i in range(max(0, row - radius), min(rows, row + radius + 1)):
+                for j in range(max(0, col - radius), min(cols, col + radius + 1)):
+                    if (i, j) != (row, col) and is_within_circle(row, col, i, j, radius):
+                        if np.isnan(filtered_histogram[i, j]):
+                            nan_count += 1
+                        else:
+                            surrounding_values.append(filtered_histogram[i, j])
+
+            for i in range(max(0, row - 2), min(rows, row + 2 + 1)):
+                for j in range(max(0, col - 2), min(cols, col + 2 + 1)):
+                    if (i, j) != (row, col) and is_within_circle(row, col, i, j, 2):
+                        if np.isnan(filtered_histogram[i, j]):
+                            pass
+                        else:
+                            surrounding_values_within_one.append(filtered_histogram[i, j])
+
+            if nan_count < 13 and surrounding_values_within_one:
+                filtered_histogram[row, col] = np.mean(surrounding_values)
+
+        return filtered_histogram
+
+    # Apply the function to your data
+    filtered_histogram = remove_lonely_point(filtered_histogram)
+    filtered_histogram = fill_nan_with_mean(filtered_histogram)
 
     # plot
     fig, ax = plt.subplots()
     fig.subplots_adjust(left=0)
 
-    surf = ax.pcolormesh(X, Y, masked_array, shading='auto', vmax=vmax, cmap='jet', antialiased=True)
+    surf = ax.pcolormesh(X, Y, filtered_histogram, shading='auto', cmap='jet', antialiased=True)
 
     max_ws = max_ws or np.concatenate((abs(df.u), abs(df.v))).max()  # Get the maximum value of the wind speed
 
@@ -231,11 +296,11 @@ def CBPF(df: DataFrame,
            yticklabels=[],
            aspect='equal',
            )
-    if bottom_text is not None:
+    if bottom_text:
         ax.text(0.50, -0.05, bottom_text, fontweight='bold', fontsize=8, va='center', ha='center',
                 transform=ax.transAxes)
 
-    ax.text(0.03, 0.97, Unit(val), fontweight='bold', fontsize=12, va='top', ha='left', transform=ax.transAxes)
+    ax.text(0.5, 1.05, Unit(val), fontweight='bold', fontsize=12, va='center', ha='center', transform=ax.transAxes)
 
     cbar = plt.colorbar(surf, ax=ax, label='Frequency', pad=0.01, fraction=0.04)
     cbar.ax.yaxis.label.set_fontsize(8)
@@ -243,17 +308,10 @@ def CBPF(df: DataFrame,
 
 
 if __name__ == "__main__":
-    df = DataBase().copy()
-    df1 = df[['WS', 'WD', 'PM25', 'NO2', 'O3', 'SO2']]
+    df = DataBase('/Users/chanchihyu/data/2020能見度計畫/data/All_data.csv').copy()
 
-    wind_rose(df1, 'WS', 'WD', typ='bar')
-    wind_rose(df1, 'WS', 'WD', 'PM25', typ='scatter')
-
-    # CBPF(df1, 'WS', 'WD', 'PM25')
-    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[0, 25])
-    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[25, 50])
-    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[50, 75])
-    # CBPF(df1, 'WS', 'WD', 'PM25', percentile=[75, 100])
-    #
-    # CBPF(df1, 'WS', 'WD', 'NO2', percentile=75)
-    # CBPF(df1, 'WS', 'WD', 'SO2', percentile=75)
+    CBPF(df, 'WS', 'WD', 'PM25')
+    CBPF(df, 'WS', 'WD', 'PM25', percentile=[0, 25])
+    CBPF(df, 'WS', 'WD', 'PM25', percentile=[25, 50])
+    CBPF(df, 'WS', 'WD', 'PM25', percentile=[50, 75])
+    CBPF(df, 'WS', 'WD', 'PM25', percentile=[75, 100])
