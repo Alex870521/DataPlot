@@ -286,7 +286,12 @@ class AbstractReader(ABC):
         return _f_qc if self.qc else _f_raw
 
     # get data
-    def __call__(self, start=None, end=None, mean_freq=None, csv_out=False, **kwarg):
+    def __call__(self,
+                 start: dtm | None = None,
+                 end: dtm | None = None,
+                 mean_freq=None,
+                 csv_out=False,
+                 **kwarg):
 
         self._oth_set = kwarg
 

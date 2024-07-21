@@ -4,12 +4,12 @@
 import numpy as n
 from pandas import read_csv, concat, to_datetime
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 np = n
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'IGAC_TH'
 
     def _raw_reader(self, _file):

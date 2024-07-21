@@ -1,43 +1,32 @@
-import sys
+from datetime import datetime as dtm
 from pathlib import Path
 
-# sys.path.insert(1,str(Path('C:/')/'Users'/os.getlogin()/'Desktop'/'yrr'/'program'/'my'/'application'/'ContainerHandle'))
+from DataPlot.dataProcess import *
+from DataPlot.rawDataReader import *
 
-# sys.path.insert(1,str(Path('pkg')))
+# sys.path.insert(1, '/path/to/the/package')
 
-sys.path.insert(1, str(Path('ContainerHandle-main')))
+start, end = dtm(2024, 2, 1), dtm(2024, 4, 30, 23, 54)
 
-from ContainerHandle.rawDataReader import *
-from ContainerHandle.dataProcess import *
-from datetime import datetime as dtm
-
-start = dtm(2024, 2, 1, 0)
-end = dtm(2024, 4, 30, 23, 54)
 path_raw = Path('_RawData')
 
 # dt_smps = pd.read_csv(path_raw/("smps")/('tunnel')/('test')/r"_read_smps_th_raw.csv",parse_dates=['time']).set_index(['time'])
 
-## read data
-# th_all = Table.reader(path_raw/'th_all',reset=True)
-# th_all_oth = Table.reader(path_raw/'th_oth',reset=True)
-# dt_th = th_all(start,end)
-# dt_th_oth = th_all_oth(start,end)
+# read data
+dt_smps = RawDataReader('SMPS_TH', path_raw / 'NZ_SMPS', reset=True, start=start, end=end, mean_freq='1h', csv_out=True)
+dt_smps = RawDataReader('SMPS_genr', path_raw / 'NZ_SMPS', reset=True, start=start, end=end, mean_freq='1h',
+                        csv_out=True)
+dt_aps = RawDataReader('APS_3321', path_raw / 'FS_APS', reset=True, start=start, end=end, mean_freq='1h')
 
-# smps = SMPS_TH.reader(path_raw/'NZ_SMPS',reset=True)
-aps = APS_3321.reader(path_raw / 'FS_APS', reset=True)
-# smps = SMPS_genr.reader(path_raw/'NZ_SMPS', reset=True, rate=True, update_meta=dict(freq='1.5T'), QC=True, )
-# dt_smps = smps(start,end,mean_freq='1h')
-dt_aps = aps(start, end, mean_freq='1h')
-
-## process data
-# # # ## size 2023-12-03 16:15:00
+# process data
+# size 2023-12-03 16:15:00
 path_prcs = Path('prcs_FSaps')
 distr_prcs = SizeDistr(path_prcs, excel=False, csv=True)
 
 # dt_smps_prcs = distr_prcs.basic(dt_smps,nam='distr_smps')
 dt_aps_prcs = distr_prcs.basic(dt_aps, nam='distr_aps', unit='um')
 
-## merge
+# merge
 
 # '''
 # merge_prcs   = distr_prcs.merge_SMPS_APS(dt_smps,dt_aps,nam='merge_data')

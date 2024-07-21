@@ -1,9 +1,9 @@
 from pandas import read_csv
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'AE43'
 
     def _raw_reader(self, _file):

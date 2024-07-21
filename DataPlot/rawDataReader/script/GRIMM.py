@@ -1,6 +1,6 @@
 from pandas import to_datetime, read_csv
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
 class Reader(AbstractReader):

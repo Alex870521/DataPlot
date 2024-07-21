@@ -1,9 +1,9 @@
 from pandas import to_datetime, read_table, to_numeric
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'SMPS_genr'
 
     def _raw_reader(self, _file):

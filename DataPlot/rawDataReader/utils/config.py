@@ -1,10 +1,12 @@
 meta = {
     "__comment": "meta data for rawDataReader",
     "__instrument": [
-        "AE33",
-        "AE43",
         "NEPH",
         "Aurora",
+        "AE33",
+        "AE43",
+        "Table",
+        "EPA_vertical",
         "SMPS_NTU(SMPS_3080_3788)",
         "SMPS_TH(SMPS_3080_3772)",
         "APS_3321",

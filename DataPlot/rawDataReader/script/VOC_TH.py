@@ -3,10 +3,10 @@
 
 from pandas import read_csv
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'VOC_TH'
 
     def _raw_reader(self, _file):
@@ -25,3 +25,6 @@ class reader(AbstractReader):
 
             _df = _df[_keys].loc[_df.index.dropna()]
         return _df.loc[~_df.index.duplicated()]
+
+    def _QC(self, _df):
+        return _df

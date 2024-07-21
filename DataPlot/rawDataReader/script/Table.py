@@ -3,10 +3,10 @@
 
 from pandas import read_csv, to_datetime
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'Table'
 
     def _raw_reader(self, _file):
@@ -23,3 +23,6 @@ class reader(AbstractReader):
             _df = _df.loc[_df.index.dropna()].copy()
 
         return _df.loc[~_df.index.duplicated()]
+
+    def _QC(self, _df):
+        return _df

@@ -1,10 +1,10 @@
 import numpy as n
 from pandas import to_datetime, read_table
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'APS_3321'
 
     def _raw_reader(self, _file):

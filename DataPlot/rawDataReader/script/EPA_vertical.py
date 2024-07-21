@@ -1,9 +1,9 @@
 from pandas import read_csv, to_numeric
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'EPA_vertical'
 
     def _raw_reader(self, _file):

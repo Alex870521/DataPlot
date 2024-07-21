@@ -4,10 +4,10 @@
 import numpy as n
 from pandas import read_csv, concat, to_numeric
 
-from .core import AbstractReader
+from DataPlot.rawDataReader.core import AbstractReader
 
 
-class reader(AbstractReader):
+class Reader(AbstractReader):
     nam = 'IGAC_ZM'
 
     def _raw_reader(self, _file):
