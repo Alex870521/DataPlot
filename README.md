@@ -20,20 +20,13 @@
 
 </div>
 
-[//]: # (> [!IMPORTANT]\)
-[//]: # (> Important)
-
-[//]: # (> [!NOTE]\)
-[//]: # (> The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. )
-
-[//]: # (> It can be converted into surface area and volume distribution. At the same time, )
-
-[//]: # (> chemical composition data can also be used to calculate particle extinction through Mie theory.)
-
 ## <div align="center">Supported Instruments</div>
 
-The DataPlot project currently supports data from the following instruments:
+> [!NOTE]\
+> We are continuously working to support more instruments. Please check back for updates or contribute to our project on
+> GitHub.
 
+The DataPlot project currently supports data from the following instruments:
 - **SMPS (Scanning Mobility Particle Sizer)**
 - **APS (Aerodynamic Particle Sizer)**
 - **GRIMM (GRIMM Aerosol Technik)**
@@ -48,46 +41,35 @@ The DataPlot project currently supports data from the following instruments:
 - **IGAC (In-situ Gas and Aerosol Compositions monitor)**
 - **VOC (Volatile Organic Compounds Monitor)**
 
-> [!NOTE]\
-> We are continuously working to support more instruments. Please check back for updates or contribute to our project on
-> GitHub.
+[//]: # (## <div align="center">Visual Example</div>)
 
-## <div align="center">Visual Example</div>
+### <div align="center">WindRose and Conditional Bivariate Probability Function (CBPF)</div>
 
-## <div align="center">WindRose</div>
-![WindRose](assets/figure/wind_rose.png)
+> [!TIP]\
+> The provided code of WindRose and CBPF suitable for wind speed and wind direction data.
 
-## <div align="center">Conditional Bivariate Probability Function (CBPF)</div>
+![WindRose](assets/figure/windrose_CBPF.png)
 
-![CBPF](assets/figure/cbpf.png)
+## <div align="center">Particle Size Distribution</div>
 
-## <div align="center">For Particle Size Distribution</div>
+> [!IMPORTANT]\
+> The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit.
+> It can be converted into surface area and volume distribution. At the same time,
+> chemical composition data can also be used to calculate particle extinction through Mie theory.
 
 ![PNSD](assets/figure/OverPSD.png)
 
 ## <div align="center">For some basic plot</div>
-
 |                **Three_dimension**                 |                **Correlation Matrix**                |         **Mutiply Linear Regression**         |
 |:--------------------------------------------------:|:----------------------------------------------------:|:---------------------------------------------:|
 |        ![PSD 3D](assets/figure/psd_3D.png)         | ![Correlation Matrix](assets/figure/corr_matrix.png) | ![IMPROVE MLR](assets/figure/IMPROVE_MLR.png) |
 |                  **Pie & Donut**                   |                      **Dounts**                      |                  **Scatter**                  |
 | ![IMPROVE donuts](assets/figure/IMPROVE_donut.png) |   ![IMPROVE bar](assets/figure/IMPROVE_donuts.png)   |     ![scatter](assets/figure/scatter.png)     |
 
-## <div align="center">For "PyMieScatt"</div>
-
+## <div align="center">PyMieScatt</div>
 |             **Mie_Q**             |              **Mie_MEE**              |
 |:---------------------------------:|:-------------------------------------:|
 | ![Mie Q](assets/figure/Mie_Q.png) | ![Mie MEE](assets/figure/Mie_MEE.png) |     |
-
-[//]: # (## <div align="center">Usage</div>)
-
-[//]: # ()
-
-[//]: # (To install the package, run)
-
-[//]: # ()
-
-[//]: # (    $ git clone https://github.com/Alex870521/DataPlot.git)
 
 
 ## <div align="center">Related Dependencies</div>

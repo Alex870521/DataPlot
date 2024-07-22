@@ -4,7 +4,7 @@ sys.path.extend(['/Users/chanchihyu/PycharmProjects/DataPlot'])
 
 from DataPlot import *
 
-dataset = '/Users/chanchihyu/data/2020能見度計畫/data/All_data.csv'
+dataset = '/Users/chanchihyu/NTU/2020能見度計畫/data/All_data.csv'
 
 
 def use_scatter():
@@ -64,4 +64,5 @@ def use_SMPS():
 
 
 if __name__ == '__main__':
-    use_SMPS()
+    # use_SMPS()
+    use_CBPF_windrose()

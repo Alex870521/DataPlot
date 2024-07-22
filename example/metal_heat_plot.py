@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
 
     def smooth_data(df):
-        return df.rolling(window=2, min_periods=1).mean()
+        return df.rolling(window=1, min_periods=1).mean()
 
 
     df = smooth_data(df)
