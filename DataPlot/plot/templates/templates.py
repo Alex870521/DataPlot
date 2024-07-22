@@ -100,7 +100,7 @@ def pie(data_set: DataFrame | dict,
     pct_distance = 0.6 if style == 'pie' else 0.88
 
     if ax is None:
-        fig, ax = plt.subplots(1, pies, figsize=((pies * 3) + 1, 3))
+        fig, ax = plt.subplots(1, pies, figsize=((pies * 2) + 1, 2))
 
     if pies == 1:
         ax = [ax]
@@ -118,7 +118,7 @@ def pie(data_set: DataFrame | dict,
         ax[i].set_title(category_names[i])
 
     ax[-1].legend(labels, loc='center left', prop={'weight': 'bold'}, bbox_to_anchor=(1, 0, 1.15, 1))
-
+    plt.tight_layout()
     # fig.savefig(f"pie_{style}_{title}")
 
     return ax
@@ -211,7 +211,7 @@ def donuts(data_set: DataFrame | dict,
     return ax
 
 
-@set_figure(figsize=(8, 5))
+@set_figure(figsize=(5, 4))
 def bar(data_set: DataFrame | dict,
         data_std: DataFrame | None,
         labels: list[str],
@@ -310,6 +310,7 @@ def bar(data_set: DataFrame | dict,
         ax.set_ylabel(Unit(unit) if style == "dispersed" else '$Contribution (\\%)$')
         ax.set_ylim(0, None if style == "dispersed" else 100)
         ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
+        plt.tight_layout()
 
     if orientation == 'ha':
         ax.invert_yaxis()
@@ -318,6 +319,7 @@ def bar(data_set: DataFrame | dict,
         ax.set_xlabel(Unit(unit) if style == "dispersed" else '$Contribution (\\%)$')
         ax.set_xlim(0, None if style == "dispersed" else 100)
         ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
+        plt.tight_layout()
 
     # fig.savefig(f"Barplot_{title}")
 

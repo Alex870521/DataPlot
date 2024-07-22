@@ -20,11 +20,8 @@ def use_regression():
     df = DataBase(dataset)
 
     plot.linear_regression(df, x='PM25', y='Extinction')
-
     plot.linear_regression(df, x='PM25', y=['Extinction', 'Scattering', 'Absorption'])
-
     plot.multiple_linear_regression(df, x=['AS', 'AN', 'OM', 'EC', 'SS', 'Soil'], y=['Extinction'])
-
     plot.multiple_linear_regression(df, x=['NO', 'NO2', 'CO', 'PM1'], y=['PM25'])
 
 
@@ -63,6 +60,41 @@ def use_SMPS():
     # plot.distribution.curve_fitting(np.array(PNSE_ext_class.columns, dtype=float), PNSE_ext_class.iloc[0, :], mode=3, unit='Number')
 
 
+def use_linear_regression_and_scatter_to_verify():
+    # example of using plot.linear_regression and plot.scatter
+    df = DataBase(dataset)
+
+    plot.linear_regression(df, x='Extinction', y=['Bext_internal', 'Bext_external'], xlim=[0, 300], ylim=[0, 600])
+    plot.linear_regression(df, x='Scattering', y=['Bsca_internal', 'Bsca_external'], xlim=[0, 300], ylim=[0, 600])
+    plot.linear_regression(df, x='Absorption', y=['Babs_internal', 'Babs_external'], xlim=[0, 100], ylim=[0, 200])
+
+    plot.scatter(df, x='Extinction', y='Bext_Fixed_PNSD', xlim=[0, 600], ylim=[0, 600], title='Fixed PNSD',
+                 regression=True, diagonal=True)
+    plot.scatter(df, x='Extinction', y='Bext_Fixed_RI', xlim=[0, 600], ylim=[0, 600], title='Fixed RI',
+                 regression=True, diagonal=True)
+
+
+def use_extinction_by_particle_gas():
+    # example of using plot.bar and plot.pie
+    df = DataBase(dataset)
+
+    ser_grp_sta, ser_grp_sta_std = DataClassifier(df, by='State')
+    ext_particle_gas = ser_grp_sta.loc[:, ['Scattering', 'Absorption', 'ScatteringByGas', 'AbsorptionByGas']]
+
+    plot.bar(data_set=ext_particle_gas, data_std=None,
+             labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
+             unit='Extinction',
+             style="stacked",
+             colors=plot.Color.paired)
+
+    plot.pie(data_set=ext_particle_gas,
+             labels=[rf'$b_{{sp}}$', rf'$b_{{ap}}$', rf'$b_{{sg}}$', rf'$b_{{ag}}$'],
+             unit='Extinction',
+             style='donut',
+             colors=plot.Color.paired)
+
+
 if __name__ == '__main__':
     # use_SMPS()
-    use_CBPF_windrose()
+    # use_CBPF_windrose()
+    use_extinction_by_particle_gas()

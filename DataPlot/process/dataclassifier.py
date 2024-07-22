@@ -4,6 +4,7 @@ from typing import Literal, Sequence
 import pandas as pd
 from pandas import concat, DataFrame
 
+from DataPlot.process.core._DEFAULT import DEFAULT_DATA_PATH
 from DataPlot.process.database import DataBase
 
 
@@ -81,7 +82,7 @@ class DataClassifier(Classifier):
     @staticmethod
     def _group_data(df, by, cut_bins=None, qcut=None, labels=None):
         if by not in df.columns:
-            df = concat([df, Classifier.classify(DataBase())[by]], axis=1)
+            df = concat([df, Classifier.classify(DataBase(DEFAULT_DATA_PATH / 'All_data.csv'))[by]], axis=1)
 
         if cut_bins is not None:
             df[f'{by}_cut'] = pd.cut(df.loc[:, f'{by}'], cut_bins,
