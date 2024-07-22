@@ -11,17 +11,11 @@
 
 <div align="center">
 
-  <a href="https://github.com/Alex870521/DataPlot"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
+<a href="https://github.com/Alex870521"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-youtube.png" width="3%" alt="Alex870521 YouTube"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-discord.png" width="3%" alt="Alex870521 Discord"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
 
 </div>
@@ -34,6 +28,27 @@
 > It can be converted into surface area and volume distribution. At the same time, 
 > chemical composition data can also be used to calculate particle extinction through Mie theory.
 
+## <div align="center">RawDataReader Supported Instruments</div>
+
+The DataPlot project currently supports data from the following instruments:
+
+- **SMPS (Scanning Mobility Particle Sizer)**
+- **APS (Aerodynamic Particle Sizer)**
+- **GRIMM (GRIMM Aerosol Technik)**
+- **TEOM (Continuous Ambient Particulate Monitor)**
+- **NEPH (Nephelometer)**
+- **Aurora (Nephelometer)**
+- **AE33 (Aethalometer Model 33)**
+- **AE43 (Aethalometer Model 43)**
+- **BC1054 (Black Carbon Monitor 1054)**
+- **MA350 (MicroAeth MA350)**
+- **OCEC (Organic Carbon Elemental Carbon Analyzer)**
+- **IGAC (In-situ Gas and Aerosol Compositions monitor)**
+- **VOC (Volatile Organic Compounds Monitor)**
+
+> [!NOTE]\
+> We are continuously working to support more instruments. Please check back for updates or contribute to our project on
+> GitHub.
 
 ## <div align="center">Visual Example</div>
 
@@ -81,17 +96,11 @@ For bug reports and feature requests please visit [GitHub Issues](https://github
 
 <div align="center">
 
-  <a href="https://github.com/Alex870521/DataPlot"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
+<a href="https://github.com/Alex870521"><img src="assets/media/logo-social-github.png" width="3%" alt="Alex870521 GitHub"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-youtube.png" width="3%" alt="Alex870521 YouTube"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.youtube.com/@user-zc9nd2wn1i"><img src="assets/media/logo-social-discord.png" width="3%" alt="Alex870521 Discord"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
-  <a href="https://www.threads.net/@mas__870521"><img src="assets/media/logo-social-threads.png" width="3%" alt="Alex870521 Medium"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
 
 </div>
