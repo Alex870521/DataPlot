@@ -16,19 +16,21 @@
   <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
+
 
 </div>
 
 [//]: # (> [!IMPORTANT]\)
 [//]: # (> Important)
 
-> [!NOTE]\
-> The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. 
-> It can be converted into surface area and volume distribution. At the same time, 
-> chemical composition data can also be used to calculate particle extinction through Mie theory.
+[//]: # (> [!NOTE]\)
+[//]: # (> The provided code of distribution suitable for SMPS and APS data in "dX/dlogdp" unit. )
 
-## <div align="center">RawDataReader Supported Instruments</div>
+[//]: # (> It can be converted into surface area and volume distribution. At the same time, )
+
+[//]: # (> chemical composition data can also be used to calculate particle extinction through Mie theory.)
+
+## <div align="center">Supported Instruments</div>
 
 The DataPlot project currently supports data from the following instruments:
 
@@ -77,13 +79,15 @@ The DataPlot project currently supports data from the following instruments:
 |:---------------------------------:|:-------------------------------------:|
 | ![Mie Q](assets/figure/Mie_Q.png) | ![Mie MEE](assets/figure/Mie_MEE.png) |     |
 
+[//]: # (## <div align="center">Usage</div>)
 
+[//]: # ()
 
-## <div align="center">Usage</div>
+[//]: # (To install the package, run)
 
-To install the package, run
+[//]: # ()
 
-    $ git clone https://github.com/Alex870521/DataPlot.git
+[//]: # (    $ git clone https://github.com/Alex870521/DataPlot.git)
 
 
 ## <div align="center">Related Dependencies</div>
@@ -101,6 +105,6 @@ For bug reports and feature requests please visit [GitHub Issues](https://github
   <a href="https://www.linkedin.com/in/Alex870521/"><img src="assets/media/logo-social-linkedin.png" width="3%" alt="Alex870521 LinkedIn"></a>
   <img src="assets/media/logo-transparent.png" width="3%">
   <a href="https://medium.com/@alex870521"><img src="assets/media/logo-social-medium.png" width="3%" alt="Alex870521 Medium"></a>
-  <img src="assets/media/logo-transparent.png" width="3%">
+
 
 </div>
