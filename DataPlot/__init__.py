@@ -2,6 +2,7 @@ from typing import Literal
 
 from pandas import DataFrame, read_csv
 
+from DataPlot.dataProcess import *
 from DataPlot.plot import Color, Unit, set_figure
 from DataPlot.process import DataBase, DataReader, DataClassifier
 from DataPlot.rawDataReader import RawDataReader
