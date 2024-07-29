@@ -17,6 +17,5 @@ setup(
         "tabulate", "tqdm"
         # Add any other dependencies here
     ],
-    # 你要安装的包，通过 setuptools.find_packages
     packages=find_packages()
 )
