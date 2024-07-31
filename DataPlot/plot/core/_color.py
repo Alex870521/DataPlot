@@ -2,12 +2,15 @@ import matplotlib.colors as plc
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from cycler import cycler
 from matplotlib import colormaps
 
 __all__ = ['Color']
 
 
 class Color:
+    color_cycle = cycler(color=['b', 'g', 'r', 'c', 'm', 'y', 'k'])
+
     linecolor = [{'line': '#1a56db', 'edge': '#0F50A6', 'face': '#5983D9'},
                  {'line': '#046c4e', 'edge': '#1B591F', 'face': '#538C4A'},
                  {'line': '#c81e1e', 'edge': '#f05252', 'face': '#f98080'}]
