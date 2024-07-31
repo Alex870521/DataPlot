@@ -18,7 +18,7 @@ def set_figure(func=None,
     def decorator(_func):
         @wraps(_func)
         def wrapper(*args, **kwargs):
-            print(f'\t\t\t Plot: \033[96m{_func.__name__}\033[0m')
+            print(f'\t\t Plot: \033[96m{_func.__name__}\033[0m')
 
             plt.rcParams['mathtext.fontset'] = 'custom'
             plt.rcParams['mathtext.rm'] = 'Times New Roman'
@@ -30,11 +30,14 @@ def set_figure(func=None,
             # The text, annotate, label, title, ticks, are used to create text
             plt.rcParams['font.family'] = 'Times New Roman'
             plt.rcParams['font.weight'] = fw or 'normal'
-            plt.rcParams['font.size'] = fs or 12
+            plt.rcParams['font.size'] = fs or 8
 
             plt.rcParams['axes.titlesize'] = 'large'
             plt.rcParams['axes.titleweight'] = 'bold'
             plt.rcParams['axes.labelweight'] = 'bold'
+
+            # color
+            plt.rcParams['axes.prop_cycle'] = plt.cycler(color=['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
 
             plt.rcParams['xtick.labelsize'] = 'medium'
             plt.rcParams['ytick.labelsize'] = 'medium'
@@ -45,6 +48,7 @@ def set_figure(func=None,
             plt.rcParams['legend.fontsize'] = 'small'
             plt.rcParams['legend.title_fontsize'] = 'medium'
             plt.rcParams['legend.handlelength'] = 1.5
+            plt.rcParams['legend.labelspacing'] = 0.7
 
             plt.rcParams['figure.figsize'] = figsize or (5, 4)
             plt.rcParams['figure.dpi'] = 200
@@ -53,13 +57,18 @@ def set_figure(func=None,
             plt.rcParams['figure.subplot.bottom'] = 0.125
             plt.rcParams['figure.subplot.top'] = 0.88
             plt.rcParams['figure.autolayout'] = autolayout
+
+            if ~autolayout:
+                plt.rcParams['figure.subplot.left'] = 0.1
+                plt.rcParams['figure.subplot.right'] = 0.9
+                plt.rcParams['figure.subplot.top'] = 0.9
+                plt.rcParams['figure.subplot.bottom'] = 0.125
+
             # plt.rcParams['figure.constrained_layout.use'] = True
 
             plt.rcParams['savefig.transparent'] = True
 
-            result = _func(*args, **kwargs)
-
-            return result
+            return _func(*args, **kwargs)
 
         return wrapper
 
