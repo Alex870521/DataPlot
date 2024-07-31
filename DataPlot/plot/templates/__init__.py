@@ -6,4 +6,3 @@ from .radar import *
 from .regression import *
 from .scatter import *
 from .templates import *
-from .timeseries import *
