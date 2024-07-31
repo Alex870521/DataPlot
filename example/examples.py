@@ -94,7 +94,25 @@ def use_extinction_by_particle_gas():
              colors=plot.Color.paired)
 
 
+def use_timeseries():
+    # example of using plot.timeseries
+    df = DataBase(dataset)
+
+    plot.timeseries(df, y=['Extinction', 'Scattering', 'Absorption'], y2=['PM1', 'PM25'], rolling=60,
+                    ylim=[0, None], ylim2=[0, None],
+                    title='Extinction, Scattering, Absorption and PM', legend_ncol=5)
+
+    # plot.timeseries(df, y=['Extinction'], y2=['PM1'], ylim=[0, None], ylim2=[0, None],
+    #                 rolling=50, legend_loc='upper left', legend_ncol=2, fill_between=True)
+
+    plot.timeseries(df, y='WS', c='WD', scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]),
+                    ylim=[0, None])
+
+    plot.timeseries_template(df.loc['2020-09-01':'2020-12-31'])
+
+
 if __name__ == '__main__':
     # use_SMPS()
     # use_CBPF_windrose()
-    use_extinction_by_particle_gas()
+    # use_extinction_by_particle_gas()
+    use_timeseries()
