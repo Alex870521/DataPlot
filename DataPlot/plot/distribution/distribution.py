@@ -3,12 +3,11 @@ from typing import Literal
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from matplotlib.collections import PolyCollection
 from matplotlib.pyplot import Figure, Axes
 from matplotlib.ticker import FuncFormatter
 from numpy import log, exp, sqrt, pi
-from pandas import DataFrame, date_range
+from pandas import DataFrame, Series, date_range
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from scipy.stats import norm, lognorm
@@ -124,7 +123,7 @@ def plot_dist(data: DataFrame | np.ndarray,
     return ax
 
 
-@set_figure(fs=12)
+@set_figure
 def heatmap(data: DataFrame,
             unit: Literal["Number", "Surface", "Volume", "Extinction"],
             cmap: str = 'Blues',
@@ -220,7 +219,7 @@ def heatmap(data: DataFrame,
     return ax
 
 
-@set_figure(fs=12)
+@set_figure
 def heatmap_tms(data: DataFrame,
                 unit: Literal["Number", "Surface", "Volume", "Extinction"],
                 cmap: str = 'jet',
@@ -257,10 +256,12 @@ def heatmap_tms(data: DataFrame,
     >>> heatmap_tms(DataFrame(...), cmap='jet')
     """
     if ax is None:
-        fig, ax = plt.subplots(figsize=(len(data.index) * 0.02, 3), **kwargs.get('fig_kws', {}))
+        fig, ax = plt.subplots(figsize=(len(data.index) * 0.01, 2), **kwargs.get('fig_kws', {}))
 
     time = data.index
     dp = np.array(data.columns, dtype=float)
+
+    # data = data.interpolate(method='linear', axis=0)
     data = np.nan_to_num(data.to_numpy())
 
     vmin_mapping = {'Number': 1e2, 'Surface': 1e8, 'Volume': 1e9, 'Extinction': 1}
@@ -279,8 +280,12 @@ def heatmap_tms(data: DataFrame,
     st_tm, fn_tm = time[0], time[-1]
     tick_time = date_range(st_tm, fn_tm, freq=kwargs.get('freq', '10d')).strftime("%F")
 
-    ax.set(xlim=(st_tm, fn_tm), ylim=(dp.min(), dp.max()), ylabel='$D_p (nm)$',
-           xticks=tick_time, xticklabels=tick_time, yscale='log',
+    ax.set(xlim=(st_tm, fn_tm),
+           ylim=(dp.min(), dp.max()),
+           ylabel='$D_p (nm)$',
+           xticks=tick_time,
+           xticklabels=tick_time,
+           yscale='log',
            title=kwargs.get('title', f'{st_tm.strftime("%F")} - {fn_tm.strftime("%F")}'))
 
     plt.colorbar(pco, pad=0.02, fraction=0.02, label=Unit(f'{unit}_dist'), **kwargs.get('cbar_kws', {}))
@@ -365,7 +370,7 @@ def three_dimension(data: DataFrame | np.ndarray,
 
 @set_figure
 def curve_fitting(dp: np.ndarray,
-                  dist: np.ndarray | pd.Series | DataFrame,
+                  dist: np.ndarray | Series | DataFrame,
                   mode: int = None,
                   unit: Literal["Number", "Surface", "Volume", "Extinction"] = None,
                   ax: Axes | None = None,

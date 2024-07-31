@@ -8,8 +8,8 @@ from DataPlot.rawDataReader import *
 
 start, end = dtm(2023, 12, 18), dtm(2023, 12, 20)
 
-path_raw = Path('_RawData')
-path_prcs = Path('other')
+path_raw = Path('/Users/chanchihyu/NTU/KSvis能見度計畫/FS/data')
+path_prcs = Path('/Users/chanchihyu/NTU/KSvis能見度計畫/FS/prcs')
 
 # read data
 dt_th = RawDataReader('Table', path_raw / 'th_all', reset=True, start=start, end=end)

@@ -1,23 +1,22 @@
 import matplotlib.pyplot as plt
-from matplotlib.dates import MonthLocator, DateFormatter
-from pandas import read_csv, concat
+from pandas import concat, date_range
 
 from DataPlot import *
 
-TP_AE33_file_lst = ['/Users/chanchihyu/Downloads/TP_AE33_20180716-20191231.csv',
-                    '/Users/chanchihyu/Downloads/TP_AE33_20200101-20211231.csv',
-                    '/Users/chanchihyu/Downloads/TP_AE33_20220101-20221231.csv',
-                    '/Users/chanchihyu/Downloads/TP_AE33_20230101-20230921.csv',
-                    '/Users/chanchihyu/Downloads/TP_AE33_20231219-20240131.csv']
+TP_AE33_file_lst = ['/Users/chanchihyu/NTU/台大貨櫃/TP_AE33_20180716-20191231.csv',
+                    '/Users/chanchihyu/NTU/台大貨櫃/TP_AE33_20200101-20211231.csv',
+                    '/Users/chanchihyu/NTU/台大貨櫃/TP_AE33_20220101-20221231.csv',
+                    '/Users/chanchihyu/NTU/台大貨櫃/TP_AE33_20230101-20230921.csv',
+                    '/Users/chanchihyu/NTU/台大貨櫃/TP_AE33_20231219-20240131.csv']
 
-TP_BC1054_file_lst = ['/Users/chanchihyu/Downloads/TP_BC1054_20230927-1219.csv',
-                      '/Users/chanchihyu/Downloads/TP_BC1054_20240214-0714.csv']
+TP_BC1054_file_lst = ['/Users/chanchihyu/NTU/台大貨櫃/TP_BC1054_20230927-1219.csv',
+                      '/Users/chanchihyu/NTU/台大貨櫃/TP_BC1054_20240214-0714.csv']
 
-DH_AE33_file = '/Users/chanchihyu/Downloads/DH_AE33_2017-2022.csv'
+DH_AE33_file = '/Users/chanchihyu/NTU/台大貨櫃/DH_AE33_2017-2022.csv'
 
-FS_AE33_file = '/Users/chanchihyu/Downloads/FS_AE33_240301-0704.csv'
+FS_AE33_file = '/Users/chanchihyu/NTU/台大貨櫃/FS_AE33_240301-0704.csv'
 
-NZ_BC1054_file = '/Users/chanchihyu/Downloads/NZ_BC1054_240129-0622.csv'
+NZ_BC1054_file = '/Users/chanchihyu/NTU/台大貨櫃/NZ_BC1054_240129-0622.csv'
 
 resample = '1d'
 rolling_window = 30
@@ -50,7 +49,7 @@ FS_AE33_roll, FS_AE33_std_roll = rolling_tool(FS_AE33)
 NZ_BC1054_roll, NZ_BC1054_std_roll = rolling_tool(NZ_BC1054)
 
 
-@set_figure(figsize=(10, 5))
+@set_figure(figsize=(6, 3), fs=8)
 def plot():
     fig, ax = plt.subplots()
     fig.subplots_adjust(bottom=0.2, left=0.1, right=0.95)
@@ -58,9 +57,9 @@ def plot():
     ax.fill_between(TP_AE33_1054_roll.index, TP_AE33_1054_roll['BC6'] - TP_AE33_1054_std_roll['BC6'] * 0.5,
                     TP_AE33_1054_roll['BC6'] + TP_AE33_1054_std_roll['BC6'] * 0.5, color='green', alpha=0.2,
                     edgecolor=None)
-    ax.scatter(DH_AE33_roll.index, DH_AE33_roll['BC'], s=2, color='blue', label='Taichung')
-    ax.fill_between(DH_AE33_roll.index, DH_AE33_roll['BC'] - DH_AE33_roll['BC'] * 0.5,
-                    DH_AE33_roll['BC'] + DH_AE33_roll['BC'] * 0.5, color='blue', alpha=0.2, edgecolor=None)
+    # ax.scatter(DH_AE33_roll.index, DH_AE33_roll['BC'], s=2, color='blue', label='Taichung')
+    # ax.fill_between(DH_AE33_roll.index, DH_AE33_roll['BC'] - DH_AE33_roll['BC'] * 0.5,
+    #                 DH_AE33_roll['BC'] + DH_AE33_roll['BC'] * 0.5, color='blue', alpha=0.2, edgecolor=None)
     ax.scatter(FS_AE33_roll.index, FS_AE33_roll['BC6'], s=2, color='r', label='Kaohsiung FS')
     ax.fill_between(FS_AE33_roll.index, FS_AE33_roll['BC6'] - FS_AE33_roll['BC6'] * 0.5,
                     FS_AE33_roll['BC6'] + FS_AE33_roll['BC6'] * 0.5, color='r', alpha=0.2, edgecolor=None)
@@ -68,17 +67,22 @@ def plot():
     ax.fill_between(NZ_BC1054_roll.index, NZ_BC1054_roll['BC6'] - NZ_BC1054_roll['BC6'] * 0.5,
                     NZ_BC1054_roll['BC6'] + NZ_BC1054_roll['BC6'] * 0.5, color='purple', alpha=0.2, edgecolor=None)
 
-    ax.set(xlim=(DH_AE33_roll.index[0], None),
+    ax.set(xlim=(DH_AE33_roll.index[0], FS_AE33_roll.index[-1]),
            ylim=(0, None),
            ylabel='$BC\\ (ng/m^3)$',
            title='BC Long-term Observation')
 
-    # Set major ticks locator to each month and formatter to year-month format
-    ax.xaxis.set_major_locator(MonthLocator(bymonth=None, bymonthday=1, interval=6, tz=None))
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m'))
+    major_tick = date_range(start=DH_AE33_roll.index[0], end=FS_AE33_roll.index[-1], freq='6MS').strftime("%Y-%m")
+    minor_tick = date_range(start=DH_AE33_roll.index[0], end=FS_AE33_roll.index[-1], freq='2MS').strftime("%Y-%m")
 
-    plt.xticks(rotation=30)
+    ax.set_xticks(ticks=major_tick)
+    ax.set_xticks(ticks=minor_tick, minor=True)
+    ax.set_xticklabels(major_tick)
 
+    # ax.xaxis.set_major_locator(MonthLocator(interval=6))
+    # ax.xaxis.set_major_formatter(DateFormatter('%Y-%m'))
+
+    plt.xticks(rotation=90)
     ax.legend()
 
 

@@ -8,9 +8,8 @@ from DataPlot.rawDataReader import *
 
 start, end = dtm(2024, 2, 1), dtm(2024, 4, 30, 23, 54)
 
-path_raw = Path('_RawData')
-
-# dt_smps = pd.read_csv(path_raw/("smps")/('tunnel')/('test')/r"_read_smps_th_raw.csv",parse_dates=['time']).set_index(['time'])
+path_raw = Path('/Users/chanchihyu/NTU/KSvis能見度計畫/FS/data')
+path_prcs = Path('/Users/chanchihyu/NTU/KSvis能見度計畫/FS/prcs')
 
 # read data
 dt_smps = RawDataReader('SMPS_TH', path_raw / 'NZ_SMPS', reset=True, start=start, end=end, mean_freq='1h', csv_out=True)
