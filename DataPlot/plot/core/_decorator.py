@@ -37,7 +37,7 @@ def set_figure(func=None,
             plt.rcParams['axes.labelweight'] = 'bold'
 
             # color
-            plt.rcParams['axes.prop_cycle'] = plt.cycler(color=['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
+            plt.rcParams['axes.prop_cycle'] = plt.cycler(color=['b', 'g', 'r', 'c', 'm', 'y', 'k'])
 
             plt.rcParams['xtick.labelsize'] = 'medium'
             plt.rcParams['ytick.labelsize'] = 'medium'
@@ -52,16 +52,12 @@ def set_figure(func=None,
 
             plt.rcParams['figure.figsize'] = figsize or (5, 4)
             plt.rcParams['figure.dpi'] = 200
-            plt.rcParams['figure.subplot.left'] = 0.125
-            plt.rcParams['figure.subplot.right'] = 0.875
-            plt.rcParams['figure.subplot.bottom'] = 0.125
-            plt.rcParams['figure.subplot.top'] = 0.88
             plt.rcParams['figure.autolayout'] = autolayout
 
             if ~autolayout:
                 plt.rcParams['figure.subplot.left'] = 0.1
-                plt.rcParams['figure.subplot.right'] = 0.9
-                plt.rcParams['figure.subplot.top'] = 0.9
+                plt.rcParams['figure.subplot.right'] = 0.875
+                plt.rcParams['figure.subplot.top'] = 0.875
                 plt.rcParams['figure.subplot.bottom'] = 0.125
 
             # plt.rcParams['figure.constrained_layout.use'] = True
