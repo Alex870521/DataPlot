@@ -310,7 +310,6 @@ def bar(data_set: DataFrame | dict,
         ax.set_ylabel(Unit(unit) if style == "dispersed" else '$Contribution (\\%)$')
         ax.set_ylim(0, None if style == "dispersed" else 100)
         ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
-        plt.tight_layout()
 
     if orientation == 'ha':
         ax.invert_yaxis()
@@ -319,7 +318,6 @@ def bar(data_set: DataFrame | dict,
         ax.set_xlabel(Unit(unit) if style == "dispersed" else '$Contribution (\\%)$')
         ax.set_xlim(0, None if style == "dispersed" else 100)
         ax.legend(labels, bbox_to_anchor=(1, 1), loc='upper left', prop={'size': 12})
-        plt.tight_layout()
 
     # fig.savefig(f"Barplot_{title}")
 

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Literal
 
 import matplotlib.pyplot as plt
+from matplotlib.cm import ScalarMappable
 from matplotlib.pyplot import Axes
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pandas import DataFrame, date_range, Timestamp
@@ -32,6 +33,41 @@ default_insert_kws = dict(
     borderpad=0
 )
 
+default_plot_kws = dict()
+
+default_cbar_kws = dict()
+
+
+def _scatter(ax, df, _y, _c, scatter_kws, cbar_kws, inset_kws):
+    if _c is None or _c not in df.columns:
+        scatter_kws.pop('cmap')
+        ax.scatter(df.index, df[_y], **scatter_kws)
+    else:
+        ax.scatter(df.index, df[_y], c=df[_c], **scatter_kws)
+        cax = inset_axes(ax, **inset_kws)
+
+        # Filter the children to find ScalarMappable objects
+        mappable_objects = [child for child in ax.get_children() if isinstance(child, ScalarMappable)]
+
+        # Use the first mappable object for the colorbar
+        if mappable_objects:
+            plt.colorbar(mappable=mappable_objects[0], cax=cax, **cbar_kws)
+        else:
+            print("No mappable objects found.")
+
+        # plt.colorbar(mappable=ax.get_children()[0], cax=cax, **cbar_kws)
+
+
+def _bar(ax, df, _y, _c, bar_kws, cbar_kws, inset_kws):
+    scalar_map, colors = Color.color_maker(df[_c].values, cmap=bar_kws.pop('cmap'))
+    ax.bar(df.index, df[_y], color=scalar_map.to_rgba(colors), **bar_kws)
+    cax = inset_axes(ax, **inset_kws)
+    plt.colorbar(mappable=scalar_map, cax=cax, **cbar_kws)
+
+
+def _plot(ax, df, _y, _color, plot_kws):
+    ax.plot(df.index, df[_y], color=_color, **plot_kws)
+
 
 def combine_legends(axes_list: list[Axes]) -> tuple[list, list]:
     return (
@@ -44,13 +80,12 @@ def combine_legends(axes_list: list[Axes]) -> tuple[list, list]:
 def timeseries(df: DataFrame,
                y: list[str] | str,
                y2: list[str] | str = None,
-               c: str = None,
-               color: list[str] | str = None,
+               c: list[str] | str = None,
+               # color: list[str] | str = None,
                rolling: str | int | None = None,
-               times: tuple[datetime, datetime] | tuple[Timestamp, Timestamp] = None,
-               freq: str = '2MS',
-               style: Literal['scatter', 'bar', 'line'] | None = 'scatter',
-               fill_between: bool = False,
+               times: tuple[datetime | Timestamp | str, datetime | Timestamp | str] = None,
+               freq: str = '1MS',
+               style: list[Literal['scatter', 'bar', 'line']] | str | None = None,
                ax: Axes | None = None,
                set_xaxis_visible: bool | None = None,
                legend_loc: Literal['best', 'upper right', 'upper left', 'lower left', 'lower right'] = 'best',
@@ -68,21 +103,15 @@ def timeseries(df: DataFrame,
     y2 : list[str] | str, optional
         The secondary y-axis data columns. Defaults to None.
     c : str, optional
-        The column for color mapping. Defaults to None.
-    color : list[str] | str, optional
-        Colors for the plots. Defaults to None.
+        The column for color mapping or the color. Defaults to None.
     rolling : str | int | None, optional
         Rolling window size for smoothing. Defaults to None.
     times : tuple[datetime, datetime] | tuple[Timestamp, Timestamp], optional
         Time range for the data. Defaults to None.
     freq : str, optional
         Frequency for x-axis ticks. Defaults to '2MS'.
-    orientation : Literal['vertical', 'horizontal'], optional
-        Orientation of the plot. Defaults to 'vertical'.
     style : Literal['scatter', 'bar', 'line'] | None, optional
         Style of the plot. Defaults to 'scatter'.
-    fill_between : bool, optional
-        Whether to fill between lines for line plots. Defaults to False.
     ax : Axes | None, optional
         Matplotlib Axes object to plot on. Defaults to None.
     set_xaxis_visible : bool | None, optional
@@ -116,91 +145,86 @@ def timeseries(df: DataFrame,
     -------
     >>> timeseries(df, y='WS', c='WD', scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]), ylim=[0, None])
     """
-
-    # Rolling data
-    df = df.rolling(window=rolling, min_periods=1).mean(numeric_only=True) if rolling is not None else df
-    df_std = df.rolling(window=rolling, min_periods=1).std(numeric_only=True) if rolling is not None else None
-
     # Set the time
-    if times is None:
-        st_tm, fn_tm = df.index[0], df.index[-1]
+    st_tm, fn_tm = (df.index[0], df.index[-1]) if times is None else map(Timestamp, times)
 
-    else:
-        if all(isinstance(t, datetime) for t in times):
-            st_tm, fn_tm = Timestamp(times[0]), Timestamp(times[1])
-        elif all(isinstance(t, Timestamp) for t in times):
-            st_tm, fn_tm = times[0], times[1]
-        else:
-            raise ValueError('The time should be datetime or Timestamp')
+    # Apply rolling window if specified
+    df = df.loc[st_tm:fn_tm] if rolling is None else (
+        df.loc[st_tm:fn_tm].rolling(window=rolling, min_periods=1).mean(numeric_only=True))
 
-        df = df.loc[st_tm:fn_tm]
-        df_std = df_std.loc[st_tm:fn_tm] if df_std is not None else None
+    # Initialize figure and axis if not provided
+    fig, ax = plt.subplots(**{**{'figsize': (6, 2)}, **kwargs.get('fig_kws', {})}) if ax is None else (
+    ax.get_figure(), ax)
 
-    if ax is None:
-        default_fig_kws = {**{'figsize': (6, 2)}, **kwargs.get('fig_kws', {})}
-        fig, ax = plt.subplots(**default_fig_kws)
-    else:
-        fig, ax = ax.get_figure(), ax
-
-    # config the y and y2
+    # Ensure y, y2, c, and style are lists
     y = [y] if isinstance(y, str) else y
     y2 = [y2] if isinstance(y2, str) else y2 if y2 is not None else []
+    c = [c] if isinstance(c, str) else c if c is not None else [None] * (len(y) + len(y2))
+    style = [style] if isinstance(style, str) else style if style is not None else ['plot'] * (len(y) + len(y2))
 
-    # Ensure color is a list and check the length
-    if color is not None:
-        color = [color] if isinstance(color, str) else color
-        if len(color) != len(y) + len(y2):
-            raise ValueError("The length of color must match the combined length of y and y2")
+    if len(c) != len(y) + len(y2):
+        raise ValueError("The length of c must match the combined length of y and y2")
 
-    # Set color cycle
-    ax.set_prop_cycle(color if color is not None else Color.color_cycle)
+    if len(style) != len(y) + len(y2):
+        raise ValueError("The length of style must match the combined length of y and y2")
 
+    # Create a secondary y-axis if y2 is not empty
+    ax2 = ax.twinx() if y2 else None
+
+    # # Set color cycle
+    ax.set_prop_cycle(Color.color_cycle)
     if y2:
-        ax2 = ax.twinx()
-        ax2.set_prop_cycle(color[len(y):] if color is not None else Color.color_cycle[len(y):])
+        ax2.set_prop_cycle(Color.color_cycle[len(y):])
 
-    # Set the plot_kws
-    if c is not None and style == 'scatter':  # scatterplot
-        default_scatter_kws.update(kwargs.get('scatter_kws', {}))
-        default_cbar_kws = {**{'label': Unit(c), 'ticks': None}, **kwargs.get('cbar_kws', {})}
-        default_inset_kws = {**default_insert_kws, **{'bbox_transform': ax.transAxes}, **kwargs.get('inset_kws', {})}
+    if y2 and ('scatter' or 'bar') in style:
+        fig.subplots_adjust(right=0.8)
 
-        ax.scatter(df.index, df[y], c=df[c], **default_scatter_kws)
-        cax = inset_axes(ax, **default_inset_kws)
-        plt.colorbar(mappable=ax.get_children()[0], cax=cax, **default_cbar_kws)
+    for i, _c in enumerate(c):
+        if _c is not None and _c in df.columns:
+            style[i] = 'scatter'
 
-    elif c is not None and style == 'bar':  # barplot
-        default_bar_kws.update(kwargs.get('bar_kws', {}))
-        default_cbar_kws = {**{'label': Unit(c), 'ticks': None}, **kwargs.get('cbar_kws', {})}
-        default_inset_kws = {**default_insert_kws, **{'bbox_transform': ax.transAxes}, **kwargs.get('inset_kws', {})}
+    for i, (_y, _c, _style) in enumerate(zip(y, c, style)):
+        scatter_kws = {**default_scatter_kws, **{'label': Unit(_y)}, **kwargs.get('scatter_kws', {})}
+        bar_kws = {**default_bar_kws, **{'label': Unit(_y)}, **kwargs.get('bar_kws', {})}
+        plot_kws = {**default_plot_kws, **{'label': Unit(_y)}, **kwargs.get('plot_kws', {})}
 
-        scalar_map, colors = Color.color_maker(df[c].values, cmap=default_bar_kws.pop('cmap'))
-        ax.bar(df.index, df[y[0]], color=scalar_map.to_rgba(colors), **default_bar_kws)
-        cax = inset_axes(ax, **default_inset_kws)
-        plt.colorbar(mappable=scalar_map, cax=cax, **default_cbar_kws)
+        if _style in ['scatter', 'bar']:
+            cbar_kws = {**default_cbar_kws, **{'label': Unit(_c), 'ticks': None}, **kwargs.get('cbar_kws', {})}
+            inset_kws = {**default_insert_kws, **{'bbox_transform': ax.transAxes}, **kwargs.get('inset_kws', {})}
 
-    else:  # line plot
-        for i, _y in enumerate(y):
-            default_plot_kws = {**{'label': Unit(_y)}, **kwargs.get('ax_plot_kws', {})}
+        if _style == 'scatter':
+            _scatter(ax, df, _y, _c, scatter_kws, cbar_kws, inset_kws)
 
-            ax.plot(df.index, df[_y], **default_plot_kws)
-            if fill_between:
-                ax.fill_between(df.index, df[_y] - df_std[_y], df[_y] + df_std[_y], alpha=0.2, edgecolor=None)
-
-        if y2:
-            for i, _y in enumerate(y2):
-                default_plot_kws = {**{'label': Unit(_y)}, **kwargs.get('ax2_plot_kws', {})}
-
-                ax2.plot(df.index, df[_y], **default_plot_kws)
-                if fill_between:
-                    ax2.fill_between(df.index, df[_y] - df_std[_y], df[_y] + df_std[_y], alpha=0.2, edgecolor=None)
-
-                # Combine legends from ax and ax2
-                legends_combined, labels_combined = combine_legends([ax, ax2])
-                ax.legend(legends_combined, labels_combined, loc=legend_loc, ncol=legend_ncol)
+        elif _style == 'bar':
+            _bar(ax, df, _y, _c, bar_kws, cbar_kws, inset_kws)
 
         else:
-            ax.legend(loc=legend_loc, ncol=legend_ncol)
+            _plot(ax, df, _y, _c, plot_kws)
+
+    if y2:
+        for i, (_y, _c, _style) in enumerate(zip(y2, c[len(y):], style[len(y):])):
+            scatter_kws = {**default_scatter_kws, **{'label': Unit(_y)}, **kwargs.get('scatter_kws2', {})}
+            bar_kws = {**default_bar_kws, **{'label': Unit(_y)}, **kwargs.get('bar_kws2', {})}
+            plot_kws = {**default_plot_kws, **{'label': Unit(_y)}, **kwargs.get('plot_kws2', {})}
+
+            if _style in ['scatter', 'bar']:
+                cbar_kws = {**default_cbar_kws, **{'label': Unit(_c), 'ticks': None}, **kwargs.get('cbar_kws2', {})}
+                inset_kws = {**default_insert_kws, **{'bbox_transform': ax.transAxes}, **kwargs.get('inset_kws2', {})}
+
+            if _style == 'scatter':
+                _scatter(ax2, df, _y, _c, scatter_kws, cbar_kws, inset_kws)
+
+            elif _style == 'bar':
+                _bar(ax2, df, _y, _c, bar_kws, cbar_kws, inset_kws)
+
+            else:  # line plot
+                _plot(ax2, df, _y, _c, plot_kws)
+
+        # Combine legends from ax and ax2
+        ax.legend(*combine_legends([ax, ax2]), loc=legend_loc, ncol=legend_ncol)
+
+    else:
+        ax.legend(loc=legend_loc, ncol=legend_ncol)
 
     if set_xaxis_visible is not None:
         ax.axes.xaxis.set_visible(set_xaxis_visible)
@@ -230,7 +254,14 @@ if __name__ == '__main__':
 
     df = DataBase('/Users/chanchihyu/NTU/2020能見度計畫/data/All_data.csv')
 
-    # plot.timeseries(df, y=['Extinction'], y2=['PM1'], ylim=[0, None], ylim2=[0, None], rolling=50, legend_loc='upper left', legend_ncol=2, fill_between=True)
+    plot.timeseries(df,
+                    y=['Extinction', 'Scattering', 'Absorption'],
+                    y2=['PBLH'],
+                    c=['PM25', None, None, None],
+                    style=['scatter', 'line', 'line', 'line'],
+                    times=('2020-10-01', '2020-11-30'), ylim=[0, None], ylim2=[0, None], rolling=50,
+                    inset_kws=dict(bbox_to_anchor=(1.12, 0, 1.2, 1)),
+                    legend_ncol=4)
 
-    timeseries(df, y='WS', c='WD', scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]),
-               ylim=[0, None])
+    # timeseries(df, y='WS', c='WD', style='scatter', times=('2020-10-01', '2020-11-30'), scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]),
+    #            ylim=[0, None])

@@ -98,14 +98,16 @@ def use_timeseries():
     # example of using plot.timeseries
     df = DataBase(dataset)
 
-    plot.timeseries(df, y=['Extinction', 'Scattering', 'Absorption'], y2=['PM1', 'PM25'], rolling=60,
-                    ylim=[0, None], ylim2=[0, None],
-                    title='Extinction, Scattering, Absorption and PM', legend_ncol=5)
+    plot.timeseries(df,
+                    y=['Extinction', 'Scattering', 'Absorption'],
+                    y2=['PBLH'],
+                    c=[None, None, None, 'VC'],
+                    style=['line', 'line', 'line', 'scatter'],
+                    times=('2020-10-01', '2020-11-30'), ylim=[0, None], ylim2=[0, None], rolling=50,
+                    inset_kws2=dict(bbox_to_anchor=(1.12, 0, 1.2, 1)))
 
-    # plot.timeseries(df, y=['Extinction'], y2=['PM1'], ylim=[0, None], ylim2=[0, None],
-    #                 rolling=50, legend_loc='upper left', legend_ncol=2, fill_between=True)
-
-    plot.timeseries(df, y='WS', c='WD', scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]),
+    plot.timeseries(df, y='WS', c='WD', style='scatter', times=('2020-10-01', '2020-11-30'),
+                    scatter_kws=dict(cmap='hsv'), cbar_kws=dict(ticks=[0, 90, 180, 270, 360]),
                     ylim=[0, None])
 
     plot.timeseries_template(df.loc['2020-09-01':'2020-12-31'])
