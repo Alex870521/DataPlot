@@ -17,15 +17,16 @@ __all__ = ['chemical_enhancement',
            ]
 
 
-@set_figure(figsize=(10, 6))
-def chemical_enhancement(data_set: pd.DataFrame = None,
-                         data_std: pd.DataFrame = None,
+@set_figure
+def chemical_enhancement(data_set: DataFrame = None,
+                         data_std: DataFrame = None,
                          ax: Axes | None = None,
                          **kwargs):
     if ax is None:
         fig, ax = plt.subplots()
 
-    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase(), by='State')
+    ser_grp_sta, ser_grp_sta_std = DataClassifier(DataBase('/Users/chanchihyu/NTU/2020能見度計畫/data/All_data.csv'),
+                                                  by='State')
     species = ['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC']
     data_set, data_std = ser_grp_sta.loc[:, species], ser_grp_sta_std.loc[:, species]
 
@@ -41,12 +42,12 @@ def chemical_enhancement(data_set: pd.DataFrame = None,
                 alpha=0.6 + (0.2 * i),
                 edgecolor=None, capsize=None, label=state)
 
-    ax.set_xlabel(r'$\bf Chemical\ species$')
-    ax.set_xticks(x + 2 * (width + block))
-    ax.set_xticklabels(['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], fontweight='normal')
-    ax.set_ylabel(r'$\bf Mass\ concentration\ ({\mu}g/m^3)$')
-    ax.set_ylim(0, 25)
-    ax.set_title(r'$\bf Chemical\ enhancement$')
+    ax.set(xlabel=r'$\bf Chemical\ species$',
+           ylabel=r'$\bf Mass\ concentration\ ({\mu}g/m^3)$',
+           xticks=x + 2 * (width + block),
+           xticklabels=species,
+           ylim=(0, 25),
+           title=r'$\bf Chemical\ enhancement$')
 
     ax.vlines(8, 0, 25, linestyles='--', colors='k')
 
@@ -55,13 +56,13 @@ def chemical_enhancement(data_set: pd.DataFrame = None,
         val = np.array(data_set.iloc[i, -1])
         std = np.array([[0], [data_std.iloc[i, -1]]])
         plt.bar(8 + (i + 1) * (width + block), val, yerr=std, width=width, color='#96c8e6',
-                alpha=0.6 + (0.2 * i),
-                edgecolor=None, capsize=None, label=state)
+                alpha=0.6 + (0.2 * i), edgecolor=None, capsize=None, label=state)
 
-    ax2.set_xticks(np.array([1, 2, 3, 4, 5, 6, 7, 8]) + 2 * (width + block))
-    ax2.set_xticklabels(['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'ALWC'], fontweight='normal')
-    ax2.set_ylabel(r'$\bf Mass\ concentration\ ({\mu}g/m^3)$')
-    ax2.set_ylim(0, 100)
+    ax2.set(ylabel=r'$\bf Mass\ concentration\ ({\mu}g/m^3)$',
+            ylim=(0, 100),
+            xticks=x + 2 * (width + block),
+            xticklabels=species
+            )
 
     a = (np.array(data_set.loc['Event']) + np.array(data_set.loc['Transition'])) / 2
     b = (np.array(data_set.loc['Transition']) + np.array(data_set.loc['Clean'])) / 2
@@ -80,7 +81,7 @@ def chemical_enhancement(data_set: pd.DataFrame = None,
 
 
 @set_figure
-def ammonium_rich(df: pd.DataFrame,
+def ammonium_rich(df: DataFrame,
                   **kwargs) -> Axes:
     df = df[['NH4+', 'SO42-', 'NO3-', 'PM25']].dropna().copy().div([18, 96, 62, 1])
     df['required_ammonium'] = df['NO3-'] + 2 * df['SO42-']
@@ -93,15 +94,13 @@ def ammonium_rich(df: pd.DataFrame,
     ax.axline((0, 0), slope=1., color='k', lw=2, ls='--', alpha=0.5, label='1:1')
     plt.text(0.97, 0.97, r'$\bf 1:1\ Line$', color='k', ha='right', va='top', transform=ax.transAxes)
 
-    ax.set_xlabel(r'$\bf NO_{3}^{-}\ +\ 2\ \times\ SO_{4}^{2-}\ (mole\ m^{-3})$')
-    ax.set_ylabel(r'$\bf NH_{4}^{+}\ (mole\ m^{-3})$')
-    ax.set_xlim(0, 1.2)
-    ax.set_ylim(0, 1.2)
-    ax.set_xticks(ax.get_yticks())
-    ax.set_title(kwargs.get('title', ''))
+    ax.set(xlim=(0, 1.2),
+           ylim=(0, 1.2),
+           xlabel=r'$\bf NO_{3}^{-}\ +\ 2\ \times\ SO_{4}^{2-}\ (mole\ m^{-3})$',
+           ylabel=r'$\bf NH_{4}^{+}\ (mole\ m^{-3})$',
+           title=kwargs.get('title', ''))
 
-    color_bar = plt.colorbar(scatter, extend='both')
-    color_bar.set_label(label=Unit('PM25'), size=14)
+    color_bar = plt.colorbar(scatter, label=Unit('PM25'), extend='both')
 
     # fig.savefig(f'Ammonium_rich_{title}')
     return ax
@@ -159,7 +158,7 @@ def MLR_IMPROVE(**kwargs):
                'total_ext_dry', 'AS_ext_dry', 'AN_ext_dry', 'OM_ext_dry', 'Soil_ext_dry', 'SS_ext_dry', 'EC_ext_dry',
                'AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC', 'OM']
 
-    df = DataBase()[species].dropna().copy()
+    df = DataBase('/Users/chanchihyu/NTU/2020能見度計畫/data/All_data.csv')[species].dropna().copy()
 
     # multiple_linear_regression(df, x=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS'], y='Scattering', add_constant=True)
     # multiple_linear_regression(df, x=['POC', 'SOC', 'EC'], y='Absorption', add_constant=True)
@@ -180,7 +179,7 @@ def MLR_IMPROVE(**kwargs):
 
     # plot
     plot.linear_regression(df, x='Extinction', y=['Revised', 'Modified', 'Localized'], xlim=[0, 400], ylim=[0, 400],
-                      regression=True, diagonal=True)
+                           regression=True, diagonal=True)
     plot.donuts(data_set=mass_comp, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'],
                 unit='PM25', colors=Color.colors3)
     plot.donuts(mean, labels=['AS', 'AN', 'POC', 'SOC', 'Soil', 'SS', 'EC'], unit='Extinction', colors=Color.colors3)
@@ -201,18 +200,23 @@ def fRH_plot(**kwargs) -> Axes:
     params = result[0].tolist()
     val_fit = fitting_func(x, *params)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(3, 3))
 
-    ax.plot(frh.index, frh['fRH'], 'k-o')
-    ax.plot(frh.index, frh['fRHs'], 'g-o')
-    ax.plot(frh.index, frh['fRHl'], 'r-o')
-    ax.plot(frh.index, frh['fRHSS'], 'b-o')
+    ax.plot(frh.index, frh['fRH'], 'k-o', ms=2, label='$f(RH)_{original}$')
+    ax.plot(frh.index, frh['fRHs'], 'g-o', ms=2, label='$f(RH)_{small\\ mode}$')
+    ax.plot(frh.index, frh['fRHl'], 'r-o', ms=2, label='$f(RH)_{large\\ mode}$')
+    ax.plot(frh.index, frh['fRHSS'], 'b-o', ms=2, label='$f(RH)_{sea\\ salt}$')
 
-    ax.set(xlim=(0, 100), ylim=(1, None), xlabel='$RH (\\%)$', ylabel='$f(RH)$', title='$Hygroscopic growth factor$')
+    ax.set(xlim=(0, 100),
+           ylim=(1, None),
+           xlabel='$RH (\\%)$',
+           ylabel='$f(RH)$',
+           title=f'$Hygroscopic\\ growth\\ factor$'
+           )
+
     ax.grid(axis='y', color='gray', linestyle='dashed', linewidth=0.4, alpha=0.4)
 
-    ax.legend([f'$f(RH)_{{original}}$', f'$f(RH)_{{small mode}}$', f'$f(RH)_{{large mode}}$', f'$f(RH)_{{sea salt}}$'],
-              prop=dict(weight='bold'))
+    ax.legend()
 
     # fig.savefig('fRH_plot')
 
@@ -220,6 +224,7 @@ def fRH_plot(**kwargs) -> Axes:
 
 
 if __name__ == '__main__':
-    chemical_enhancement()
-    MLR_IMPROVE()
-    ammonium_rich()
+    # chemical_enhancement()
+    # MLR_IMPROVE()
+    # ammonium_rich()
+    fRH_plot()
