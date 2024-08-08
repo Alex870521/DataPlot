@@ -32,4 +32,4 @@ class Reader(AbstractReader):
 
             return _df_1hr.mask(_df_lowb | _df_highb).copy()
 
-        return _df.resample('1h', group_keys=False).apply(_QC_func).resample('5min').mean()
+        return _df.resample('5min').apply(_QC_func).resample('1h').mean()

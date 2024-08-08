@@ -289,8 +289,8 @@ class AbstractReader(ABC):
     def __call__(self,
                  start: dtm | None = None,
                  end: dtm | None = None,
-                 mean_freq=None,
-                 csv_out=False,
+                 mean_freq='1h',
+                 csv_out=True,
                  **kwarg):
 
         self._oth_set = kwarg
